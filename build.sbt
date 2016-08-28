@@ -2,8 +2,8 @@ lazy val commonSettings = Seq(
 	organization := "io.github.katrix",
 	scalaVersion := "2.11.8",
 	resolvers += "SpongePowered" at "https://repo.spongepowered.org/maven",
-	resolvers += Resolver.mavenLocal,
-	libraryDependencies += "io.github.katrix" % "katlib" % "1.0.0" % "provided",
+	resolvers += "jitpack" at "https://jitpack.io",
+	libraryDependencies += "com.github.Katrix-.KatLib" % "katlib-shared" % "1.0.1" % "provided",
 	scalacOptions += "-Xexperimental",
 	crossPaths := false,
 	assemblyShadeRules in assembly := Seq(
@@ -24,14 +24,14 @@ lazy val homeV410 = project in file("4.1.0") dependsOn homeShared settings(commo
 	name := "HomeSweetHome-4.1.0",
 	version := "1.0.0",
 	libraryDependencies += "org.spongepowered" % "spongeapi" % "4.1.0" % "provided",
-	libraryDependencies += "io.github.katrix" % "katlib-4-1-0" % "1.0.0" % "provided"
+	libraryDependencies += "com.github.Katrix-.KatLib" % "katlib-4-1-0" % "1.0.1" % "provided"
 	)
 
 lazy val homeV500 = project in file("5.0.0") dependsOn homeShared settings(commonSettings: _*) settings(
 	name := "HomeSweetHome-5.0.0-SNAPSHOT",
 	version := "1.0.0",
 	libraryDependencies += "org.spongepowered" % "spongeapi" % "5.0.0-SNAPSHOT" % "provided",
-	libraryDependencies += "io.github.katrix" % "katlib-5-0-0-snapshot" % "1.0.0" % "provided"
+	libraryDependencies += "com.github.Katrix-.KatLib" % "katlib-5-0-0" % "1.0.1" % "provided"
 	)
 
 lazy val homeRoot = project in file(".") settings (publishArtifact := false) disablePlugins AssemblyPlugin aggregate(homeV410, homeV500)
