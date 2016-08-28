@@ -49,8 +49,7 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
 			case Right((homeName, residents)) =>
 				val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
 
-				import cats.implicits._
-				val residentList = residents.sorted.toList.mapFilter(uuid => userStorage.get(uuid).toOption.map(_.getName)).mkString(", ")
+				val residentList = residents.sorted.toList.map(uuid => userStorage.get(uuid).toOption.map(_.getName)).filter(_.isDefined).mkString(", ")
 				src.sendMessage(s"""The residents of "$homeName" are: $residentList""".richText.info())
 				CommandResult.builder().successCount(residents.size).build()
 			case Left(error) => throw error
