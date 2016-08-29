@@ -20,13 +20,51 @@
  */
 package io.github.katrix.homesweethome.persistant
 
+import org.spongepowered.api.text.{Text, TextTemplate}
+
 import io.github.katrix.katlib.persistant.{Config, ConfigValue}
 
 abstract class HomeConfig extends Config {
 
+	final val HomeName  = "homeName"
+	final val Homes     = "homes"
+	final val Limit     = "limit"
+	final val Target    = "target"
+	final val Owner     = "owner"
+	final val Requester = "requester"
+	final val Residents = "residents"
+
 	val homeLimitDefault    : ConfigValue[Int]
 	val residentLimitDefault: ConfigValue[Int]
 	val timeout             : ConfigValue[Int]
+
+	val textHomeTeleport : ConfigValue[TextTemplate] //One arg homeName
+	val textHomeDelete   : ConfigValue[TextTemplate] //One arg homeName
+	val textHomeSet      : ConfigValue[TextTemplate] //One arg homeName
+	val textHomeList     : ConfigValue[TextTemplate] //One arg homes
+	val textHomeLimit    : ConfigValue[TextTemplate] //One arg limit
+	val textInviteSrc    : ConfigValue[TextTemplate] //Two args target homeName
+	val textInvitePlayer : ConfigValue[TextTemplate] //Two args homeName owner
+	val textGotoValid    : ConfigValue[TextTemplate] //Two args homeName owner
+	val textGotoRequest  : ConfigValue[TextTemplate] //Two args owner homeName
+	val textAcceptSuccess: ConfigValue[TextTemplate] //One arg requester
+
+	val textResidentsList: ConfigValue[TextTemplate] //Two args homeName residents
+	val textResidentsNone: ConfigValue[TextTemplate] //One arg homeName
+
+	val textHomeOtherTeleport : ConfigValue[TextTemplate] //Two arg homeName owner
+	val textHomeOtherDelete   : ConfigValue[TextTemplate] //Two arg homeName owner
+	val textHomeOtherSet      : ConfigValue[TextTemplate] //Two arg homeName owner
+	val textHomeOtherList     : ConfigValue[TextTemplate] //Two arg owner homes
+	val textHomeOtherLimit    : ConfigValue[TextTemplate] //Two arg owner limit
+	val textInviteOtherSrc    : ConfigValue[TextTemplate] //Three args target homeName owner
+	val textInviteOtherPlayer : ConfigValue[TextTemplate] //Three args homeName owner target
+
+	val textHomeNoHomes     : ConfigValue[Text]
+	val textHomeLimitReached: ConfigValue[Text]
+	val textInvalidRequest  : ConfigValue[Text]
+	val textAcceptRequester : ConfigValue[Text]
+	val textHomeNotFound    : ConfigValue[Text]
 
 	override def seq: Seq[ConfigValue[_]] = Seq(homeLimitDefault, residentLimitDefault, version)
 }
