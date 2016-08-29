@@ -58,7 +58,7 @@ object HomeSweetHome {
 		plugin.storageLoader.init()
 		plugin._config = plugin.configLoader.loadData()
 
-		val homeHandler = new HomeHandler(plugin.storageLoader) {
+		val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
 			override def getHomeLimit(player: Subject): Int = player.getOption(s"${LibPlugin.Id}.homeLimit").toOption
 				.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
 			override def getResidentLimit(player: Subject): Int = player.getOption(s"${LibPlugin.Id}.residentLimit").toOption

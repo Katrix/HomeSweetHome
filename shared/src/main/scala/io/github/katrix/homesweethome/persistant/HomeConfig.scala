@@ -26,6 +26,7 @@ abstract class HomeConfig extends Config {
 
 	val homeLimitDefault    : ConfigValue[Int]
 	val residentLimitDefault: ConfigValue[Int]
+	val timeout             : ConfigValue[Int]
 
 	override def seq: Seq[ConfigValue[_]] = Seq(homeLimitDefault, residentLimitDefault, version)
 }

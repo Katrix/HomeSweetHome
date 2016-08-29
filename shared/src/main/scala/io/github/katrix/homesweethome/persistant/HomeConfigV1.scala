@@ -31,4 +31,5 @@ class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(imp
 	override val homeLimitDefault     = ConfigValue(cfgRoot, default.homeLimitDefault)
 	override val residentLimitDefault = default.residentLimitDefault
 	override val version              = default.version
+	override val timeout              = default.version
 }

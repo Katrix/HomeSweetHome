@@ -33,24 +33,29 @@ import org.spongepowered.api.world.{Location, World}
 import com.flowpowered.math.vector.Vector3d
 import com.google.common.cache.CacheBuilder
 
-import io.github.katrix.homesweethome.persistant.StorageLoader
+import io.github.katrix.homesweethome.persistant.{HomeConfig, StorageLoader}
 
-abstract class HomeHandler(storage: StorageLoader) {
-
-	val inviteDuration = 5 * 60 //TODO: Config
+/**
+	* The HomeHandler is what manages all the homes.
+	* @param storage The home storage where everything is saved
+	* @param config The config to read from. Pass-by-name to allow it to use a new config if there is one
+	*/
+abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 
 	private val homeMap = new mutable.HashMap[UUID, mutable.Map[String, Home]]() withDefaultValue new mutable.HashMap[String, Home]()
 
 	private val requests = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]] withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(
-		inviteDuration, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
+		config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
 	private val invites  = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]] withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(
-		inviteDuration, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
+		config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
 
 	/**
 		* Clears the current homes and reloads them from disk.
 		*/
 	def reloadHomeData(): Unit = {
 		homeMap.clear()
+		requests.clear()
+		invites.clear()
 
 		val toAdd = mutable.Map(storage.loadData().map { case (key, map) => (key, mutable.Map(map.toSeq: _*)) }.toSeq: _*)
 		homeMap ++= toAdd
