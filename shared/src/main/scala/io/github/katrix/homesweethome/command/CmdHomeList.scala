@@ -20,6 +20,8 @@
  */
 package io.github.katrix.homesweethome.command
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.CommandContext
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -27,11 +29,12 @@ import org.spongepowered.api.entity.living.player.Player
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.LibPerm
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 
-class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
@@ -40,11 +43,11 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
 		data match {
 			case Right(Seq()) =>
-				src.sendMessage("You don't have any homes yet".richText.info())
+				src.sendMessage(config.text.homeNoHomes.value)
 				CommandResult.empty()
 			case Right(homes) =>
 				val homeList = homes.sorted.mkString(", ")
-				src.sendMessage(s"Your homes are: $homeList".richText.info())
+				src.sendMessage(config.text.homeList.value(Map(config.Homes -> homeList.text).asJava).build())
 				CommandResult.builder().successCount(homes.size).build()
 			case Left(error) => throw error
 		}

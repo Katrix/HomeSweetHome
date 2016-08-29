@@ -22,11 +22,10 @@ package io.github.katrix.homesweethome
 
 import org.spongepowered.api.command.CommandException
 
-import io.github.katrix.katlib.helper.Implicits.RichString
+import io.github.katrix.homesweethome.persistant.HomeConfig
 
 package object command {
 
-	def homeNotFoundError: CommandException = new CommandException("The home with that name could not be found".richText.error())
-	def teleportError: CommandException = new CommandException(
-		"Could not teleport you to the specific location. Does the location exist, and is it safe?".richText.error())
+	def homeNotFoundError(implicit config: HomeConfig): CommandException = new CommandException(config.text.homeNotFound.value)
+	def teleportError(implicit config: HomeConfig): CommandException = new CommandException(config.text.teleportError.value)
 }

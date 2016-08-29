@@ -35,10 +35,11 @@ import org.spongepowered.api.text.Text
 import org.spongepowered.api.util.SpongeApiTranslationHelper.t
 
 import io.github.katrix.homesweethome.home.HomeHandler
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.helper.Implicits._
 
 //Copy of PatternMatchingCommandElement to get player and use more than one string
-class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) extends CommandElement(key) {
+class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler)(implicit config: HomeConfig) extends CommandElement(key) {
 
 	private final val NullKeyArg = t("argument")
 
@@ -62,7 +63,7 @@ class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) exte
 				if(!ret.iterator.hasNext) throw args.createError(t(
 					"No values matching pattern '%s' present for %s!", unformattedPattern, {if(getKey == null) NullKeyArg else getKey}))
 				ret.asJava
-			case _ => throw args.createError("Only players can have homes".text)
+			case _ => throw args.createError(config.text.onlyPlayers.value)
 		}
 	}
 

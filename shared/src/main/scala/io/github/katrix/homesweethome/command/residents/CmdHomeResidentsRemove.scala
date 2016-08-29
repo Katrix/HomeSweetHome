@@ -21,6 +21,8 @@
 package io.github.katrix.homesweethome.command
 package residents
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
@@ -28,12 +30,13 @@ import org.spongepowered.api.entity.living.player.Player
 
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
@@ -46,10 +49,13 @@ class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)
 			case Right((player, target, home, homeName)) if home.residents.contains(target.getUniqueId) =>
 				val newHome = home.removeResident(target.getUniqueId)
 				homeHandler.updateHome(player.getUniqueId, homeName, newHome)
-				src.sendMessage(s"""Removed ${target.getName} as a resident from "$homeName"""".richText.success())
-				target.sendMessage(s"""You have been removed as a resident from "$homeName" for ${player.getName}""".richText.info())
+				src.sendMessage(config.text.residentsRemoveSrc.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava)
+					.build())
+				target.sendMessage(config.text.residentsRemovePlayer.value(Map(config.HomeName -> homeName.text, config.Owner -> player.getName.text).asJava)
+					.build())
 				CommandResult.success()
-			case Right((_, target, _, homeName)) => throw new CommandException(s"""${target.getName} is not a resident of "$homeName"""".richText.error())
+			case Right((_, target, _, homeName)) =>
+				throw new CommandException(config.text.residentsRemoveNotExist.value(Map(config.Target -> target.getName.text).asJava).build())
 			case Left(error) => throw error
 		}
 	}

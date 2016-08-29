@@ -20,6 +20,8 @@
  */
 package io.github.katrix.homesweethome.command
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.CommandContext
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -27,16 +29,17 @@ import org.spongepowered.api.entity.living.player.Player
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.LibPerm
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 
-class CmdHomeLimit(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeLimit(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = src match {
 		case player: Player =>
 			val limit = homeHandler.getHomeLimit(player)
-			src.sendMessage(s"Your home limit is: $limit".richText.info())
+			src.sendMessage(config.text.homeLimit.value(Map(config.Limit -> s"$limit".text).asJava).build())
 			CommandResult.builder().successCount(limit).build()
 		case _ => throw nonPlayerError
 	}

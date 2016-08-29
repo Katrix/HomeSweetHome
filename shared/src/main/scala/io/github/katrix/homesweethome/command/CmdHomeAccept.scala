@@ -20,6 +20,8 @@
  */
 package io.github.katrix.homesweethome.command
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
@@ -27,24 +29,25 @@ import org.spongepowered.api.entity.living.player.Player
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.LibPerm
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
 			player <- src.asInstanceOfOpt[Player].toRight(nonPlayerError).right
 			requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			home <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException("That player has not sent a request".text)).right
+			home <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(config.text.invalidRequest.value)).right
 		} yield (player, requester, home)
 
 		data match {
 			case Right((homeOwner, requester, home)) if home.teleport(requester) =>
-				requester.sendMessage("Teleported you to your requested home".richText.info())
-				src.sendMessage(s"""Teleported ${requester.getName} to their requested home""".richText.success())
+				requester.sendMessage(config.text.acceptRequester.value)
+				src.sendMessage(config.text.acceptSuccess.value(Map(config.Requester -> requester.getName.text).asJava).build())
 				homeHandler.removeRequest(requester, homeOwner.getUniqueId)
 				CommandResult.success()
 			case Right((player, requester, home)) => throw teleportError

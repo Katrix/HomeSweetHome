@@ -21,6 +21,8 @@
 package io.github.katrix.homesweethome.command
 package residents
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
@@ -28,12 +30,13 @@ import org.spongepowered.api.entity.living.player.Player
 
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
@@ -46,13 +49,15 @@ class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(im
 			case Right((player, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
 				val newHome = home.addResident(target.getUniqueId)
 				homeHandler.updateHome(player.getUniqueId, homeName, newHome)
-				src.sendMessage(s"""Added ${target.getName} as a resident to "$homeName"""".richText.success())
-				target.sendMessage(s"""You have been add as a resident to "$homeName" for ${player.getName}""".richText.info())
+				src.sendMessage(config.text.residentsAddSrc.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava).build())
+				target.sendMessage(config.text.residentsAddPlayer.value(Map(config.HomeName -> homeName.text, config.Target -> player.getName.text).asJava)
+					.build())
 				CommandResult.success()
 			case Right((_, target, _, homeName, true)) =>
-				src.sendMessage(s"""${target.getName} is already a resident of "$homeName"""".richText.error())
+				src.sendMessage(config.text.residentsAddAlready.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava)
+					.build())
 				CommandResult.empty()
-			case Right((_, _, _, _, false)) => throw new CommandException("Home resident limit reached".richText.error())
+			case Right((_, _, _, _, false)) => throw new CommandException(config.text.homeLimitReached.value)
 			case Left(error) => throw error
 		}
 	}

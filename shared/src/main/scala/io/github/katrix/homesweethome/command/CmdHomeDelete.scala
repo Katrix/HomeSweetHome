@@ -20,6 +20,8 @@
  */
 package io.github.katrix.homesweethome.command
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.CommandContext
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -27,11 +29,12 @@ import org.spongepowered.api.entity.living.player.Player
 
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 
-class CmdHomeDelete(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeDelete(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
@@ -42,7 +45,7 @@ class CmdHomeDelete(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 		data match {
 			case Right((player, homeName)) =>
 				homeHandler.deleteHome(player.getUniqueId, homeName)
-				src.sendMessage(s"""Deleted "$homeName"""".richText.success())
+				src.sendMessage(config.text.homeDelete.value(Map(config.HomeName -> homeName.text).asJava).build())
 				CommandResult.success()
 			case Left(error) => throw error
 		}

@@ -38,33 +38,109 @@ abstract class HomeConfig extends Config {
 	val residentLimitDefault: ConfigValue[Int]
 	val timeout             : ConfigValue[Int]
 
-	val textHomeTeleport : ConfigValue[TextTemplate] //One arg homeName
-	val textHomeDelete   : ConfigValue[TextTemplate] //One arg homeName
-	val textHomeSet      : ConfigValue[TextTemplate] //One arg homeName
-	val textHomeList     : ConfigValue[TextTemplate] //One arg homes
-	val textHomeLimit    : ConfigValue[TextTemplate] //One arg limit
-	val textInviteSrc    : ConfigValue[TextTemplate] //Two args target homeName
-	val textInvitePlayer : ConfigValue[TextTemplate] //Two args homeName owner
-	val textGotoValid    : ConfigValue[TextTemplate] //Two args homeName owner
-	val textGotoRequest  : ConfigValue[TextTemplate] //Two args owner homeName
-	val textAcceptSuccess: ConfigValue[TextTemplate] //One arg requester
+	val text: TextMessages
+	trait TextMessages {
+		val homeTeleport    : ConfigValue[TextTemplate] //One arg homeName
+		val homeDelete      : ConfigValue[TextTemplate] //One arg homeName
+		val homeSet         : ConfigValue[TextTemplate] //One arg homeName
+		val homeList        : ConfigValue[TextTemplate] //One arg homes
+		val homeLimit       : ConfigValue[TextTemplate] //One arg limit
+		val inviteSrc       : ConfigValue[TextTemplate] //Two args target homeName
+		val invitePlayer    : ConfigValue[TextTemplate] //Two args homeName owner
+		val gotoValid       : ConfigValue[TextTemplate] //Two args homeName owner
+		val gotoRequestSrc  : ConfigValue[TextTemplate] //Two args owner homeName
+		val gotoRequestOwner: ConfigValue[TextTemplate] //Two args target homeName
+		val acceptSuccess   : ConfigValue[TextTemplate] //One arg requester
 
-	val textResidentsList: ConfigValue[TextTemplate] //Two args homeName residents
-	val textResidentsNone: ConfigValue[TextTemplate] //One arg homeName
+		val residentsList          : ConfigValue[TextTemplate] //Two args homeName residents
+		val residentsNone          : ConfigValue[TextTemplate] //One arg homeName
+		val residentsLimit         : ConfigValue[TextTemplate] //One arg limit
+		val residentsAddSrc        : ConfigValue[TextTemplate] //Two args target homeName
+		val residentsAddPlayer     : ConfigValue[TextTemplate] //Two args homeName owner
+		val residentsAddAlready    : ConfigValue[TextTemplate] //Two args target homeName
+		val residentsRemoveSrc     : ConfigValue[TextTemplate] //Two args target homeName
+		val residentsRemovePlayer  : ConfigValue[TextTemplate] //Two args homeName owner
+		val residentsRemoveNotExist: ConfigValue[TextTemplate] //Two args target homeName
 
-	val textHomeOtherTeleport : ConfigValue[TextTemplate] //Two arg homeName owner
-	val textHomeOtherDelete   : ConfigValue[TextTemplate] //Two arg homeName owner
-	val textHomeOtherSet      : ConfigValue[TextTemplate] //Two arg homeName owner
-	val textHomeOtherList     : ConfigValue[TextTemplate] //Two arg owner homes
-	val textHomeOtherLimit    : ConfigValue[TextTemplate] //Two arg owner limit
-	val textInviteOtherSrc    : ConfigValue[TextTemplate] //Three args target homeName owner
-	val textInviteOtherPlayer : ConfigValue[TextTemplate] //Three args homeName owner target
+		val homeOtherTeleport : ConfigValue[TextTemplate] //Two arg homeName owner
+		val homeOtherDelete   : ConfigValue[TextTemplate] //Two arg homeName owner
+		val homeOtherSet      : ConfigValue[TextTemplate] //Two arg homeName owner
+		val homeOtherList     : ConfigValue[TextTemplate] //Two arg owner homes
+		val homeOtherLimit    : ConfigValue[TextTemplate] //Two arg owner limit
+		val inviteOtherSrc    : ConfigValue[TextTemplate] //Three args target homeName owner
+		val inviteOtherPlayer : ConfigValue[TextTemplate] //Three args homeName owner target
 
-	val textHomeNoHomes     : ConfigValue[Text]
-	val textHomeLimitReached: ConfigValue[Text]
-	val textInvalidRequest  : ConfigValue[Text]
-	val textAcceptRequester : ConfigValue[Text]
-	val textHomeNotFound    : ConfigValue[Text]
+		val residentsOtherList          : ConfigValue[TextTemplate] //Three args homeName owner residents
+		val residentsOtherNone          : ConfigValue[TextTemplate] //Two args homeName owner
+		val residentsOtherLimit         : ConfigValue[TextTemplate] //Two args target limit
+		val residentsOtherAddSrc        : ConfigValue[TextTemplate] //Three args target homeName owner
+		val residentsOtherAddAlready    : ConfigValue[TextTemplate] //Three args target homeName owner
+		val residentsOtherRemoveSrc     : ConfigValue[TextTemplate] //Three args target homeName owner
+		val residentsOtherRemoveNotExist: ConfigValue[TextTemplate] //Three args target homeName owner
 
-	override def seq: Seq[ConfigValue[_]] = Seq(homeLimitDefault, residentLimitDefault, version)
+		val homeNoHomes          : ConfigValue[Text]
+		val residentsLimitReached: ConfigValue[Text]
+		val homeLimitReached     : ConfigValue[Text]
+		val invalidRequest       : ConfigValue[Text]
+		val acceptRequester      : ConfigValue[Text]
+		val requestOffline       : ConfigValue[Text]
+		val homeNotFound         : ConfigValue[Text]
+		val teleportError        : ConfigValue[Text]
+		val onlyPlayers          : ConfigValue[Text]
+	}
+
+	override def seq: Seq[ConfigValue[_]] = Seq(
+		version,
+		homeLimitDefault,
+		residentLimitDefault,
+		timeout,
+
+		text.homeTeleport,
+		text.homeDelete,
+		text.homeSet,
+		text.homeList,
+		text.homeLimit,
+		text.inviteSrc,
+		text.invitePlayer,
+		text.gotoValid,
+		text.gotoRequestSrc,
+		text.gotoRequestOwner,
+		text.acceptSuccess,
+
+		text.residentsList,
+		text.residentsNone,
+		text.residentsLimit,
+		text.residentsAddSrc,
+		text.residentsAddPlayer,
+		text.residentsAddAlready,
+		text.residentsRemoveSrc,
+		text.residentsRemovePlayer,
+		text.residentsRemoveNotExist,
+
+		text.homeOtherTeleport,
+		text.homeOtherDelete,
+		text.homeOtherSet,
+		text.homeOtherList,
+		text.homeOtherLimit,
+		text.inviteOtherSrc,
+		text.inviteOtherPlayer,
+
+		text.residentsOtherList,
+		text.residentsOtherNone,
+		text.residentsOtherLimit,
+		text.residentsOtherAddSrc,
+		text.residentsOtherAddAlready,
+		text.residentsOtherRemoveSrc,
+		text.residentsOtherRemoveNotExist,
+
+		text.homeNoHomes,
+		text.residentsLimitReached,
+		text.homeLimitReached,
+		text.invalidRequest,
+		text.acceptRequester,
+		text.requestOffline,
+		text.homeNotFound,
+		text.teleportError,
+		text.onlyPlayers
+	)
 }
