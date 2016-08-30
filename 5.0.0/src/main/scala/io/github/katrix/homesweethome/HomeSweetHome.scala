@@ -62,11 +62,11 @@ object HomeSweetHome {
 			override def getHomeLimit(player: Subject): Int = player.getOption(s"${LibPlugin.Id}.homeLimit").toOption
 				.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
 			override def getResidentLimit(player: Subject): Int = player.getOption(s"${LibPlugin.Id}.residentLimit").toOption
-				.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
+				.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.residentLimitDefault.value)
 		}
 		homeHandler.reloadHomeData()
 
-		val cmdHome = new CmdHome(homeHandler)
+		val cmdHome = new CmdHome(homeHandler)(plugin, plugin.config)
 		cmdHome.registerHelp()
 		Sponge.getCommandManager.register(plugin, plugin.pluginCmd.commandSpec, plugin.pluginCmd.aliases: _*)
 		Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases: _*)
