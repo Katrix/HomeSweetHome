@@ -7,7 +7,7 @@ lazy val commonSettings = Seq(
 	scalacOptions += "-Xexperimental",
 	crossPaths := false,
 	assemblyShadeRules in assembly := Seq(
-		ShadeRule.rename("scala.**" -> "io.github.katrix.chateditor.shade.scala.@1").inProject
+		ShadeRule.rename("scala.**" -> "io.github.katrix.katlib.shade.scala.@1").inProject
 	),
 	autoScalaLibrary := false
 )
