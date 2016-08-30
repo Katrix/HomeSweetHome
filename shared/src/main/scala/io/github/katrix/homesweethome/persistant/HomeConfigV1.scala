@@ -56,20 +56,24 @@ class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(imp
 		override val residentsRemovePlayer   = default.text.residentsRemovePlayer
 		override val residentsRemoveNotExist = default.text.residentsRemoveNotExist
 
-		override val homeOtherTeleport = default.text.homeOtherTeleport
-		override val homeOtherDelete   = default.text.homeOtherDelete
-		override val homeOtherSet      = default.text.homeOtherSet
-		override val homeOtherList     = default.text.homeOtherList
-		override val homeOtherLimit    = default.text.homeOtherLimit
-		override val inviteOtherSrc    = default.text.inviteOtherSrc
-		override val inviteOtherPlayer = default.text.inviteOtherPlayer
+		override val homeOtherTeleport     = default.text.homeOtherTeleport
+		override val homeOtherDelete       = default.text.homeOtherDelete
+		override val homeOtherSet          = default.text.homeOtherSet
+		override val homeOtherList         = default.text.homeOtherList
+		override val homeOtherLimit        = default.text.homeOtherLimit
+		override val homeOtherLimitReached = default.text.homeOtherLimitReached
+		override val inviteOtherSrc        = default.text.inviteOtherSrc
+		override val inviteOtherPlayer     = default.text.inviteOtherPlayer
 
 		override val residentsOtherList           = default.text.residentsOtherList
 		override val residentsOtherNone           = default.text.residentsOtherNone
 		override val residentsOtherLimit          = default.text.residentsOtherLimit
+		override val residentsOtherLimitReached   = default.text.residentsOtherLimitReached
 		override val residentsOtherAddSrc         = default.text.residentsOtherAddSrc
+		override val residentsOtherAddPlayer      = default.text.residentsOtherAddPlayer
 		override val residentsOtherAddAlready     = default.text.residentsOtherAddAlready
 		override val residentsOtherRemoveSrc      = default.text.residentsOtherRemoveSrc
+		override val residentsOtherRemovePlayer   = default.text.residentsOtherRemovePlayer
 		override val residentsOtherRemoveNotExist = default.text.residentsOtherRemoveNotExist
 
 		override val homeNoHomes           = default.text.homeNoHomes
