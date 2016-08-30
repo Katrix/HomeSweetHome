@@ -35,7 +35,6 @@ class HomeConfigLoader(dir: Path)(implicit plugin: KatPlugin) extends AbstractCo
 
 	override protected def loadVersionedData(version: String): HomeConfig = version match {
 		case "1" => new HomeConfigV1(cfgRoot, default)
-		case "2" => new HomeConfigV2(cfgRoot, default)
 		case _ =>
 			LogHelper.error("Invalid version in config. Loading default")
 			default
@@ -46,8 +45,8 @@ class HomeConfigLoader(dir: Path)(implicit plugin: KatPlugin) extends AbstractCo
 			"homeLimit"))
 		override val residentLimitDefault      = ConfigValue(2, "Type = Int\nThe default limit to how many residents a home can have",
 			Seq("home", "residentLimit"))
-		override val version                   = ConfigValue("2", "Please don't change this", versionNode.getPath.map(_.toString))
-		override val timeout: ConfigValue[Int] = ConfigValue(60 * 50, "Type = Int\nThe aamount of time in seconds before an invite or request times out",
+		override val version                   = ConfigValue("1", "Please don't change this", versionNode.getPath.map(_.toString))
+		override val timeout: ConfigValue[Int] = ConfigValue(60 * 50, "Type = Int\nThe amount of time in seconds before an invite or request times out",
 			Seq("home", "timeout"))
 
 		override val text = new TextMessages {

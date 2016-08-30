@@ -21,70 +21,68 @@
 package io.github.katrix.homesweethome.persistant
 
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.helper.LogHelper
 import io.github.katrix.katlib.persistant.ConfigValue
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 
 class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(implicit plugin: KatPlugin) extends HomeConfig {
 
-	LogHelper.info("Config with version 1 is old. Updating to version 2")
 	override val homeLimitDefault     = ConfigValue(cfgRoot, default.homeLimitDefault)
-	override val residentLimitDefault = default.residentLimitDefault
-	override val version              = default.version
-	override val timeout              = default.timeout
+	override val residentLimitDefault = ConfigValue(cfgRoot, default.residentLimitDefault)
+	override val version              = ConfigValue(cfgRoot, default.version)
+	override val timeout              = ConfigValue(cfgRoot, default.timeout)
 
 	override val text = new TextMessages {
-		override val homeTeleport     = default.text.homeTeleport
-		override val homeDelete       = default.text.homeDelete
-		override val homeSet          = default.text.homeSet
-		override val homeList         = default.text.homeList
-		override val homeLimit        = default.text.homeLimit
-		override val inviteSrc        = default.text.inviteSrc
-		override val invitePlayer     = default.text.invitePlayer
-		override val gotoValid        = default.text.gotoValid
-		override val gotoRequestSrc   = default.text.gotoRequestSrc
-		override val gotoRequestOwner = default.text.gotoRequestOwner
-		override val acceptSuccess    = default.text.acceptSuccess
+		override val homeTeleport     = ConfigValue(cfgRoot, default.text.homeTeleport)
+		override val homeDelete       = ConfigValue(cfgRoot, default.text.homeDelete)
+		override val homeSet          = ConfigValue(cfgRoot, default.text.homeSet)
+		override val homeList         = ConfigValue(cfgRoot, default.text.homeList)
+		override val homeLimit        = ConfigValue(cfgRoot, default.text.homeLimit)
+		override val inviteSrc        = ConfigValue(cfgRoot, default.text.inviteSrc)
+		override val invitePlayer     = ConfigValue(cfgRoot, default.text.invitePlayer)
+		override val gotoValid        = ConfigValue(cfgRoot, default.text.gotoValid)
+		override val gotoRequestSrc   = ConfigValue(cfgRoot, default.text.gotoRequestSrc)
+		override val gotoRequestOwner = ConfigValue(cfgRoot, default.text.gotoRequestOwner)
+		override val acceptSuccess    = ConfigValue(cfgRoot, default.text.acceptSuccess)
 
-		override val residentsList           = default.text.residentsList
-		override val residentsNone           = default.text.residentsNone
-		override val residentsLimit          = default.text.residentsLimit
-		override val residentsAddSrc         = default.text.residentsAddSrc
-		override val residentsAddPlayer      = default.text.residentsAddPlayer
-		override val residentsAddAlready     = default.text.residentsAddAlready
-		override val residentsRemoveSrc      = default.text.residentsRemoveSrc
-		override val residentsRemovePlayer   = default.text.residentsRemovePlayer
-		override val residentsRemoveNotExist = default.text.residentsRemoveNotExist
+		override val residentsList           = ConfigValue(cfgRoot, default.text.residentsList)
+		override val residentsNone           = ConfigValue(cfgRoot, default.text.residentsNone)
+		override val residentsLimit          = ConfigValue(cfgRoot, default.text.residentsLimit)
+		override val residentsAddSrc         = ConfigValue(cfgRoot, default.text.residentsAddSrc)
+		override val residentsAddPlayer      = ConfigValue(cfgRoot, default.text.residentsAddPlayer)
+		override val residentsAddAlready     = ConfigValue(cfgRoot, default.text.residentsAddAlready)
+		override val residentsRemoveSrc      = ConfigValue(cfgRoot, default.text.residentsRemoveSrc)
+		override val residentsRemovePlayer   = ConfigValue(cfgRoot, default.text.residentsRemovePlayer)
+		override val residentsRemoveNotExist = ConfigValue(cfgRoot, default.text.residentsRemoveNotExist)
 
-		override val homeOtherTeleport     = default.text.homeOtherTeleport
-		override val homeOtherDelete       = default.text.homeOtherDelete
-		override val homeOtherSet          = default.text.homeOtherSet
-		override val homeOtherList         = default.text.homeOtherList
-		override val homeOtherListNone     = default.text.homeOtherListNone
-		override val homeOtherLimit        = default.text.homeOtherLimit
-		override val homeOtherLimitReached = default.text.homeOtherLimitReached
-		override val inviteOtherSrc        = default.text.inviteOtherSrc
-		override val inviteOtherPlayer     = default.text.inviteOtherPlayer
+		override val homeOtherTeleport     = ConfigValue(cfgRoot, default.text.homeOtherTeleport)
+		override val homeOtherDelete       = ConfigValue(cfgRoot, default.text.homeOtherDelete)
+		override val homeOtherSet          = ConfigValue(cfgRoot, default.text.homeOtherSet)
+		override val homeOtherList         = ConfigValue(cfgRoot, default.text.homeOtherList)
+		override val homeOtherListNone     = ConfigValue(cfgRoot, default.text.homeOtherListNone)
+		override val homeOtherLimit        = ConfigValue(cfgRoot, default.text.homeOtherLimit)
+		override val homeOtherLimitReached = ConfigValue(cfgRoot, default.text.homeOtherLimitReached)
+		override val inviteOtherSrc        = ConfigValue(cfgRoot, default.text.inviteOtherSrc)
+		override val inviteOtherPlayer     = ConfigValue(cfgRoot, default.text.inviteOtherPlayer)
 
-		override val residentsOtherList           = default.text.residentsOtherList
-		override val residentsOtherNone           = default.text.residentsOtherNone
-		override val residentsOtherLimit          = default.text.residentsOtherLimit
-		override val residentsOtherLimitReached   = default.text.residentsOtherLimitReached
-		override val residentsOtherAddSrc         = default.text.residentsOtherAddSrc
-		override val residentsOtherAddPlayer      = default.text.residentsOtherAddPlayer
-		override val residentsOtherAddAlready     = default.text.residentsOtherAddAlready
-		override val residentsOtherRemoveSrc      = default.text.residentsOtherRemoveSrc
-		override val residentsOtherRemovePlayer   = default.text.residentsOtherRemovePlayer
-		override val residentsOtherRemoveNotExist = default.text.residentsOtherRemoveNotExist
+		override val residentsOtherList           = ConfigValue(cfgRoot, default.text.residentsOtherList)
+		override val residentsOtherNone           = ConfigValue(cfgRoot, default.text.residentsOtherNone)
+		override val residentsOtherLimit          = ConfigValue(cfgRoot, default.text.residentsOtherLimit)
+		override val residentsOtherLimitReached   = ConfigValue(cfgRoot, default.text.residentsOtherLimitReached)
+		override val residentsOtherAddSrc         = ConfigValue(cfgRoot, default.text.residentsOtherAddSrc)
+		override val residentsOtherAddPlayer      = ConfigValue(cfgRoot, default.text.residentsOtherAddPlayer)
+		override val residentsOtherAddAlready     = ConfigValue(cfgRoot, default.text.residentsOtherAddAlready)
+		override val residentsOtherRemoveSrc      = ConfigValue(cfgRoot, default.text.residentsOtherRemoveSrc)
+		override val residentsOtherRemovePlayer   = ConfigValue(cfgRoot, default.text.residentsOtherRemovePlayer)
+		override val residentsOtherRemoveNotExist = ConfigValue(cfgRoot, default.text.residentsOtherRemoveNotExist)
 
-		override val homeNoHomes           = default.text.homeNoHomes
-		override val residentsLimitReached = default.text.residentsLimitReached
-		override val homeLimitReached      = default.text.homeLimitReached
-		override val invalidRequest        = default.text.invalidRequest
-		override val acceptRequester       = default.text.acceptRequester
-		override val requestOffline        = default.text.requestOffline
-		override val homeNotFound          = default.text.homeNotFound
-		override val teleportError         = default.text.teleportError
-		override val onlyPlayers           = default.text.onlyPlayers
+		override val homeNoHomes           = ConfigValue(cfgRoot, default.text.homeNoHomes)
+		override val residentsLimitReached = ConfigValue(cfgRoot, default.text.residentsLimitReached)
+		override val homeLimitReached      = ConfigValue(cfgRoot, default.text.homeLimitReached)
+		override val invalidRequest        = ConfigValue(cfgRoot, default.text.invalidRequest)
+		override val acceptRequester       = ConfigValue(cfgRoot, default.text.acceptRequester)
+		override val requestOffline        = ConfigValue(cfgRoot, default.text.requestOffline)
+		override val homeNotFound          = ConfigValue(cfgRoot, default.text.homeNotFound)
+		override val teleportError         = ConfigValue(cfgRoot, default.text.teleportError)
+		override val onlyPlayers           = ConfigValue(cfgRoot, default.text.onlyPlayers)
 	}
 }
