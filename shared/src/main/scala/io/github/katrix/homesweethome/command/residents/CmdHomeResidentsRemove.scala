@@ -55,7 +55,7 @@ class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)
 					.build())
 				CommandResult.success()
 			case Right((_, target, _, homeName)) =>
-				throw new CommandException(config.text.residentsRemoveNotExist.value(Map(config.Target -> target.getName.text).asJava).build())
+				throw new CommandException(config.text.residentsRemoveNotExist.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava).build())
 			case Left(error) => throw error
 		}
 	}

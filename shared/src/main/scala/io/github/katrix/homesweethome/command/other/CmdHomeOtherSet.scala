@@ -53,10 +53,10 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
 		data match {
 			case Right((player, target, homeName, true)) =>
 				homeHandler.makeHome(target.getUniqueId, homeName, player.getLocation, player.getRotation)
-				src.sendMessage(config.text.homeOtherSet.value(Map(config.HomeName -> homeName.text, config.Target -> target.getName.text).asJava).build())
+				src.sendMessage(config.text.homeOtherSet.value(Map(config.HomeName -> homeName.text, config.Owner -> target.getName.text).asJava).build())
 				CommandResult.success()
 			case Right((_, target, _, false)) =>
-				throw new CommandException(config.text.homeOtherLimitReached.value(Map(config.Target -> target.getName.text).asJava).build())
+				throw new CommandException(config.text.homeOtherLimitReached.value(Map(config.Owner -> target.getName.text).asJava).build())
 			case Left(error) => throw error
 		}
 	}

@@ -82,6 +82,11 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 	def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = invites(target).put(homeOwner, home)
 
 	/**
+		* Removed an invite
+		*/
+	def removeInvite(player: Player, homeOwner: UUID): Unit = invites(player).remove(homeOwner)
+
+	/**
 		* Check if a player is invited to a specific home
 		*/
 	def isInvited(target: Player, homeOwner: UUID, home: Home): Boolean = invites(target).get(homeOwner).contains(home)

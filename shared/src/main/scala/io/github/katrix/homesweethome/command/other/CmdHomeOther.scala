@@ -49,7 +49,7 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
 
 		data match {
 			case Right((player, target, homeName, home)) if home.teleport(player) =>
-				src.sendMessage(config.text.homeOtherTeleport.value(Map(config.HomeName -> homeName.text, config.Target -> target.getName.text).asJava)
+				src.sendMessage(config.text.homeOtherTeleport.value(Map(config.HomeName -> homeName.text, config.Owner -> target.getName.text).asJava)
 					.build())
 				CommandResult.success()
 			case Right(_) => throw teleportError

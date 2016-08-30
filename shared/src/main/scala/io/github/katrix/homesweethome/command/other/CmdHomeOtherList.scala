@@ -45,11 +45,11 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
 
 		data match {
 			case Right((target, Seq())) =>
-				src.sendMessage(config.text.homeOtherLimit.value(Map(config.Target -> target.getName.text).asJava).build())
+				src.sendMessage(config.text.homeOtherListNone.value(Map(config.Owner -> target.getName.text).asJava).build())
 				CommandResult.empty()
 			case Right((target, homes)) =>
 				val homeList = homes.sorted.mkString(", ")
-				src.sendMessage(s"${target.getName}'s homes are: $homeList".richText.info())
+				src.sendMessage(config.text.homeOtherList.value(Map(config.Owner -> target.getName.text, config.Homes -> homeList).asJava).build())
 				CommandResult.builder().successCount(homes.size).build()
 			case Left(error) => throw error
 		}

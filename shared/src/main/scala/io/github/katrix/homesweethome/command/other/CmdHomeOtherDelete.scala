@@ -47,7 +47,7 @@ class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
 		data match {
 			case Right((target, homeName)) if homeHandler.homeExist(target.getUniqueId, homeName) =>
 				homeHandler.deleteHome(target.getUniqueId, homeName)
-				src.sendMessage(config.text.homeOtherDelete.value(Map(config.Target -> target.getName.text).asJava).build())
+				src.sendMessage(config.text.homeOtherDelete.value(Map(config.HomeName -> homeName.text,config.Owner -> target.getName.text).asJava).build())
 				CommandResult.success()
 			case Right(_) => throw homeNotFoundError
 			case Left(error) => throw error

@@ -67,6 +67,7 @@ abstract class HomeConfig extends Config {
 		val homeOtherSet         : ConfigValue[TextTemplate] //Two arg homeName owner
 		val homeOtherLimitReached: ConfigValue[TextTemplate] //One arg owner
 		val homeOtherList        : ConfigValue[TextTemplate] //Two arg owner homes
+		val homeOtherListNone    : ConfigValue[TextTemplate] //One arg owner
 		val homeOtherLimit       : ConfigValue[TextTemplate] //Two arg owner limit
 		val inviteOtherSrc       : ConfigValue[TextTemplate] //Three args target homeName owner
 		val inviteOtherPlayer    : ConfigValue[TextTemplate] //Three args homeName owner target
@@ -125,6 +126,7 @@ abstract class HomeConfig extends Config {
 		text.homeOtherDelete,
 		text.homeOtherSet,
 		text.homeOtherList,
+		text.homeOtherListNone,
 		text.homeOtherLimit,
 		text.inviteOtherSrc,
 		text.inviteOtherPlayer,

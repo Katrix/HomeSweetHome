@@ -42,7 +42,7 @@ class CmdHomeOtherResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeOtherR
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
 		case Some(player) =>
 			val limit = homeHandler.getResidentLimit(player)
-			src.sendMessage(config.text.residentsOtherLimit.value(Map(config.Limit -> s"$limit".text).asJava).build())
+			src.sendMessage(config.text.residentsOtherLimit.value(Map(config.Owner -> player.getName.text, config.Limit -> s"$limit".text).asJava).build())
 			CommandResult.builder().successCount(limit).build()
 		case None => throw nonPlayerError
 	}

@@ -41,7 +41,7 @@ class CmdHomeOtherLimit(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
 		case Some(player) =>
 			val limit = homeHandler.getHomeLimit(player)
-			src.sendMessage(config.text.homeOtherLimit.value(Map(config.Owner -> player.getName.text).asJava).build())
+			src.sendMessage(config.text.homeOtherLimit.value(Map(config.Owner -> player.getName.text, config.Limit -> s"$limit".text).asJava).build())
 			CommandResult.builder().successCount(limit).build()
 		case None => throw nonPlayerError
 	}

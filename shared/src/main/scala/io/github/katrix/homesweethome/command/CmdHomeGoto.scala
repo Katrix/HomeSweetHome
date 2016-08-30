@@ -52,6 +52,7 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 		data match {
 			case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
 				src.sendMessage(config.text.gotoValid.value(Map(config.HomeName -> homeName.text, config.Owner -> homeOwner.getName.text).asJava).build())
+				homeHandler.removeInvite(player, homeOwner.getUniqueId)
 				CommandResult.success()
 			case Right((_, _, _, _, true)) => throw teleportError
 			case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>

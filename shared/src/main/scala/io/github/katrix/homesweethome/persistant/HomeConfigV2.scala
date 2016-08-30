@@ -58,6 +58,7 @@ class HomeConfigV2(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(imp
 		override val homeOtherDelete       = ConfigValue(cfgRoot, default.text.homeOtherDelete)
 		override val homeOtherSet          = ConfigValue(cfgRoot, default.text.homeOtherSet)
 		override val homeOtherList         = ConfigValue(cfgRoot, default.text.homeOtherList)
+		override val homeOtherListNone     = ConfigValue(cfgRoot, default.text.homeOtherListNone)
 		override val homeOtherLimit        = ConfigValue(cfgRoot, default.text.homeOtherLimit)
 		override val homeOtherLimitReached = ConfigValue(cfgRoot, default.text.homeOtherLimitReached)
 		override val inviteOtherSrc        = ConfigValue(cfgRoot, default.text.inviteOtherSrc)

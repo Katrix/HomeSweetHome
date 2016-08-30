@@ -31,7 +31,7 @@ class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(imp
 	override val homeLimitDefault     = ConfigValue(cfgRoot, default.homeLimitDefault)
 	override val residentLimitDefault = default.residentLimitDefault
 	override val version              = default.version
-	override val timeout              = default.version
+	override val timeout              = default.timeout
 
 	override val text = new TextMessages {
 		override val homeTeleport     = default.text.homeTeleport
@@ -60,6 +60,7 @@ class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(imp
 		override val homeOtherDelete       = default.text.homeOtherDelete
 		override val homeOtherSet          = default.text.homeOtherSet
 		override val homeOtherList         = default.text.homeOtherList
+		override val homeOtherListNone     = default.text.homeOtherListNone
 		override val homeOtherLimit        = default.text.homeOtherLimit
 		override val homeOtherLimitReached = default.text.homeOtherLimitReached
 		override val inviteOtherSrc        = default.text.inviteOtherSrc

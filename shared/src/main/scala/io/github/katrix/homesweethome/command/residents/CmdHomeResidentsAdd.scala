@@ -50,14 +50,14 @@ class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(im
 				val newHome = home.addResident(target.getUniqueId)
 				homeHandler.updateHome(player.getUniqueId, homeName, newHome)
 				src.sendMessage(config.text.residentsAddSrc.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava).build())
-				target.sendMessage(config.text.residentsAddPlayer.value(Map(config.HomeName -> homeName.text, config.Target -> player.getName.text).asJava)
+				target.sendMessage(config.text.residentsAddPlayer.value(Map(config.HomeName -> homeName.text, config.Owner -> player.getName.text).asJava)
 					.build())
 				CommandResult.success()
 			case Right((_, target, _, homeName, true)) =>
 				src.sendMessage(config.text.residentsAddAlready.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava)
 					.build())
 				CommandResult.empty()
-			case Right((_, _, _, _, false)) => throw new CommandException(config.text.homeLimitReached.value)
+			case Right((_, _, _, _, false)) => throw new CommandException(config.text.residentsLimitReached.value)
 			case Left(error) => throw error
 		}
 	}
