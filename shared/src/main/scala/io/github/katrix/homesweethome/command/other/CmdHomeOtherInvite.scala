@@ -21,6 +21,8 @@
 package io.github.katrix.homesweethome.command
 package other
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -28,12 +30,13 @@ import org.spongepowered.api.entity.living.player.{Player, User}
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
@@ -47,8 +50,10 @@ class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
 		data match {
 			case Right((player, homeOwner, target, homeName, home)) =>
 				homeHandler.addInvite(target, homeOwner.getUniqueId, home)
-				src.sendMessage(s"""Invited ${target.getName} to "$homeName" for ${homeOwner.getName}""".richText.success())
-				target.sendMessage(s"""You have been invited to "$homeName" for ${homeOwner.getName} by ${player.getName}""".richText.info())
+				src.sendMessage(config.text.inviteOtherSrc.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text,
+					config.Owner -> homeOwner.getName.text).asJava).build())
+				target.sendMessage(config.text.inviteOtherPlayer.value(Map(config.HomeName -> homeName.text, config.Owner -> homeOwner.getName.text,
+					config.Target -> player.getName.text).asJava).build())
 				CommandResult.success()
 			case Left(error) => throw error
 		}

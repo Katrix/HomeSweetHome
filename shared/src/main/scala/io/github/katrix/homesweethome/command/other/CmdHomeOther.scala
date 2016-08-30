@@ -21,6 +21,8 @@
 package io.github.katrix.homesweethome.command
 package other
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -29,12 +31,13 @@ import org.spongepowered.api.entity.living.player.{Player, User}
 import io.github.katrix.homesweethome.command.other.residents.CmdHomeOtherResidents
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
@@ -46,7 +49,8 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
 
 		data match {
 			case Right((player, target, homeName, home)) if home.teleport(player) =>
-				src.sendMessage(s"""Teleported you to "$homeName" for ${target.getName}""".richText.success())
+				src.sendMessage(config.text.homeOtherTeleport.value(Map(config.HomeName -> homeName.text, config.Target -> target.getName.text).asJava)
+					.build())
 				CommandResult.success()
 			case Right(_) => throw teleportError
 			case Left(error) => throw error

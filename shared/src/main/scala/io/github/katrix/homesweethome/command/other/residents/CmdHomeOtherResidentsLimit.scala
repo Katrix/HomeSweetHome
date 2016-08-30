@@ -21,6 +21,8 @@
 package io.github.katrix.homesweethome.command
 package other.residents
 
+import scala.collection.JavaConverters._
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -28,18 +30,19 @@ import org.spongepowered.api.entity.living.player.User
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.LibPerm
+import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(
+class CmdHomeOtherResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(
 	parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
 		case Some(player) =>
 			val limit = homeHandler.getResidentLimit(player)
-			src.sendMessage(s"${player.getName}'s resident limit is: $limit".richText.info())
+			src.sendMessage(config.text.residentsOtherLimit.value(Map(config.Limit -> s"$limit".text).asJava).build())
 			CommandResult.builder().successCount(limit).build()
 		case None => throw nonPlayerError
 	}

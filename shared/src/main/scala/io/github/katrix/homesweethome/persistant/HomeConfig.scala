@@ -62,20 +62,24 @@ abstract class HomeConfig extends Config {
 		val residentsRemovePlayer  : ConfigValue[TextTemplate] //Two args homeName owner
 		val residentsRemoveNotExist: ConfigValue[TextTemplate] //Two args target homeName
 
-		val homeOtherTeleport : ConfigValue[TextTemplate] //Two arg homeName owner
-		val homeOtherDelete   : ConfigValue[TextTemplate] //Two arg homeName owner
-		val homeOtherSet      : ConfigValue[TextTemplate] //Two arg homeName owner
-		val homeOtherList     : ConfigValue[TextTemplate] //Two arg owner homes
-		val homeOtherLimit    : ConfigValue[TextTemplate] //Two arg owner limit
-		val inviteOtherSrc    : ConfigValue[TextTemplate] //Three args target homeName owner
-		val inviteOtherPlayer : ConfigValue[TextTemplate] //Three args homeName owner target
+		val homeOtherTeleport    : ConfigValue[TextTemplate] //Two arg homeName owner
+		val homeOtherDelete      : ConfigValue[TextTemplate] //Two arg homeName owner
+		val homeOtherSet         : ConfigValue[TextTemplate] //Two arg homeName owner
+		val homeOtherLimitReached: ConfigValue[TextTemplate] //One arg owner
+		val homeOtherList        : ConfigValue[TextTemplate] //Two arg owner homes
+		val homeOtherLimit       : ConfigValue[TextTemplate] //Two arg owner limit
+		val inviteOtherSrc       : ConfigValue[TextTemplate] //Three args target homeName owner
+		val inviteOtherPlayer    : ConfigValue[TextTemplate] //Three args homeName owner target
 
 		val residentsOtherList          : ConfigValue[TextTemplate] //Three args homeName owner residents
 		val residentsOtherNone          : ConfigValue[TextTemplate] //Two args homeName owner
 		val residentsOtherLimit         : ConfigValue[TextTemplate] //Two args target limit
+		val residentsOtherLimitReached  : ConfigValue[TextTemplate] //One arg owner
 		val residentsOtherAddSrc        : ConfigValue[TextTemplate] //Three args target homeName owner
+		val residentsOtherAddPlayer     : ConfigValue[TextTemplate] //Two args homeName owner
 		val residentsOtherAddAlready    : ConfigValue[TextTemplate] //Three args target homeName owner
 		val residentsOtherRemoveSrc     : ConfigValue[TextTemplate] //Three args target homeName owner
+		val residentsOtherRemovePlayer  : ConfigValue[TextTemplate] //Two args homeName owner
 		val residentsOtherRemoveNotExist: ConfigValue[TextTemplate] //Three args target homeName owner
 
 		val homeNoHomes          : ConfigValue[Text]
@@ -128,9 +132,12 @@ abstract class HomeConfig extends Config {
 		text.residentsOtherList,
 		text.residentsOtherNone,
 		text.residentsOtherLimit,
+		text.residentsOtherLimitReached,
 		text.residentsOtherAddSrc,
+		text.residentsOtherAddPlayer,
 		text.residentsOtherAddAlready,
 		text.residentsOtherRemoveSrc,
+		text.residentsOtherRemovePlayer,
 		text.residentsOtherRemoveNotExist,
 
 		text.homeNoHomes,
