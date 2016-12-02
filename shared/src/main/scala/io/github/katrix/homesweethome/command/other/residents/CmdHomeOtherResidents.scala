@@ -52,8 +52,8 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
 				src.sendMessage(t""""$YELLOW$homeName" for ${player.getName} doesn't have any residents""")
 				CommandResult.empty()
 			case Right((player, homeName, residents, limit)) =>
-				val userStorage = Sponge.getServiceManager.provideUnchecked[UserStorageService]
-				val builder = Sponge.getServiceManager.provideUnchecked[PaginationService].builder()
+				val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
+				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
 				val homeOwner = player.getName
 				builder.title(t"$YELLOW$homeOwner's $homeName's residents")
 

@@ -48,7 +48,7 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
 				src.sendMessage(t"$YELLOW${target.getName} doesn't have any homes yet")
 				CommandResult.empty()
 			case Right((target, homes, limit)) =>
-				val builder = Sponge.getServiceManager.provideUnchecked[PaginationService].builder()
+				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
 				val homeOwner = target.getName
 				builder.title(t"$YELLOW$homeOwner's homes")
 

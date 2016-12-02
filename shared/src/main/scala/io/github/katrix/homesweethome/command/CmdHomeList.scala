@@ -45,7 +45,7 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 				src.sendMessage(t"${YELLOW}You don't have any homes")
 				CommandResult.empty()
 			case Right((homes, limit)) =>
-				val builder = Sponge.getServiceManager.provideUnchecked[PaginationService].builder()
+				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
 				builder.title(t"${YELLOW}Homes")
 				val homeText = homes.sorted.map { homeName =>
 					val setButton = shiftButton(t"${YELLOW}Set", s"/home set $homeName")

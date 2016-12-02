@@ -48,8 +48,8 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
 				src.sendMessage(t""""$YELLOW$homeName" doesn't have any residents""")
 				CommandResult.empty()
 			case Right((homeName, residents, limit)) =>
-				val userStorage = Sponge.getServiceManager.provideUnchecked[UserStorageService]
-				val builder = Sponge.getServiceManager.provideUnchecked[PaginationService].builder()
+				val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
+				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
 				builder.title(t"$YELLOW$homeName's residents")
 
 				val residentText = residents.sorted
