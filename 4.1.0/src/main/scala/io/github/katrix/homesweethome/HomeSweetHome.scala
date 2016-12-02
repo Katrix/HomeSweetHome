@@ -21,6 +21,7 @@
 package io.github.katrix.homesweethome
 
 import java.nio.file.Path
+import java.util.UUID
 
 import scala.util.Try
 
@@ -33,17 +34,18 @@ import org.spongepowered.api.plugin.{Dependency, Plugin, PluginContainer}
 import org.spongepowered.api.service.permission.Subject
 import org.spongepowered.api.service.permission.option.OptionSubject
 
-import com.google.common.reflect.TypeToken
 import com.google.inject.Inject
 
 import io.github.katrix.homesweethome.command.CmdHome
-import io.github.katrix.homesweethome.home.{Home, HomeHandler}
+import io.github.katrix.homesweethome.home.{Home, HomeHandler, HomeV1}
 import io.github.katrix.homesweethome.lib.LibPlugin
 import io.github.katrix.homesweethome.persistant.{HomeConfig, HomeConfigLoader, HomeSerializer, StorageLoader}
-import io.github.katrix.katlib.helper.Implicits.RichOptional
+import io.github.katrix.katlib.helper.Implicits.{RichOptional, _}
 import io.github.katrix.katlib.lib.LibKatLibPlugin
-import io.github.katrix.katlib.{ImplKatPlugin, InitNeeded, KatLib}
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers
+import io.github.katrix.katlib.serializer.TypeSerializerImpl
+import io.github.katrix.katlib.serializer.TypeSerializerImpl.typeSerializer
+import io.github.katrix.katlib.{ImplKatPlugin, KatLib}
+import ninja.leaping.configurate.objectmapping.serialize.{TypeSerializer, TypeSerializers}
 
 object HomeSweetHome {
 
@@ -55,7 +57,10 @@ object HomeSweetHome {
 	implicit def plugin: HomeSweetHome = _plugin
 
 	def init(event: GameInitializationEvent): Unit = {
-		TypeSerializers.getDefaultSerializers.registerType(TypeToken.of(classOf[Home]), HomeSerializer)
+		val serializers = TypeSerializers.getDefaultSerializers
+		implicit val uuidSerializer = TypeSerializerImpl.fromTypeSerializer(serializers.get(typeToken[UUID]), classOf[UUID])
+		serializers.registerType(typeToken[HomeV1], HomeSerializer)
+		serializers.registerType(typeToken[Home], implicitly[TypeSerializer[Home]])
 		plugin._config = plugin.configLoader.loadData
 
 		val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
@@ -72,14 +77,15 @@ object HomeSweetHome {
 		}
 		homeHandler.reloadHomeData()
 
-		val cmdHome = new CmdHome(homeHandler)(plugin, plugin.config)
+		val cmdHome = new CmdHome(homeHandler)
 		cmdHome.registerHelp()
 		Sponge.getCommandManager.register(plugin, plugin.pluginCmd.commandSpec, plugin.pluginCmd.aliases: _*)
 		Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases: _*)
 	}
 }
 
-@Plugin(id = LibPlugin.Id, name = LibPlugin.Name, version = HomeSweetHome.ConstantVersion, dependencies = Array(new Dependency(id = LibKatLibPlugin.Id)))
+@Plugin(id = LibPlugin.Id, name = LibPlugin.Name, version = HomeSweetHome.ConstantVersion, dependencies = Array(new Dependency(
+	id = LibKatLibPlugin.Id)))
 class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfgDir: Path, spongeContainer: PluginContainer)
 	extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
 

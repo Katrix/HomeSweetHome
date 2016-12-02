@@ -44,10 +44,8 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 
 	private val homeMap = new mutable.HashMap[UUID, mutable.Map[String, Home]]() withDefaultValue new mutable.HashMap[String, Home]()
 
-	private val requests = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]] withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(
-		config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
-	private val invites  = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]] withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(
-		config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
+	private val requests = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
+	private val invites  = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
 
 	/**
 		* Clears the current homes and reloads them from disk.

@@ -26,7 +26,7 @@ import java.util.UUID
 
 import scala.collection.JavaConverters._
 
-import io.github.katrix.homesweethome.home.{Home, V1Home}
+import io.github.katrix.homesweethome.home.{Home, HomeV1}
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.helper.Implicits.typeToken
 import io.github.katrix.katlib.helper.LogHelper
@@ -38,7 +38,7 @@ class StorageLoader(dir: Path)(implicit plugin: KatPlugin) extends ConfigurateBa
 	dir, "storage.json", path => GsonConfigurationLoader.builder().setPath(path).build()) {
 
 	private val mapTypeToken = typeToken[JMap[UUID, JMap[String, Home]]]
-	private val v1MapTypeToken = typeToken[JMap[UUID, JMap[String, V1Home]]]
+	private val v1MapTypeToken = typeToken[JMap[UUID, JMap[String, HomeV1]]]
 
 	override def loadData: Map[UUID, Map[String, Home]] = {
 		val node = homeNode

@@ -24,9 +24,9 @@ import java.util.UUID
 
 import shapeless.Generic
 
-case class V1Home(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, worldUuid: UUID, residents: Seq[UUID]) {
+case class HomeV1(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, worldUuid: UUID, residents: Seq[UUID]) {
 
-	def toCurrent[Repr](implicit newGeneric: Generic.Aux[Home, Repr], oldGeneric: Generic.Aux[V1Home, Repr]): Home = {
+	def toCurrent[Repr](implicit newGeneric: Generic.Aux[Home, Repr], oldGeneric: Generic.Aux[HomeV1, Repr]): Home = {
 		newGeneric.from(oldGeneric.to(this))
 	}
 }
