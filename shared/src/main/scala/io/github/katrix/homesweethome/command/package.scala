@@ -22,6 +22,8 @@ package io.github.katrix.homesweethome
 
 import org.spongepowered.api.command.CommandException
 import org.spongepowered.api.entity.living.player.Player
+import org.spongepowered.api.text.Text
+import org.spongepowered.api.text.action.TextActions
 import org.spongepowered.api.text.format.TextColors._
 
 import io.github.katrix.homesweethome.persistant.HomeConfig
@@ -36,4 +38,7 @@ package object command {
 	def homeNotFoundError(implicit config: HomeConfig): CommandException = CommandBase.notFoundError("A home", "with that name")
 	def teleportError(implicit config: HomeConfig): CommandException =
 		new CommandException(t"${RED}A teleport error occurred, is the home in a safe place, and does the world exist")
+
+	def shiftButton(button: Text, text: String): Text =
+		t"[$button]".toBuilder.onShiftClick(TextActions.insertText(text)).build()
 }

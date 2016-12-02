@@ -31,7 +31,6 @@ import io.github.katrix.homesweethome.command.other.CmdHomeOther
 import io.github.katrix.homesweethome.command.residents.CmdHomeResidents
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
-import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._

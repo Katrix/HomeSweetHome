@@ -25,15 +25,15 @@ import org.spongepowered.api.Sponge
 import org.spongepowered.api.command.args.CommandContext
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
+import org.spongepowered.api.service.pagination.PaginationService
 import org.spongepowered.api.service.user.UserStorageService
+import org.spongepowered.api.text.format.TextColors._
 
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
-import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
-import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -41,21 +41,33 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
 		val data = for {
 			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
 			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError).right
-		} yield (home._2, home._1.residents)
+		} yield (home._2, home._1.residents, homeHandler.getResidentLimit(player))
 
 		data match {
-			case Right((homeName, Seq())) =>
-				src.sendMessage(t""""${YELLOW}$homeName" doesn't have any residents""")
+			case Right((homeName, Seq(), _)) =>
+				src.sendMessage(t""""$YELLOW$homeName" doesn't have any residents""")
 				CommandResult.empty()
-			case Right((homeName, residents)) =>
+			case Right((homeName, residents, limit)) =>
 				val userStorage = Sponge.getServiceManager.provideUnchecked[UserStorageService]
+				val builder = Sponge.getServiceManager.provideUnchecked[PaginationService].builder()
+				builder.title(t"$YELLOW$homeName's residents")
 
-				val residentList = residents.sorted
+				val residentText = residents.sorted
 					.map(uuid => userStorage.get(uuid).toOption
 						.map(_.getName))
 					.collect { case Some(str) => str }
-					.mkString(", ")
-				src.sendMessage(t"""${YELLOW}The residents of "$homeName" are: $residentList""")
+					.map { residentName =>
+						val deleteButton = shiftButton(t"${RED}Delete", s"/home residents remove $residentName $homeName")
+
+						t"$YELLOW$residentName $deleteButton"
+					}
+
+				val limitText = t"Limit: $limit"
+				val newButton = shiftButton(t"${YELLOW}New resident", s"/home residents add <player> $homeName")
+
+				builder.contents(limitText +: newButton +: residentText: _*)
+
+				builder.sendTo(src)
 				CommandResult.builder().successCount(residents.size).build()
 			case Left(error) => throw error
 		}
