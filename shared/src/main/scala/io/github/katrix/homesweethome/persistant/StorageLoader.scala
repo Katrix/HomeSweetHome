@@ -21,49 +21,51 @@
 package io.github.katrix.homesweethome.persistant
 
 import java.nio.file.Path
-import java.util
+import java.util.{Map => JMap}
 import java.util.UUID
 
 import scala.collection.JavaConverters._
 
-import com.google.common.reflect.{TypeParameter, TypeToken}
-
-import io.github.katrix.homesweethome.home.Home
+import io.github.katrix.homesweethome.home.{Home, V1Home}
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.helper.Implicits.typeToken
 import io.github.katrix.katlib.helper.LogHelper
 import io.github.katrix.katlib.persistant.ConfigurateBase
-import ninja.leaping.configurate.commented.CommentedConfigurationNode
+import ninja.leaping.configurate.ConfigurationNode
+import ninja.leaping.configurate.gson.GsonConfigurationLoader
 
-class StorageLoader(dir: Path)(implicit plugin: KatPlugin) extends ConfigurateBase[Map[UUID, Map[String, Home]]](dir, "storage", true) {
+class StorageLoader(dir: Path)(implicit plugin: KatPlugin) extends ConfigurateBase[Map[UUID, Map[String, Home]], ConfigurationNode, GsonConfigurationLoader](
+	dir, "storage.json", path => GsonConfigurationLoader.builder().setPath(path).build()) {
 
-	private val mapTypeToken = mapOf(typeToken[UUID], mapOf[String, Home])
+	private val mapTypeToken = typeToken[JMap[UUID, JMap[String, Home]]]
+	private val v1MapTypeToken = typeToken[JMap[UUID, JMap[String, V1Home]]]
 
-	private def mapOf[K: TypeToken, V: TypeToken]: TypeToken[util.Map[K, V]] = {
-		new TypeToken[util.Map[K, V]]() {}
-			.where(new TypeParameter[K] {}, implicitly[TypeToken[K]])
-			.where(new TypeParameter[V] {}, implicitly[TypeToken[V]])
+	override def loadData: Map[UUID, Map[String, Home]] = {
+		val node = homeNode
+		versionNode.getString("2") match {
+			case "1" =>
+				val ver1: Map[UUID, Map[String, Home]] = Option(node.getValue(v1MapTypeToken)) match {
+					case Some(map) =>
+						Map(map.asScala.map { case (key, value) => (key, Map(value.asScala.mapValues(_.toCurrent).toSeq: _*)) }.toSeq: _*)
+					case None =>
+						LogHelper.error("Could not load homes from storage.")
+						Map()
+				}
+				saveData(ver1)
+				ver1
+			case "2" =>
+				Option(node.getValue(mapTypeToken)) match {
+					case Some(map) =>
+						Map(map.asScala.map { case (key, value) => (key, Map(value.asScala.toSeq: _*)) }.toSeq: _*)
+					case None =>
+						LogHelper.error("Could not load homes from storage.")
+						Map()
+				}
+		}
 	}
 
-	override protected def loadVersionedData(version: String): Map[UUID, Map[String, Home]] = version match {
-		case "1" =>
-			val node = homeNode
-			Option(node.getValue(mapTypeToken)) match {
-				case Some(map) =>
-					Map(map.asScala.map { case (key, value) => (key, Map(value.asScala.toSeq: _*)) }.toSeq: _*)
-				case None =>
-					LogHelper.error("Could not load homes from storage.")
-					default
-			}
-		case _ =>
-			LogHelper.error("Invalid version for homes in storage.")
-			default
-	}
-
-	override protected val default: Map[UUID, Map[String, Home]] = Map()
-
-	override protected def saveData(data: Map[UUID, Map[String, Home]]): Unit = {
-		versionNode.setValue("1")
+	override def saveData(data: Map[UUID, Map[String, Home]]): Unit = {
+		versionNode.setValue("2")
 
 		val javaMap = data.map { case (key, value) => (key, value.asJava) }.asJava
 		homeNode.setValue(mapTypeToken, javaMap)
@@ -73,5 +75,7 @@ class StorageLoader(dir: Path)(implicit plugin: KatPlugin) extends ConfigurateBa
 
 	def saveMap(data: Map[UUID, Map[String, Home]]): Unit = saveData(data)
 
-	private def homeNode: CommentedConfigurationNode = cfgRoot.getNode("home")
+	private def homeNode: ConfigurationNode = cfgRoot.getNode("home")
+
+	private def versionNode: ConfigurationNode = cfgRoot.getNode("version")
 }

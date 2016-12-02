@@ -20,8 +20,6 @@
  */
 package io.github.katrix.homesweethome.command
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -35,11 +33,11 @@ import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- src.asInstanceOfOpt[Player].toRight(nonPlayerError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
 			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
 			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError).right
 		} yield (player, target, home._2, home._1)
@@ -47,8 +45,8 @@ class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 		data match {
 			case Right((player, target, homeName, home)) =>
 				homeHandler.addInvite(target, player.getUniqueId, home)
-				player.sendMessage(config.text.inviteSrc.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava).build())
-				target.sendMessage(config.text.invitePlayer.value(Map(config.HomeName -> homeName.text, config.Owner -> player.getName.text).asJava).build())
+				player.sendMessage(t"""Invited ${target.getName} to "$homeName"""")
+				target.sendMessage(t"""You have been invited to "$homeName" by ${target.getName}""")
 				CommandResult.success()
 			case Left(error) => throw error
 		}
@@ -56,7 +54,7 @@ class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
 		.arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.description("Invite someone else to your home".text)
+		.description(t"Invite someone else to your home")
 		.permission(LibPerm.HomeInvite)
 		.executor(this)
 		.build()

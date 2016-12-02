@@ -21,8 +21,6 @@
 package io.github.katrix.homesweethome.command
 package residents
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
@@ -36,11 +34,11 @@ import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- src.asInstanceOfOpt[Player].toRight(nonPlayerError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
 			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
 			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError).right
 		} yield (player, target, home._1, home._2, home._1.residents.size < homeHandler.getResidentLimit(player))
@@ -49,22 +47,19 @@ class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(im
 			case Right((player, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
 				val newHome = home.addResident(target.getUniqueId)
 				homeHandler.updateHome(player.getUniqueId, homeName, newHome)
-				src.sendMessage(config.text.residentsAddSrc.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava).build())
-				target.sendMessage(config.text.residentsAddPlayer.value(Map(config.HomeName -> homeName.text, config.Owner -> player.getName.text).asJava)
-					.build())
+				src.sendMessage(t"""Adding ${target.getName} as a resident to "$homeName"""")
 				CommandResult.success()
 			case Right((_, target, _, homeName, true)) =>
-				src.sendMessage(config.text.residentsAddAlready.value(Map(config.Target -> target.getName.text, config.HomeName -> homeName.text).asJava)
-					.build())
+				src.sendMessage(t"""${target.getName} is already a resident of "$homeName"""")
 				CommandResult.empty()
-			case Right((_, _, _, _, false)) => throw new CommandException(config.text.residentsLimitReached.value)
+			case Right((_, _, _, _, false)) => throw new CommandException(t"Resident limit reached")
 			case Left(error) => throw error
 		}
 	}
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
 		.arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.description("Add a user as a resident to a home".text)
+		.description(t"Add a user as a resident to a home")
 		.permission(LibPerm.HomeResidentsAdd)
 		.executor(this)
 		.build()

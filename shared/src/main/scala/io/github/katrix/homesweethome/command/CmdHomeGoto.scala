@@ -20,12 +20,11 @@
  */
 package io.github.katrix.homesweethome.command
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.{Player, User}
+import org.spongepowered.api.entity.living.player.User
+import org.spongepowered.api.text.Text
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
@@ -35,11 +34,11 @@ import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- src.asInstanceOfOpt[Player].toRight(nonPlayerError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
 			homeOwner <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
 			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
 			home <- homeHandler.specificHome(player.getUniqueId, homeName).toRight(homeNotFoundError).right
@@ -51,25 +50,25 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
 		data match {
 			case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
-				src.sendMessage(config.text.gotoValid.value(Map(config.HomeName -> homeName.text, config.Owner -> homeOwner.getName.text).asJava).build())
+				src.sendMessage(t"""Teleported to "$homeName" for ${homeOwner.getName}""")
 				homeHandler.removeInvite(player, homeOwner.getUniqueId)
 				CommandResult.success()
 			case Right((_, _, _, _, true)) => throw teleportError
 			case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
 				homeHandler.addRequest(player, homeOwner.getUniqueId, home)
-				src.sendMessage(config.text.gotoRequestSrc.value(Map(config.Owner -> homeOwner.getName.text, config.HomeName -> homeName.text).asJava).build())
-				homeOwner.getPlayer.get().sendMessage(config.text.gotoRequestOwner.value(Map(config.Target -> player.getName.text,
-					config.HomeName -> homeName.text).asJava).build())
+				src.sendMessage(t"""Sent home request to ${homeOwner.getName} for "$homeName"""")
+				homeOwner.getPlayer.get().sendMessage(
+					t"""${player.getName} has requested a to be teleported to "$homeName". ${Text.NEW_LINE} Type /home accept to accept""")
 				CommandResult.success()
-			case Right((_, _, _, _, false)) => throw new CommandException(config.text.requestOffline.value)
+			case Right((_, _, _, _, false)) => throw new CommandException(t"The player you tried to send a home request to is offline")
 			case Left(error) => throw error
 		}
 	}
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
 		.arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.description("Go to another players home if they are allowed to go there.".text)
-		.extendedDescription("To be allowed into a home you either need to be a resident, or be invited".text)
+		.description(t"Go to another players home if they are allowed to go there.")
+		.extendedDescription(t"To be allowed into a home you either need to be a resident, or be invited")
 		.permission(LibPerm.HomeGoto)
 		.executor(this)
 		.build()

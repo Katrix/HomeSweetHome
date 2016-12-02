@@ -31,13 +31,18 @@ import io.github.katrix.katlib.helper.Implicits.{RichString, typeToken}
 import io.github.katrix.katlib.helper.LogHelper
 import io.github.katrix.katlib.persistant.{ConfigValue, ConfigLoader => AbstractConfigLoader}
 
-class HomeConfigLoader(dir: Path)(implicit plugin: KatPlugin) extends AbstractConfigLoader[HomeConfig](dir) {
+class HomeConfigLoader(dir: Path)(implicit plugin: KatPlugin) extends AbstractConfigLoader[HomeConfig](dir, identity) {
 
-	override protected def loadVersionedData(version: String): HomeConfig = version match {
-		case "1" => new HomeConfigV1(cfgRoot, default)
-		case _ =>
-			LogHelper.error("Invalid version in config. Loading default")
-			default
+	override def loadData: HomeConfig = {
+		val loaded = cfgRoot.getNode("version").getString("2") match {
+			case "1" =>
+				cfgRoot.removeChild("text")
+				new HomeConfigV1(cfgRoot, default)
+			case "2" =>	 new HomeConfigV1(cfgRoot, default)
+		}
+
+		saveData(loaded)
+		loaded
 	}
 
 	override protected final val default: HomeConfig = new HomeConfig {
@@ -45,8 +50,8 @@ class HomeConfigLoader(dir: Path)(implicit plugin: KatPlugin) extends AbstractCo
 			"homeLimit"))
 		override val residentLimitDefault      = ConfigValue(2, "Type = Int\nThe default limit to how many residents a home can have",
 			Seq("home", "residentLimit"))
-		override val version                   = ConfigValue("1", "Please don't change this", versionNode.getPath.map(_.toString))
-		override val timeout: ConfigValue[Int] = ConfigValue(60 * 50, "Type = Int\nThe amount of time in seconds before an invite or request times out",
+		override val version                   = ConfigValue("2", "Please don't change this", Seq("version"))
+		override val timeout                   = ConfigValue(60 * 5, "Type = Int\nThe amount of time in seconds before an invite or request times out",
 			Seq("home", "timeout"))
 
 		override val text = new TextMessages {

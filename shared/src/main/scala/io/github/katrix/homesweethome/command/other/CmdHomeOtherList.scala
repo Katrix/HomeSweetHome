@@ -21,8 +21,6 @@
 package io.github.katrix.homesweethome.command
 package other
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -30,13 +28,12 @@ import org.spongepowered.api.entity.living.player.User
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.LibPerm
-import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
@@ -45,18 +42,18 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
 
 		data match {
 			case Right((target, Seq())) =>
-				src.sendMessage(config.text.homeOtherListNone.value(Map(config.Owner -> target.getName.text).asJava).build())
+				src.sendMessage(t"${target.getName} doesn't have any homes yet")
 				CommandResult.empty()
 			case Right((target, homes)) =>
 				val homeList = homes.sorted.mkString(", ")
-				src.sendMessage(config.text.homeOtherList.value(Map(config.Owner -> target.getName.text, config.Homes -> homeList).asJava).build())
+				src.sendMessage(t"${target.getName}'s homes are: $homeList")
 				CommandResult.builder().successCount(homes.size).build()
 			case Left(error) => throw error
 		}
 	}
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description("Lists all of the homes of someone else".text)
+		.description(t"Lists all of the homes of someone else")
 		.permission(LibPerm.HomeOtherList)
 		.arguments(GenericArguments.player(LibCommonCommandKey.Player))
 		.executor(this)

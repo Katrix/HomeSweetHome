@@ -1,37 +1,74 @@
+def removeSnapshot(str: String): String = if(str.endsWith("-SNAPSHOT")) str.substring(0, str.length - 9) else str
+def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "d3733ebd4e" % Provided //d3733ebd4e is the same as 2.0.0 with the resolver added to the plugins
+
 lazy val commonSettings = Seq(
+	name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
 	organization := "io.github.katrix",
-	scalaVersion := "2.11.8",
-	resolvers += "SpongePowered" at "https://repo.spongepowered.org/maven",
+	version := "2.0.0",
+	scalaVersion := "2.12.0",
 	resolvers += "jitpack" at "https://jitpack.io",
-	libraryDependencies += "com.github.Katrix-.KatLib" % "katlib-shared" % "1.0.1" % "provided",
-	scalacOptions += "-Xexperimental",
+	libraryDependencies += katLibDependecy("shared"),
+	scalacOptions ++= Seq(
+		"-deprecation",
+		"-feature",
+		"-unchecked",
+		"-Xlint",
+		"-Yno-adapted-args",
+		"-Ywarn-dead-code",
+		"-Ywarn-unused-import"
+	),
 	crossPaths := false,
 	assemblyShadeRules in assembly := Seq(
-		ShadeRule.rename("scala.**" -> "io.github.katrix.katlib.shade.scala.@1").inProject
+		ShadeRule.rename("scala.**" -> "io.github.katrix.katlib.shade.scala.@1").inAll,
+		ShadeRule.rename("shapeless.**" -> "io.github.katrix.katlib.shade.shapeless.@1").inAll
 	),
-	autoScalaLibrary := false
+	autoScalaLibrary := false,
+
+	spongePluginInfo := spongePluginInfo.value.copy(
+		id = "homesweethome",
+		name = Some("HomeSweetHome"),
+		version = Some(s"${removeSnapshot(spongeApiVersion.value)}-${version.value}"),
+		authors = Seq("Katrix"),
+		dependencies = Set(DependencyInfo("spongeapi", Some(removeSnapshot(spongeApiVersion.value))))
+	)
 )
 
-lazy val homeShared = project in file("shared") settings(commonSettings: _*)  settings(
-	name := "HomeSweetHome",
-	version := "1.0.0",
-	assembleArtifact := false, //Why doesn't this one disable stuff?
-	//Default version
-	libraryDependencies += "org.spongepowered" % "spongeapi" % "4.1.0" % "provided"
+lazy val homeShared = (project in file("shared"))
+	.enablePlugins(SpongePlugin)
+	.settings(commonSettings: _*)
+	.settings(
+		name := "HomeSweetHome-Shared",
+		assembleArtifact := false,
+		spongeMetaCreate := false,
+		//Default version, needs to build correctly against all supported versions
+		spongeApiVersion := "4.1.0"
 	)
 
-lazy val homeV410 = project in file("4.1.0") dependsOn homeShared settings(commonSettings: _*) settings(
-	name := "HomeSweetHome-4.1.0",
-	version := "1.0.0",
-	libraryDependencies += "org.spongepowered" % "spongeapi" % "4.1.0" % "provided",
-	libraryDependencies += "com.github.Katrix-.KatLib" % "katlib-4-1-0" % "1.0.1" % "provided"
+lazy val homeV410 = (project in file("4.1.0"))
+	.enablePlugins(SpongePlugin)
+	.dependsOn(homeShared)
+	.settings(commonSettings: _*)
+	.settings(
+		spongeApiVersion := "4.1.0",
+		libraryDependencies += katLibDependecy("4-1-0")
 	)
 
-lazy val homeV500 = project in file("5.0.0") dependsOn homeShared settings(commonSettings: _*) settings(
-	name := "HomeSweetHome-5.0.0",
-	version := "1.0.0",
-	libraryDependencies += "org.spongepowered" % "spongeapi" % "5.0.0-SNAPSHOT" % "provided",
-	libraryDependencies += "com.github.Katrix-.KatLib" % "katlib-5-0-0" % "1.0.1" % "provided"
+lazy val homeV500 = (project in file("5.0.0"))
+	.enablePlugins(SpongePlugin)
+	.dependsOn(homeShared)
+	.settings(commonSettings: _*)
+	.settings(
+		spongeApiVersion := "5.0.0",
+		libraryDependencies += katLibDependecy("5-0-0")
+	)
+
+lazy val homeV600 = (project in file("6.0.0"))
+	.enablePlugins(SpongePlugin)
+	.dependsOn(homeShared)
+	.settings(commonSettings: _*)
+	.settings(
+		spongeApiVersion := "6.0.0-SNAPSHOT",
+		libraryDependencies += katLibDependecy("6-0-0")
 	)
 
 lazy val homeRoot = project in file(".") settings (publishArtifact := false) disablePlugins AssemblyPlugin aggregate(homeV410, homeV500)

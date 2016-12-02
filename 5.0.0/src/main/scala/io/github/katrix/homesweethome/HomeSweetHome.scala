@@ -46,17 +46,18 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers
 
 object HomeSweetHome {
 
-	final val Version         = s"${KatLib.CompiledAgainst}-1.0.0"
-	final val ConstantVersion = "4.1.0-1.0.0"
+	final val Version         = s"${KatLib.CompiledAgainst}-2.0.0"
+	final val ConstantVersion = "5.0.0-2.0.0"
 	assert(Version == ConstantVersion)
 
 	private var _plugin: HomeSweetHome = _
 	implicit def plugin: HomeSweetHome = _plugin
 
 	def init(event: GameInitializationEvent): Unit = {
+		TypeSerializers.getDefaultSerializers.registerType(TypeToken.of(classOf[Home]), HomeSerializer)
 		plugin.configLoader.init()
 		plugin.storageLoader.init()
-		plugin._config = plugin.configLoader.loadData()
+		plugin._config = plugin.configLoader.loadData
 
 		val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
 			override def getHomeLimit(player: Subject): Int = player.getOption(s"${LibPlugin.Id}.homeLimit").toOption
@@ -76,9 +77,9 @@ object HomeSweetHome {
 @Plugin(id = LibPlugin.Id, name = LibPlugin.Name, version = HomeSweetHome.ConstantVersion, dependencies = Array(new Dependency(
 	id = LibKatLibPlugin.Id)))
 class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfgDir: Path, spongeContainer: PluginContainer)
-	extends ImplKatPlugin(logger, cfgDir, spongeContainer, LibPlugin.Id) {
+	extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
 
-	implicit val plugin = this
+	implicit val plugin: HomeSweetHome = this
 
 	private lazy val configLoader  = new HomeConfigLoader(configDir) with InitNeeded
 	lazy         val storageLoader = new StorageLoader(configDir) with InitNeeded
@@ -93,7 +94,6 @@ class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfg
 
 	@Listener
 	def init(event: GameInitializationEvent): Unit = {
-		TypeSerializers.getDefaultSerializers.registerType(TypeToken.of(classOf[Home]), HomeSerializer)
 		HomeSweetHome.init(event)
 	}
 }

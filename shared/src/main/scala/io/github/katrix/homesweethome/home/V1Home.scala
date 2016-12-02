@@ -18,22 +18,15 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.github.katrix.homesweethome
+package io.github.katrix.homesweethome.home
 
-import org.spongepowered.api.command.CommandException
-import org.spongepowered.api.entity.living.player.Player
-import org.spongepowered.api.text.format.TextColors._
+import java.util.UUID
 
-import io.github.katrix.homesweethome.persistant.HomeConfig
-import io.github.katrix.katlib.command.CommandBase
-import io.github.katrix.katlib.helper.Implicits._
-import shapeless.Typeable
+import shapeless.Generic
 
-package object command {
+case class V1Home(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, worldUuid: UUID, residents: Seq[UUID]) {
 
-	val playerTypeable: Typeable[Player] = Typeable[Player]
-
-	def homeNotFoundError(implicit config: HomeConfig): CommandException = CommandBase.notFoundError("A home", "with that name")
-	def teleportError(implicit config: HomeConfig): CommandException =
-		new CommandException(t"${RED}A teleport error occurred, is the home in a safe place, and does the world exist")
+	def toCurrent[Repr](implicit newGeneric: Generic.Aux[Home, Repr], oldGeneric: Generic.Aux[V1Home, Repr]): Home = {
+		newGeneric.from(oldGeneric.to(this))
+	}
 }

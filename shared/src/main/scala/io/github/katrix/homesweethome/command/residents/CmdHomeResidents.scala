@@ -21,13 +21,10 @@
 package io.github.katrix.homesweethome.command
 package residents
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.Sponge
 import org.spongepowered.api.command.args.CommandContext
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.service.user.UserStorageService
 
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
@@ -37,23 +34,27 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 
-class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- src.asInstanceOfOpt[Player].toRight(nonPlayerError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
 			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError).right
 		} yield (home._2, home._1.residents)
 
 		data match {
 			case Right((homeName, Seq())) =>
-				src.sendMessage(config.text.residentsNone.value(Map(config.HomeName -> homeName.text).asJava).build())
+				src.sendMessage(t""""$homeName" doesn't have any residents""")
 				CommandResult.empty()
 			case Right((homeName, residents)) =>
-				val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
+				val userStorage = Sponge.getServiceManager.provideUnchecked[UserStorageService]
 
-				val residentList = residents.sorted.toList.map(uuid => userStorage.get(uuid).toOption.map(_.getName)).filter(_.isDefined).map(_.get).mkString(", ")
-				src.sendMessage(config.text.residentsList.value(Map(config.HomeName -> homeName.text, config.Residents -> residentList.text).asJava).build())
+				val residentList = residents.sorted
+					.map(uuid => userStorage.get(uuid).toOption
+						.map(_.getName))
+					.collect { case Some(str) => str }
+					.mkString(", ")
+				src.sendMessage(t"""The residents of "$homeName" are: $residentList""")
 				CommandResult.builder().successCount(residents.size).build()
 			case Left(error) => throw error
 		}
@@ -61,7 +62,7 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
 		.arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.description("List the residents of a home".text)
+		.description(t"List the residents of a home")
 		.permission(LibPerm.HomeResidentsList)
 		.executor(this)
 		.children(this)

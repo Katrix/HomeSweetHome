@@ -20,12 +20,9 @@
  */
 package io.github.katrix.homesweethome.command
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.Player
 
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
@@ -34,11 +31,11 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 
-class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- src.asInstanceOfOpt[Player].toRight(nonPlayerError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
 			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
 		} yield {
 			val replace = homeHandler.homeExist(player.getUniqueId, homeName)
@@ -50,15 +47,15 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
 		data match {
 			case Right((player, homeName, true)) =>
 				homeHandler.makeHome(player, homeName)
-				src.sendMessage(config.text.homeSet.value(Map(config.HomeName -> homeName.text).asJava).build())
+				src.sendMessage(t"Set $homeName successfully")
 				CommandResult.success()
-			case Right((_, _, false)) => throw new CommandException(config.text.homeLimitReached.value)
+			case Right((_, _, false)) => throw new CommandException(t"Home limit reached")
 			case Left(error) => throw error
 		}
 	}
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description("Set a new home where you are standing".text)
+		.description(t"Set a new home where you are standing")
 		.permission(LibPerm.HomeSet)
 		.arguments(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
 		.executor(this)

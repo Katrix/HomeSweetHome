@@ -57,7 +57,10 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		requests.clear()
 		invites.clear()
 
-		val toAdd = mutable.Map(storage.loadData().map { case (key, map) => (key, mutable.Map(map.toSeq: _*)) }.toSeq: _*)
+		requests withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
+		invites withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
+
+		val toAdd = storage.loadData.map{ case (k, v) => (k, mutable.Map(v.toSeq: _*))}
 		homeMap ++= toAdd
 	}
 

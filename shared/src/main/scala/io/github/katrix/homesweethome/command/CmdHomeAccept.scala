@@ -20,8 +20,6 @@
  */
 package io.github.katrix.homesweethome.command
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
@@ -35,29 +33,29 @@ import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- src.asInstanceOfOpt[Player].toRight(nonPlayerError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
 			requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			home <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(config.text.invalidRequest.value)).right
+			home <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(t"That player has not sent a home request")).right
 		} yield (player, requester, home)
 
 		data match {
 			case Right((homeOwner, requester, home)) if home.teleport(requester) =>
-				requester.sendMessage(config.text.acceptRequester.value)
-				src.sendMessage(config.text.acceptSuccess.value(Map(config.Requester -> requester.getName.text).asJava).build())
+				requester.sendMessage(t"Teleported you to your requested home")
+				src.sendMessage(t"Teleported ${requester.getName} to their requested home")
 				homeHandler.removeRequest(requester, homeOwner.getUniqueId)
 				CommandResult.success()
-			case Right((player, requester, home)) => throw teleportError
+			case Right((_, _, _)) => throw teleportError
 			case Left(error) => throw error
 		}
 	}
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
 		.arguments(GenericArguments.player(LibCommonCommandKey.Player))
-		.description("Accept a home request".text)
+		.description(t"Accept a home request")
 		.permission(LibPerm.HomeAccept)
 		.executor(this)
 		.build()

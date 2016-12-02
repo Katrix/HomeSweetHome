@@ -20,8 +20,6 @@
  */
 package io.github.katrix.homesweethome.command.residents
 
-import scala.collection.JavaConverters._
-
 import org.spongepowered.api.command.args.CommandContext
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -34,17 +32,17 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 
-class CmdHomeResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin, config: HomeConfig) extends CommandBase(Some(parent)) {
+class CmdHomeResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = src match {
 		case player: Player =>
 			val limit = homeHandler.getResidentLimit(player)
-			src.sendMessage(config.text.residentsLimit.value(Map(config.Limit -> s"$limit".text).asJava).build())
+			src.sendMessage(t"Your residents limit is: $limit")
 			CommandResult.builder().successCount(limit).build()
 		case _ => throw nonPlayerError
 	}
 	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description("See how many residents you can have for a home".text)
+		.description(t"See how many residents you can have for a home")
 		.permission(LibPerm.HomeResidentsLimit)
 		.executor(this)
 		.build()
