@@ -32,13 +32,14 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOtherLimit(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
 		case Some(player) =>
 			val limit = homeHandler.getHomeLimit(player)
-			src.sendMessage(t"${player.getName}'s home limit is: $limit")
+			src.sendMessage(t"$YELLOW${player.getName}'s home limit is: $limit")
 			CommandResult.builder().successCount(limit).build()
 		case None => throw nonPlayerError
 	}

@@ -32,6 +32,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOtherResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(
 	parent)) {
@@ -48,8 +49,8 @@ class CmdHomeOtherResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeOther
 			case Right((homeOwner, target, home, homeName)) if home.residents.contains(target.getUniqueId) =>
 				val newHome = home.removeResident(target.getUniqueId)
 				homeHandler.updateHome(homeOwner.getUniqueId, homeName, newHome)
-				src.sendMessage(t"""Removed ${target.getName} as a residents from "$homeName" for ${homeOwner.getName}""")
-				target.sendMessage(t"""You have been removed as a resident from "$homeName" for ${homeOwner.getName}""")
+				src.sendMessage(t"""${GREEN}Removed ${target.getName} as a residents from "$homeName" for ${homeOwner.getName}""")
+				target.sendMessage(t"""${YELLOW}You have been removed as a resident from "$homeName" for ${homeOwner.getName}""")
 				CommandResult.success()
 			case Right((homeOwner, target, _, homeName)) =>
 				throw new CommandException(t"""${target.getName} is not a resident of "$homeName" for ${homeOwner.getName}""")

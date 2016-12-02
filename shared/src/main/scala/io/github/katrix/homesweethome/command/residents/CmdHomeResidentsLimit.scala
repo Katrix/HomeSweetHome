@@ -31,13 +31,14 @@ import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = src match {
 		case player: Player =>
 			val limit = homeHandler.getResidentLimit(player)
-			src.sendMessage(t"Your residents limit is: $limit")
+			src.sendMessage(t"${YELLOW}Your residents limit is: $limit")
 			CommandResult.builder().successCount(limit).build()
 		case _ => throw nonPlayerError
 	}

@@ -30,6 +30,7 @@ import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -40,11 +41,11 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
 		data match {
 			case Right(Seq()) =>
-				src.sendMessage(t"You don't have any homes")
+				src.sendMessage(t"${YELLOW}You don't have any homes")
 				CommandResult.empty()
 			case Right(homes) =>
 				val homeList = homes.sorted.mkString(", ")
-				src.sendMessage(t"Your homes are: $homeList")
+				src.sendMessage(t"${YELLOW}Your homes are: $homeList")
 				CommandResult.builder().successCount(homes.size).build()
 			case Left(error) => throw error
 		}

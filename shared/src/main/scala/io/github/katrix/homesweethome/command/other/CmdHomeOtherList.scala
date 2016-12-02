@@ -32,6 +32,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -42,11 +43,11 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
 
 		data match {
 			case Right((target, Seq())) =>
-				src.sendMessage(t"${target.getName} doesn't have any homes yet")
+				src.sendMessage(t"$YELLOW${target.getName} doesn't have any homes yet")
 				CommandResult.empty()
 			case Right((target, homes)) =>
 				val homeList = homes.sorted.mkString(", ")
-				src.sendMessage(t"${target.getName}'s homes are: $homeList")
+				src.sendMessage(t"$YELLOW${target.getName}'s homes are: $homeList")
 				CommandResult.builder().successCount(homes.size).build()
 			case Left(error) => throw error
 		}

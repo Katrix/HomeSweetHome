@@ -30,6 +30,7 @@ import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeDelete(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -42,7 +43,7 @@ class CmdHomeDelete(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 		data match {
 			case Right((player, homeName)) =>
 				homeHandler.deleteHome(player.getUniqueId, homeName)
-				src.sendMessage(t"""Deleted "$homeName" successfully""")
+				src.sendMessage(t"""${GREEN}Deleted "$homeName" successfully""")
 				CommandResult.success()
 			case Left(error) => throw error
 		}

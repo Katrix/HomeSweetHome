@@ -32,6 +32,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(
 	parent)) {
@@ -48,11 +49,11 @@ class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherRes
 			case Right((homeOwner, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
 				val newHome = home.addResident(target.getUniqueId)
 				homeHandler.updateHome(homeOwner.getUniqueId, homeName, newHome)
-				src.sendMessage(t"""Added ${target.getName} as a resident to "$homeName" for ${homeOwner.getName}""")
-				target.sendMessage(t"""You have been added as a resident to "$homeName" for ${homeOwner.getName}""")
+				src.sendMessage(t"""${GREEN}Added ${target.getName} as a resident to "$homeName" for ${homeOwner.getName}""")
+				target.sendMessage(t"""${YELLOW}You have been added as a resident to "$homeName" for ${homeOwner.getName}""")
 				CommandResult.success()
 			case Right((homeOwner, target, _, homeName, true)) =>
-				src.sendMessage(t"""${target.getName} is already a resident of "$homeName" for ${homeOwner.getName}""")
+				src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName" for ${homeOwner.getName}""")
 				CommandResult.empty()
 			case Right((homeOwner, _, homeName, _, false)) =>
 				throw new CommandException(t"""Residents limit reached for "$homeName" for ${homeOwner.getName}""")

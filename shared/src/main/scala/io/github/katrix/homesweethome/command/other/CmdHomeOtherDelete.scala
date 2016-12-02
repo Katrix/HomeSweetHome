@@ -32,6 +32,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -44,7 +45,7 @@ class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
 		data match {
 			case Right((target, homeName)) if homeHandler.homeExist(target.getUniqueId, homeName) =>
 				homeHandler.deleteHome(target.getUniqueId, homeName)
-				src.sendMessage(t"""Deleted "$homeName" for ${target.getName} successfully""")
+				src.sendMessage(t"""${GREEN}Deleted "$homeName" for ${target.getName} successfully""")
 				CommandResult.success()
 			case Right(_) => throw homeNotFoundError
 			case Left(error) => throw error

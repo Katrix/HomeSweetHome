@@ -32,6 +32,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -44,8 +45,8 @@ class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 
 		data match {
 			case Right((homeOwner, requester, home)) if home.teleport(requester) =>
-				requester.sendMessage(t"Teleported you to your requested home")
-				src.sendMessage(t"Teleported ${requester.getName} to their requested home")
+				requester.sendMessage(t"${YELLOW}Teleported you to your requested home")
+				src.sendMessage(t"${GREEN}Teleported ${requester.getName} to their requested home")
 				homeHandler.removeRequest(requester, homeOwner.getUniqueId)
 				CommandResult.success()
 			case Right((_, _, _)) => throw teleportError

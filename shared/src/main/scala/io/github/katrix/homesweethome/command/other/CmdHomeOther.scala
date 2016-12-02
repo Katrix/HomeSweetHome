@@ -33,6 +33,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -46,7 +47,7 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
 
 		data match {
 			case Right((player, target, homeName, home)) if home.teleport(player) =>
-				src.sendMessage(t"""Teleported to "$homeName" for ${target.getName} successfully""")
+				src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${target.getName} successfully""")
 				CommandResult.success()
 			case Right(_) => throw teleportError
 			case Left(error) => throw error

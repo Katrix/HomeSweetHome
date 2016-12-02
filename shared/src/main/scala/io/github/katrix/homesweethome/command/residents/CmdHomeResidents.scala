@@ -33,6 +33,7 @@ import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -44,7 +45,7 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
 
 		data match {
 			case Right((homeName, Seq())) =>
-				src.sendMessage(t""""$homeName" doesn't have any residents""")
+				src.sendMessage(t""""${YELLOW}$homeName" doesn't have any residents""")
 				CommandResult.empty()
 			case Right((homeName, residents)) =>
 				val userStorage = Sponge.getServiceManager.provideUnchecked[UserStorageService]
@@ -54,7 +55,7 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
 						.map(_.getName))
 					.collect { case Some(str) => str }
 					.mkString(", ")
-				src.sendMessage(t"""The residents of "$homeName" are: $residentList""")
+				src.sendMessage(t"""${YELLOW}The residents of "$homeName" are: $residentList""")
 				CommandResult.builder().successCount(residents.size).build()
 			case Left(error) => throw error
 		}

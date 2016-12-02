@@ -33,6 +33,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -50,15 +51,15 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
 		data match {
 			case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
-				src.sendMessage(t"""Teleported to "$homeName" for ${homeOwner.getName}""")
+				src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${homeOwner.getName}""")
 				homeHandler.removeInvite(player, homeOwner.getUniqueId)
 				CommandResult.success()
 			case Right((_, _, _, _, true)) => throw teleportError
 			case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
 				homeHandler.addRequest(player, homeOwner.getUniqueId, home)
-				src.sendMessage(t"""Sent home request to ${homeOwner.getName} for "$homeName"""")
+				src.sendMessage(t"""${GREEN}Sent home request to ${homeOwner.getName} for "$homeName"""")
 				homeOwner.getPlayer.get().sendMessage(
-					t"""${player.getName} has requested a to be teleported to "$homeName". ${Text.NEW_LINE} Type /home accept to accept""")
+					t"""$YELLOW${player.getName} has requested a to be teleported to "$homeName". ${Text.NEW_LINE} Type /home accept to accept""")
 				CommandResult.success()
 			case Right((_, _, _, _, false)) => throw new CommandException(t"The player you tried to send a home request to is offline")
 			case Left(error) => throw error

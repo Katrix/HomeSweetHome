@@ -33,6 +33,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -47,10 +48,10 @@ class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(im
 			case Right((player, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
 				val newHome = home.addResident(target.getUniqueId)
 				homeHandler.updateHome(player.getUniqueId, homeName, newHome)
-				src.sendMessage(t"""Adding ${target.getName} as a resident to "$homeName"""")
+				src.sendMessage(t"""${GREEN}Adding ${target.getName} as a resident to "$homeName"""")
 				CommandResult.success()
 			case Right((_, target, _, homeName, true)) =>
-				src.sendMessage(t"""${target.getName} is already a resident of "$homeName"""")
+				src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName"""")
 				CommandResult.empty()
 			case Right((_, _, _, _, false)) => throw new CommandException(t"Resident limit reached")
 			case Left(error) => throw error

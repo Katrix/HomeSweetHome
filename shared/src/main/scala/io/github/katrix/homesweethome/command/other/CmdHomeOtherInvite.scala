@@ -32,6 +32,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -47,8 +48,8 @@ class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
 		data match {
 			case Right((player, homeOwner, target, homeName, home)) =>
 				homeHandler.addInvite(target, homeOwner.getUniqueId, home)
-				src.sendMessage(t"""Invited ${target.getName} to "$homeName" for ${homeOwner.getName}""")
-				target.sendMessage(t"""You have been invited to "$homeName" for ${homeOwner.getName} by ${player.getName}""")
+				src.sendMessage(t"""${GREEN}Invited ${target.getName} to "$homeName" for ${homeOwner.getName}""")
+				target.sendMessage(t"""${YELLOW}You have been invited to "$homeName" for ${homeOwner.getName} by ${player.getName}""")
 				CommandResult.success()
 			case Left(error) => throw error
 		}

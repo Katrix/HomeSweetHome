@@ -32,6 +32,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -50,10 +51,10 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
 		data match {
 			case Right((player, target, homeName, true)) =>
 				homeHandler.makeHome(target.getUniqueId, homeName, player.getLocation, player.getRotation)
-				src.sendMessage(t"""Set "$homeName" for ${target.getName} successfully""")
+				src.sendMessage(t"""${GREEN}Set "$homeName" for ${target.getName} successfully""")
 				CommandResult.success()
 			case Right((_, target, _, false)) =>
-				throw new CommandException(t"Home limit reached for ${target.getName}")
+				throw new CommandException(t"${RED}Home limit reached for ${target.getName}")
 			case Left(error) => throw error
 		}
 	}

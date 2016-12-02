@@ -30,6 +30,7 @@ import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
+import org.spongepowered.api.text.format.TextColors._
 
 class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
@@ -49,7 +50,7 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
 				homeHandler.makeHome(player, homeName)
 				src.sendMessage(t"Set $homeName successfully")
 				CommandResult.success()
-			case Right((_, _, false)) => throw new CommandException(t"Home limit reached")
+			case Right((_, _, false)) => throw new CommandException(t"${RED}Home limit reached")
 			case Left(error) => throw error
 		}
 	}
