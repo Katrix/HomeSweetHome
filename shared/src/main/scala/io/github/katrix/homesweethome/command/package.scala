@@ -26,7 +26,6 @@ import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.action.TextActions
 import org.spongepowered.api.text.format.TextColors._
 
-import io.github.katrix.homesweethome.persistant.HomeConfig
 import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import shapeless.Typeable
@@ -35,8 +34,8 @@ package object command {
 
 	val playerTypeable: Typeable[Player] = Typeable[Player]
 
-	def homeNotFoundError(implicit config: HomeConfig): CommandException = CommandBase.notFoundError("A home", "with that name")
-	def teleportError(implicit config: HomeConfig): CommandException =
+	def homeNotFoundError: CommandException = CommandBase.notFoundError("A home", "with that name")
+	def teleportError: CommandException =
 		new CommandException(t"${RED}A teleport error occurred, is the home in a safe place, and does the world exist")
 
 	def shiftButton(button: Text, text: String): Text =
