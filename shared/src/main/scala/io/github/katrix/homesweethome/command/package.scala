@@ -38,6 +38,5 @@ package object command {
 	def teleportError: CommandException =
 		new CommandException(t"${RED}A teleport error occurred, is the home in a safe place, and does the world exist")
 
-	def shiftButton(button: Text, text: String): Text =
-		t"[$button]".toBuilder.onShiftClick(TextActions.insertText(text)).onHover(TextActions.showText(t"Shift click me")).build()
+	def shiftButton(button: Text, text: String): Text = t"[$button]".toBuilder.onClick(TextActions.suggestCommand(text)).build()
 }
