@@ -47,7 +47,7 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
 		data match {
 			case Right((player, homeName, true)) =>
 				homeHandler.makeHome(player, homeName)
-				src.sendMessage(t"Set $homeName successfully")
+				src.sendMessage(t"""${GREEN}Set "$homeName" successfully""")
 				CommandResult.success()
 			case Right((_, _, false)) => throw new CommandException(t"${RED}Home limit reached")
 			case Left(error) => throw error

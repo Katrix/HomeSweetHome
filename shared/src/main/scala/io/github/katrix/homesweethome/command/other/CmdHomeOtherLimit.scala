@@ -41,7 +41,7 @@ class CmdHomeOtherLimit(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit
 			val limit = homeHandler.getHomeLimit(player)
 			src.sendMessage(t"$YELLOW${player.getName}'s home limit is: $limit")
 			CommandResult.builder().successCount(limit).build()
-		case None => throw nonPlayerError
+		case None => throw playerNotFoundError
 	}
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()

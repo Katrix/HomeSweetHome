@@ -60,7 +60,7 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 				homeOwner.getPlayer.get().sendMessage(
 					t"""$YELLOW${player.getName} has requested a to be teleported to "$homeName". ${Text.NEW_LINE} Type /home accept to accept""")
 				CommandResult.success()
-			case Right((_, _, _, _, false)) => throw new CommandException(t"The player you tried to send a home request to is offline")
+			case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}The player you tried to send a home request to is offline")
 			case Left(error) => throw error
 		}
 	}

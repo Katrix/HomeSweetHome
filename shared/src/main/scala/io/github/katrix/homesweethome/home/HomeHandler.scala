@@ -42,10 +42,11 @@ import io.github.katrix.homesweethome.persistant.{HomeConfig, StorageLoader}
 	*/
 abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 
-	private val homeMap = new mutable.HashMap[UUID, mutable.Map[String, Home]]() withDefaultValue new mutable.HashMap[String, Home]()
+	private val homeMap = new mutable.HashMap[UUID, mutable.Map[String, Home]]()
+		.withDefaultValue(new mutable.HashMap[String, Home]())
 
-	private val requests = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
-	private val invites  = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
+	private var requests: mutable.Map[Player, mutable.Map[UUID, Home]] = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
+	private var invites : mutable.Map[Player, mutable.Map[UUID, Home]] = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
 
 	/**
 		* Clears the current homes and reloads them from disk.
@@ -55,8 +56,10 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		requests.clear()
 		invites.clear()
 
-		requests withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
-		invites withDefaultValue CacheBuilder.newBuilder().expireAfterWrite(config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala
+		requests = requests.withDefaultValue(CacheBuilder.newBuilder()
+			.expireAfterWrite(config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala)
+		invites = invites.withDefaultValue(CacheBuilder.newBuilder()
+			.expireAfterWrite(config.timeout.value, TimeUnit.SECONDS).build[UUID, Home]().asMap.asScala)
 
 		val toAdd = storage.loadData.map{ case (k, v) => (k, mutable.Map(v.toSeq: _*))}
 		homeMap ++= toAdd
@@ -80,7 +83,10 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 	/**
 		* Add a new invite to a specific home for a homeowner
 		*/
-	def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = invites(target).put(homeOwner, home)
+	def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = {
+		println(invites.default(target))
+		invites(target).put(homeOwner, home)
+	}
 
 	/**
 		* Removed an invite

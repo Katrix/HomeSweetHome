@@ -52,7 +52,7 @@ class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(im
 			case Right((_, target, _, homeName, true)) =>
 				src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName"""")
 				CommandResult.empty()
-			case Right((_, _, _, _, false)) => throw new CommandException(t"Resident limit reached")
+			case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}Resident limit reached")
 			case Left(error) => throw error
 		}
 	}

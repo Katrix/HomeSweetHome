@@ -43,7 +43,7 @@ import io.github.katrix.katlib.helper.Implicits.{RichOptional, typeToken}
 import io.github.katrix.katlib.lib.LibKatLibPlugin
 import io.github.katrix.katlib.serializer.TypeSerializerImpl
 import io.github.katrix.katlib.serializer.TypeSerializerImpl.typeSerializer
-import io.github.katrix.katlib.{ImplKatPlugin, InitNeeded, KatLib}
+import io.github.katrix.katlib.{ImplKatPlugin, KatLib}
 import ninja.leaping.configurate.objectmapping.serialize.{TypeSerializer, TypeSerializers}
 
 object HomeSweetHome {
@@ -84,8 +84,8 @@ class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfg
 
 	implicit val plugin: HomeSweetHome = this
 
-	private lazy val configLoader  = new HomeConfigLoader(configDir) with InitNeeded
-	lazy         val storageLoader = new StorageLoader(configDir) with InitNeeded
+	private lazy val configLoader  = new HomeConfigLoader(configDir)
+	lazy         val storageLoader = new StorageLoader(configDir)
 
 	private var _config: HomeConfig = _
 	def config: HomeConfig = _config
