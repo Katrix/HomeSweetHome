@@ -1,5 +1,5 @@
 def removeSnapshot(str: String): String = if(str.endsWith("-SNAPSHOT")) str.substring(0, str.length - 9) else str
-def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "d3733ebd4e" % Provided //d3733ebd4e is the same as 2.0.0 with the resolver added to the plugins
+def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "2.0.1" % Provided
 
 lazy val commonSettings = Seq(
 	name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
@@ -29,7 +29,10 @@ lazy val commonSettings = Seq(
 		name = Some("HomeSweetHome"),
 		version = Some(s"${removeSnapshot(spongeApiVersion.value)}-${version.value}"),
 		authors = Seq("Katrix"),
-		dependencies = Set(DependencyInfo("spongeapi", Some(removeSnapshot(spongeApiVersion.value))))
+		dependencies = Set(
+			DependencyInfo("spongeapi", Some(removeSnapshot(spongeApiVersion.value))),
+			DependencyInfo("katlib", Some(s"2.0.1-${removeSnapshot(spongeApiVersion.value)}"))
+		)
 	)
 )
 
@@ -71,4 +74,4 @@ lazy val homeV600 = (project in file("6.0.0"))
 		libraryDependencies += katLibDependecy("6-0-0")
 	)
 
-lazy val homeRoot = project in file(".") settings (publishArtifact := false) disablePlugins AssemblyPlugin aggregate(homeV410, homeV500)
+lazy val homeRoot = project in file(".") settings (publishArtifact := false) disablePlugins AssemblyPlugin aggregate(homeV410, homeV500, homeV600)

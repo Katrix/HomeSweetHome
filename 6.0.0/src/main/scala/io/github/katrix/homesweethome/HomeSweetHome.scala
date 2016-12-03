@@ -78,7 +78,7 @@ object HomeSweetHome {
 }
 
 @Plugin(id = LibPlugin.Id, name = LibPlugin.Name, version = HomeSweetHome.ConstantVersion, dependencies = Array(new Dependency(
-	id = LibKatLibPlugin.Id)))
+	id = LibKatLibPlugin.Id, version = KatLib.ConstantVersion)))
 class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfgDir: Path, spongeContainer: PluginContainer)
 	extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
 
