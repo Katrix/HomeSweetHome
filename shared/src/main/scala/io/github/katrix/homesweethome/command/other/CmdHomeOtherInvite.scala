@@ -25,6 +25,7 @@ import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
 import org.spongepowered.api.entity.living.player.{Player, User}
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
 import io.github.katrix.homesweethome.home.HomeHandler
@@ -48,8 +49,10 @@ class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
 		data match {
 			case Right((player, homeOwner, target, homeName, home)) =>
 				homeHandler.addInvite(target, homeOwner.getUniqueId, home)
+				val gotoButton = shiftButton(t"""${YELLOW}Go to "$homeName"""", s"/home goto ${homeOwner.getName} $homeName")
 				src.sendMessage(t"""${GREEN}Invited ${target.getName} to "$homeName" for ${homeOwner.getName}""")
-				target.sendMessage(t"""${YELLOW}You have been invited to "$homeName" for ${homeOwner.getName} by ${player.getName}""")
+				target.sendMessage(
+					t"""${YELLOW}You have been invited to "$homeName" for ${homeOwner.getName} by ${player.getName}${Text.NEW_LINE}$RESET$gotoButton""")
 				CommandResult.success()
 			case Left(error) => throw error
 		}

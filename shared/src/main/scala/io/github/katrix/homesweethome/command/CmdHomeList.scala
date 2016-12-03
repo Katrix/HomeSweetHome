@@ -48,17 +48,18 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
 				builder.title(t"${YELLOW}Homes")
 				val homeText = homes.sorted.map { homeName =>
+					val teleportButton = shiftButton(t"${YELLOW}Teleport", s"/home $homeName")
 					val setButton = shiftButton(t"${YELLOW}Set", s"/home set $homeName")
 					val inviteButton = shiftButton(t"${YELLOW}Invite", s"/home invite <player> $homeName")
 					val deleteButton = shiftButton(t"${RED}Delete", s"/home delete $homeName")
 
 					val residentsButton = shiftButton(t"${YELLOW}Residents", s"/home residents $homeName")
 
-					t"$YELLOW$homeName $setButton $inviteButton $residentsButton $deleteButton"
+					t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
 				}
 
 				val limitText = t"Limit: $limit"
-				val newButton = shiftButton(t"${YELLOW}New home", "/home set")
+				val newButton = shiftButton(t"${YELLOW}New home", "/home set <homeName>")
 
 				builder.contents(limitText +: newButton +: homeText: _*)
 				builder.sendTo(src)

@@ -57,8 +57,9 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 			case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
 				homeHandler.addRequest(player, homeOwner.getUniqueId, home)
 				src.sendMessage(t"""${GREEN}Sent home request to ${homeOwner.getName} for "$homeName"""")
+				val acceptButton = shiftButton(t"${YELLOW}Accept", s"/home accept ${player.getName}")
 				homeOwner.getPlayer.get().sendMessage(
-					t"""$YELLOW${player.getName} has requested a to be teleported to "$homeName". ${Text.NEW_LINE} Type /home accept to accept""")
+					t"""$YELLOW${player.getName} has requested a to be teleported to "$homeName".${Text.NEW_LINE}$RESET$acceptButton""")
 				CommandResult.success()
 			case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}The player you tried to send a home request to is offline")
 			case Left(error) => throw error

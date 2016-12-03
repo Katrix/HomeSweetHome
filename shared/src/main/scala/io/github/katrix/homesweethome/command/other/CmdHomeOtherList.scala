@@ -53,17 +53,18 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
 				builder.title(t"$YELLOW$homeOwner's homes")
 
 				val homeText = homes.sorted.map { homeName =>
+					val teleportButton = shiftButton(t"${YELLOW}Teleport", s"/home other $homeOwner $homeName")
 					val setButton = shiftButton(t"${YELLOW}Set", s"/home other set $homeOwner $homeName")
 					val inviteButton = shiftButton(t"${YELLOW}Invite", s"/home other invite $homeOwner <player> $homeName")
 					val deleteButton = shiftButton(t"${RED}Delete", s"/home other delete $homeOwner $homeName")
 
 					val residentsButton = shiftButton(t"${YELLOW}Residents", s"/home other residents $homeOwner $homeName")
 
-					t"$YELLOW$homeName $setButton $inviteButton $residentsButton $deleteButton"
+					t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
 				}
 
 				val limitText = t"Limit: $limit"
-				val newButton = shiftButton(t"${YELLOW}New home", s"/home other set $homeOwner")
+				val newButton = shiftButton(t"${YELLOW}New home", s"/home other set $homeOwner <homeName>")
 
 				builder.contents(limitText +: newButton +: homeText: _*)
 				builder.sendTo(src)
