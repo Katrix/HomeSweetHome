@@ -38,8 +38,8 @@ class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
+			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
 		} yield (target, homeName)
 
 		data match {

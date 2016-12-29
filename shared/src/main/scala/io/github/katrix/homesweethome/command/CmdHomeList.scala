@@ -37,7 +37,7 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
 		} yield (homeHandler.allHomesForPlayer(player.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(player))
 
 		data match {

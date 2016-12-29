@@ -35,8 +35,8 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
+			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
 		} yield {
 			val replace = homeHandler.homeExist(player.getUniqueId, homeName)
 			val limit = homeHandler.getHomeLimit(player)

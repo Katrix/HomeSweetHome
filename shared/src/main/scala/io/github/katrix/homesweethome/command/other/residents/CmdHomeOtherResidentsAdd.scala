@@ -39,10 +39,10 @@ class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherRes
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError).right
-			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
-			home <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError).right
+			homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError)
+			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+			home <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
 		} yield (homeOwner, target, home, homeName, home.residents.size < homeHandler.getResidentLimit(homeOwner))
 
 		data match {

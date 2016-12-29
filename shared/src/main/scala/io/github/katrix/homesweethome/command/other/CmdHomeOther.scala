@@ -39,10 +39,10 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
-			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
-			home <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
+			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+			home <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError)
 		} yield (player, target, homeName, home)
 
 		data match {

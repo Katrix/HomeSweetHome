@@ -40,7 +40,7 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
+			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
 		} yield (target, homeHandler.allHomesForPlayer(target.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(target))
 
 		data match {

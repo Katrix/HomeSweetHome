@@ -37,9 +37,9 @@ class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
-			requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			home <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(t"That player has not sent a home request")).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
+			requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+			home <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(t"That player has not sent a home request"))
 		} yield (player, requester, home)
 
 		data match {

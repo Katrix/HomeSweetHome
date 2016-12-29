@@ -38,10 +38,10 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
-			homeOwner <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
-			home <- homeHandler.specificHome(player.getUniqueId, homeName).toRight(homeNotFoundError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
+			homeOwner <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+			home <- homeHandler.specificHome(player.getUniqueId, homeName).toRight(homeNotFoundError)
 		} yield {
 			val isResident = home.residents.contains(player.getUniqueId)
 			val isInvited = homeHandler.isInvited(player, homeOwner.getUniqueId, home) && homeOwner.isOnline

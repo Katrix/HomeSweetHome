@@ -39,8 +39,8 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Comm
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
-			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
+			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
 		} yield (player, home._2, home._1)
 
 		data match {

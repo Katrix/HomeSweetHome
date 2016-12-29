@@ -39,11 +39,11 @@ class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
-			homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError).right
-			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
-			home <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
+			homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError)
+			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+			home <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
 		} yield (player, homeOwner, target, homeName, home)
 
 		data match {

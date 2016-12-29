@@ -38,9 +38,9 @@ class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError).right
-			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
-			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError).right
+			player <- playerTypeable.cast(src).toRight(nonPlayerError)
+			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
 		} yield (player, target, home._1, home._2)
 
 		data match {
