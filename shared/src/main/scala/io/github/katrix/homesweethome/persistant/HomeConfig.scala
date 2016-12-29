@@ -24,14 +24,6 @@ import io.github.katrix.katlib.persistant.{CommentedConfigValue, Config}
 
 abstract class HomeConfig extends Config {
 
-	final val HomeName  = "homeName"
-	final val Homes     = "homes"
-	final val Limit     = "limit"
-	final val Target    = "target"
-	final val Owner     = "owner"
-	final val Requester = "requester"
-	final val Residents = "residents"
-
 	val version: CommentedConfigValue[String]
 
 	val homeLimitDefault    : CommentedConfigValue[Int]

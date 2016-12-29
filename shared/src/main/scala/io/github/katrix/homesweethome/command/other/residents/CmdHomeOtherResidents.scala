@@ -42,7 +42,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
 
 	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
 		val data = for {
-			player <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(nonPlayerError).right
+			player <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError).right
 			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError).right
 			home <- homeHandler.specificHome(player.getUniqueId, homeName).toRight(homeNotFoundError).right
 		} yield (player, homeName, home.residents, homeHandler.getResidentLimit(player))

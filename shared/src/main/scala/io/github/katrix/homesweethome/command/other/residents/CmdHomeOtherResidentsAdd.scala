@@ -67,7 +67,7 @@ class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherRes
 			GenericArguments.player(LibCommonCommandKey.Player),
 			GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
 		.description(t"Add a user as a resident to a home for another player")
-		.permission(LibPerm.HomeResidentsAdd)
+		.permission(LibPerm.HomeOtherResidentsAdd)
 		.executor(this)
 		.build()
 

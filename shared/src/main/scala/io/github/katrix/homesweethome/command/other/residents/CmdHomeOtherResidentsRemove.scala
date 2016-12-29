@@ -64,7 +64,7 @@ class CmdHomeOtherResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeOther
 			GenericArguments.player(LibCommonCommandKey.Player),
 			GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
 		.description(t"Remove a user as a resident from a home for another player")
-		.permission(LibPerm.HomeResidentsAdd)
+		.permission(LibPerm.HomeOtherResidentsAdd)
 		.executor(this)
 		.build()
 
