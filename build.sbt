@@ -31,7 +31,7 @@ lazy val commonSettings = Seq(
 		authors = Seq("Katrix"),
 		dependencies = Set(
 			DependencyInfo("spongeapi", Some(removeSnapshot(spongeApiVersion.value))),
-			DependencyInfo("katlib", Some(s"2.0.1-${removeSnapshot(spongeApiVersion.value)}"))
+			DependencyInfo("katlib", Some(s"${removeSnapshot(spongeApiVersion.value)}-2.0.1"))
 		)
 	)
 )
