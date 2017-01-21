@@ -83,10 +83,7 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 	/**
 		* Add a new invite to a specific home for a homeowner
 		*/
-	def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = {
-		println(invites.default(target))
-		invites(target).put(homeOwner, home)
-	}
+	def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = invites(target).put(homeOwner, home)
 
 	/**
 		* Removed an invite
