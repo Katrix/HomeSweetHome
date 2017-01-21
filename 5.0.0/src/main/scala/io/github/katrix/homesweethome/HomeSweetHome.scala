@@ -48,8 +48,8 @@ import ninja.leaping.configurate.objectmapping.serialize.{TypeSerializer, TypeSe
 
 object HomeSweetHome {
 
-	final val Version         = s"${KatLib.CompiledAgainst}-2.0.1"
-	final val ConstantVersion = "5.0.0-2.0.1"
+	final val Version         = s"${KatLib.CompiledAgainst}-2.0.2"
+	final val ConstantVersion = "5.0.0-2.0.2"
 	assert(Version == ConstantVersion)
 
 	private var _plugin: HomeSweetHome = _
