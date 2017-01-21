@@ -48,7 +48,7 @@ class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 				homeHandler.addInvite(target, player.getUniqueId, home)
 				val gotoButton = shiftButton(t"""${YELLOW}Go to "$homeName"""", s"/home goto ${player.getName} $homeName")
 				player.sendMessage(t"""${GREEN}Invited ${target.getName} to "$homeName"""")
-				target.sendMessage(t"""${YELLOW}You have been invited to "$homeName" by ${target.getName}${Text.NEW_LINE}$RESET$gotoButton""")
+				target.sendMessage(t"""${YELLOW}You have been invited to "$homeName" by ${player.getName}${Text.NEW_LINE}$RESET$gotoButton""")
 				CommandResult.success()
 			case Left(error) => throw error
 		}
