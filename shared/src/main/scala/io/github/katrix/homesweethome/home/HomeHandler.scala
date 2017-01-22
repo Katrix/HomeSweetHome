@@ -68,7 +68,11 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 	/**
 		* Add a home request
 		*/
-	def addRequest(requester: Player, homeOwner: UUID, home: Home): Unit = requests(requester).put(homeOwner, home)
+	def addRequest(requester: Player, homeOwner: UUID, home: Home): Unit = {
+		val playerRequests = requests(requester)
+		playerRequests.put(homeOwner, home)
+		requests.put(requester, playerRequests)
+	}
 
 	/**
 		* Removed a home request
@@ -83,7 +87,11 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 	/**
 		* Add a new invite to a specific home for a homeowner
 		*/
-	def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = invites(target).put(homeOwner, home)
+	def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = {
+		val playerInvites = invites(target)
+		playerInvites.put(homeOwner, home)
+		invites.put(target, playerInvites)
+	}
 
 	/**
 		* Removed an invite
@@ -165,7 +173,9 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* @param newHome The new home to use
 		*/
 	def updateHome(homeOwner: UUID, homeName: String, newHome: Home): Unit = {
-		homeMap(homeOwner).put(homeName, newHome)
+		val playerHomes = homeMap(homeOwner)
+		playerHomes.put(homeName, newHome)
+		homeMap.put(homeOwner, playerHomes)
 		save()
 	}
 
