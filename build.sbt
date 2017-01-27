@@ -31,6 +31,10 @@ lazy val commonSettings = Seq(
 	publishTo := Some(publishResolver),
 	publishArtifact in (Compile, packageDoc) := false,
 	publishArtifact in (Compile, packageSrc) := false,
+	artifact in (Compile, assembly) := {
+		val art = (artifact in (Compile, assembly)).value
+		art.copy(`classifier` = Some("assembly"))
+	},
 	addArtifact(artifact in (Compile, assembly), assembly),
 
 	spongePluginInfo := spongePluginInfo.value.copy(
