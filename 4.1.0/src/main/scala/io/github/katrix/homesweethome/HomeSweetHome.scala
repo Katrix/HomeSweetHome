@@ -38,7 +38,7 @@ import com.google.inject.Inject
 
 import io.github.katrix.homesweethome.command.CmdHome
 import io.github.katrix.homesweethome.home.{Home, HomeHandler, HomeV1}
-import io.github.katrix.homesweethome.lib.LibPlugin
+import io.github.katrix.homesweethome.lib.{LibPerm, LibPlugin}
 import io.github.katrix.homesweethome.persistant.{HomeConfig, HomeConfigLoader, HomeSerializer, StorageLoader}
 import io.github.katrix.katlib.helper.Implicits.{RichOptional, _}
 import io.github.katrix.katlib.lib.LibKatLibPlugin
@@ -66,11 +66,11 @@ object HomeSweetHome {
 		val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
 			override def getHomeLimit(player: Subject): Int = player match {
 				case sub: OptionSubject =>
-					sub.getOption(s"${LibPlugin.Id}.homeLimit").toOption.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
+					sub.getOption(LibPerm.HomeLimitOption).toOption.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
 				case _ => plugin.config.homeLimitDefault.value
 			}
 			override def getResidentLimit(player: Subject): Int = player match {
-				case sub: OptionSubject => sub.getOption(s"${LibPlugin.Id}.residentLimit").toOption
+				case sub: OptionSubject => sub.getOption(LibPerm.ResidentLimitOption).toOption
 					.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.residentLimitDefault.value)
 				case _ => plugin.config.homeLimitDefault.value
 			}

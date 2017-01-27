@@ -37,7 +37,7 @@ import com.google.inject.Inject
 
 import io.github.katrix.homesweethome.command.CmdHome
 import io.github.katrix.homesweethome.home.{Home, HomeHandler, HomeV1}
-import io.github.katrix.homesweethome.lib.LibPlugin
+import io.github.katrix.homesweethome.lib.{LibPerm, LibPlugin}
 import io.github.katrix.homesweethome.persistant.{HomeConfig, HomeConfigLoader, HomeSerializer, StorageLoader}
 import io.github.katrix.katlib.helper.Implicits.{RichOptional, typeToken}
 import io.github.katrix.katlib.lib.LibKatLibPlugin
@@ -63,9 +63,9 @@ object HomeSweetHome {
 		plugin._config = plugin.configLoader.loadData
 
 		val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
-			override def getHomeLimit(player: Subject): Int = player.getOption(s"${LibPlugin.Id}.homeLimit").toOption
+			override def getHomeLimit(player: Subject): Int = player.getOption(LibPerm.HomeLimitOption).toOption
 				.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
-			override def getResidentLimit(player: Subject): Int = player.getOption(s"${LibPlugin.Id}.residentLimit").toOption
+			override def getResidentLimit(player: Subject): Int = player.getOption(LibPerm.ResidentLimitOption).toOption
 				.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.residentLimitDefault.value)
 		}
 		homeHandler.reloadHomeData()

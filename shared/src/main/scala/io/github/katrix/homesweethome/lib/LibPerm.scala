@@ -25,11 +25,14 @@ object LibPerm {
 	final val HomeSweetHome = "homesweethome"
 	final val Help          = s"$HomeSweetHome.help"
 
+	final val HomeLimitOption     = s"$HomeSweetHome.homelimit"
+	final val ResidentLimitOption = s"$HomeSweetHome.residentlimit"
+
 	final val Home       = s"$HomeSweetHome.home"
 	final val HomeTp     = s"$Home.tp"
 	final val HomeList   = s"$Home.list"
 	final val HomeSet    = s"$Home.set"
-	final val HomeDelete = s"$Home.delete"
+	final val HomeDelete = s"$Home.remove"
 	final val HomeLimit  = s"$Home.limit"
 	final val HomeInvite = s"$Home.invite"
 	final val HomeGoto   = s"$Home.goto"
