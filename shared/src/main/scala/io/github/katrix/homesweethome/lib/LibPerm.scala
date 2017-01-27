@@ -48,7 +48,7 @@ object LibPerm {
 	final val HomeOtherTp     = s"$HomeOther.tp"
 	final val HomeOtherList   = s"$HomeOther.list"
 	final val HomeOtherSet    = s"$HomeOther.set"
-	final val HomeOtherDelete = s"$HomeOther.delete"
+	final val HomeOtherDelete = s"$HomeOther.remove"
 	final val HomeOtherLimit  = s"$HomeOther.limit"
 	final val HomeOtherInvite = s"$HomeOther.invite"
 
