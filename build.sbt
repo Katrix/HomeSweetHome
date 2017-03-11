@@ -29,13 +29,14 @@ lazy val commonSettings = Seq(
 	),
 	autoScalaLibrary := false,
 	publishTo := Some(publishResolver),
+	publishArtifact in makePom := false,
+	publishArtifact in (Compile, packageBin) := false,
 	publishArtifact in (Compile, packageDoc) := false,
 	publishArtifact in (Compile, packageSrc) := false,
 	artifact in (Compile, assembly) := {
 		val art = (artifact in (Compile, assembly)).value
 		art.copy(`classifier` = Some("assembly"))
 	},
-	addArtifact(artifact in (Compile, assembly), assembly),
 
 	spongePluginInfo := spongePluginInfo.value.copy(
 		id = "homesweethome",
@@ -47,18 +48,18 @@ lazy val commonSettings = Seq(
 			DependencyInfo("katlib", Some(s"${removeSnapshot(spongeApiVersion.value)}-2.0.1"))
 		)
 	)
-)
+) ++ addArtifact(artifact in (Compile, assembly), assembly)
 
 lazy val homeShared = (project in file("shared"))
 	.enablePlugins(SpongePlugin)
-	.settings(commonSettings: _*)
 	.settings(
+		commonSettings,
 		name := "HomeSweetHome-Shared",
 		publishArtifact := false,
-		publish := {},
-		publishLocal := {},
 		assembleArtifact := false,
 		spongeMetaCreate := false,
+		publish := {},
+		publishLocal := {},
 		//Default version, needs to build correctly against all supported versions
 		spongeApiVersion := "4.1.0"
 	)
@@ -66,8 +67,8 @@ lazy val homeShared = (project in file("shared"))
 lazy val homeV410 = (project in file("4.1.0"))
 	.enablePlugins(SpongePlugin)
 	.dependsOn(homeShared)
-	.settings(commonSettings: _*)
 	.settings(
+		commonSettings,
 		spongeApiVersion := "4.1.0",
 		libraryDependencies += katLibDependecy("4-1-0")
 	)
@@ -75,8 +76,8 @@ lazy val homeV410 = (project in file("4.1.0"))
 lazy val homeV500 = (project in file("5.0.0"))
 	.enablePlugins(SpongePlugin)
 	.dependsOn(homeShared)
-	.settings(commonSettings: _*)
 	.settings(
+		commonSettings,
 		spongeApiVersion := "5.0.0",
 		libraryDependencies += katLibDependecy("5-0-0")
 	)
@@ -84,8 +85,8 @@ lazy val homeV500 = (project in file("5.0.0"))
 lazy val homeV600 = (project in file("6.0.0"))
 	.enablePlugins(SpongePlugin)
 	.dependsOn(homeShared)
-	.settings(commonSettings: _*)
 	.settings(
+		commonSettings,
 		spongeApiVersion := "6.0.0-SNAPSHOT",
 		libraryDependencies += katLibDependecy("6-0-0")
 	)
@@ -93,6 +94,8 @@ lazy val homeV600 = (project in file("6.0.0"))
 lazy val homeRoot = (project in file("."))
 	.settings(
 		publishArtifact := false,
+		assembleArtifact := false,
+		spongeMetaCreate := false,
 		publish := {},
 		publishLocal := {}
 	)
