@@ -44,23 +44,23 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
 		} yield (home._2, home._1.residents, homeHandler.getResidentLimit(player))
 
 		data match {
-			case Right((homeName, Seq(), _)) =>
-				src.sendMessage(t"""$YELLOW"$homeName" doesn't have any residents""")
-				CommandResult.empty()
 			case Right((homeName, residents, limit)) =>
 				val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
 				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
 				builder.title(t"""$YELLOW"$homeName"'s residents""")
 
-				val residentText = residents.sorted
-					.map(uuid => userStorage.get(uuid).toOption
-						.map(_.getName))
-					.collect { case Some(str) => str }
-					.map { residentName =>
-						val deleteButton = shiftButton(t"${RED}Delete", s"/home residents remove $residentName $homeName")
+				val residentText = {
+					if(residents.isEmpty) Seq(t"${YELLOW}No residents")
+					else residents.sorted
+						.map(uuid => userStorage.get(uuid).toOption
+							.map(_.getName))
+						.collect { case Some(str) => str }
+						.map { residentName =>
+							val deleteButton = shiftButton(t"${RED}Delete", s"/home residents remove $residentName $homeName")
 
-						t"$residentName $deleteButton"
-					}
+							t"$residentName $deleteButton"
+						}
+				}
 
 				val limitText = t"Limit: $limit"
 				val newButton = shiftButton(t"${YELLOW}New resident", s"/home residents add <player> $homeName")
