@@ -63,5 +63,5 @@ class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)
       .executor(this)
       .build()
 
-  override def aliases: Seq[String] = Seq("remove")
+  override def aliases: Seq[String] = Seq("remove", "delete")
 }

@@ -20,7 +20,7 @@
  */
 package io.github.katrix.homesweethome.command
 
-import org.spongepowered.api.command.args.CommandContext
+import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
 import org.spongepowered.api.text.Text
@@ -63,7 +63,7 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Comm
         t"You can set a home using ${Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>"))}"
       )
       .permission(LibPerm.HomeTp)
-      .arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .arguments(GenericArguments.optional(new CommandElementHome(LibCommandKey.Home, homeHandler)))
       .executor(this)
       .children(this)
       .build()
