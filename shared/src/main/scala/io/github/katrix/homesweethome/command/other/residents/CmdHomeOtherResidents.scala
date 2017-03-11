@@ -40,94 +40,94 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		if(args.hasAny(LibCommandKey.Home)) {
-			val data = for {
-				player   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-				homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-				home     <- homeHandler.specificHome(player.getUniqueId, homeName).toRight(homeNotFoundError)
-			} yield (player, homeName, home.residents, homeHandler.getResidentLimit(player))
+  override def execute(src: CommandSource, args: CommandContext): CommandResult =
+    if (args.hasAny(LibCommandKey.Home)) {
+      val data = for {
+        player   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+        homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+        home     <- homeHandler.specificHome(player.getUniqueId, homeName).toRight(homeNotFoundError)
+      } yield (player, homeName, home.residents, homeHandler.getResidentLimit(player))
 
-			data match {
-				case Right((player, homeName, residents, limit)) =>
-					val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
-					val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-					val homeOwner   = player.getName
-					builder.title(t"$YELLOW$homeOwner's $homeName's residents")
+      data match {
+        case Right((player, homeName, residents, limit)) =>
+          val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
+          val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+          val homeOwner   = player.getName
+          builder.title(t"$YELLOW$homeOwner's $homeName's residents")
 
-					val residentText = {
-						if(residents.isEmpty) Seq(t"${YELLOW}No residents")
-						else
-							residents.sorted
-								.map(
-								uuid =>
-									userStorage
-										.get(uuid)
-										.toOption
-										.map(_.getName)
-								)
-								.collect { case Some(str) => str }
-								.map { residentName =>
-									val deleteButton = shiftButton(t"${RED}Delete", s"/home other residents remove $homeOwner $residentName $homeName")
+          val residentText = {
+            if (residents.isEmpty) Seq(t"${YELLOW}No residents")
+            else
+              residents.sorted
+                .map(
+                  uuid =>
+                    userStorage
+                      .get(uuid)
+                      .toOption
+                      .map(_.getName)
+                )
+                .collect { case Some(str) => str }
+                .map { residentName =>
+                  val deleteButton = shiftButton(t"${RED}Delete", s"/home other residents remove $homeOwner $residentName $homeName")
 
-									t"$YELLOW$residentName $deleteButton"
-								}
-					}
+                  t"$YELLOW$residentName $deleteButton"
+                }
+          }
 
-					val limitText = t"Limit: $limit"
-					val newButton = shiftButton(t"${YELLOW}New resident", s"/home other residents add $homeOwner <player> $homeName")
+          val limitText = t"Limit: $limit"
+          val newButton = shiftButton(t"${YELLOW}New resident", s"/home other residents add $homeOwner <player> $homeName")
 
-					builder.contents(limitText +: newButton +: residentText: _*)
+          builder.contents(limitText +: newButton +: residentText: _*)
 
-					builder.sendTo(src)
-					CommandResult.builder().successCount(residents.size).build()
-				case Left(error) => throw error
-			}
-		}
-		else {
-			val data = for {
-				player   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			} yield (player, homeHandler.allHomesForPlayer(player.getUniqueId).mapValues(_.residents), homeHandler.getResidentLimit(player))
+          builder.sendTo(src)
+          CommandResult.builder().successCount(residents.size).build()
+        case Left(error) => throw error
+      }
+    } else {
+      val data = for {
+        player <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      } yield (player, homeHandler.allHomesForPlayer(player.getUniqueId).mapValues(_.residents), homeHandler.getResidentLimit(player))
 
-			data match {
-				case Right((player, residents, limit)) =>
-					val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
-					val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-					builder.title(t"""$YELLOW${player.getName}'s residents""")
+      data match {
+        case Right((player, residents, limit)) =>
+          val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
+          val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+          builder.title(t"""$YELLOW${player.getName}'s residents""")
 
-					val residentText = {
-						if (residents.isEmpty) Seq(t"${YELLOW}No homes")
-						else
-							residents.toSeq.sortBy(_._1)
-								.map {
-									case (homeName, homeResidentsUuids) =>
-										val details = shiftButton(t"${YELLOW}Details", s"/home other residents ${player.getName} $homeName")
-										if(homeResidentsUuids.isEmpty) t"$homeName: ${YELLOW}No residents$RESET $details"
-										else {
-											val homeResidents = homeResidentsUuids.flatMap(userStorage.get(_).toOption.map(_.getName))
-											t""""$homeName": $YELLOW${homeResidents.mkString(", ")}$RESET $details"""
-										}
-								}
-					}
+          val residentText = {
+            if (residents.isEmpty) Seq(t"${YELLOW}No homes")
+            else
+              residents.toSeq
+                .sortBy(_._1)
+                .map {
+                  case (homeName, homeResidentsUuids) =>
+                    val details = shiftButton(t"${YELLOW}Details", s"/home other residents ${player.getName} $homeName")
+                    if (homeResidentsUuids.isEmpty) t"$homeName: ${YELLOW}No residents$RESET $details"
+                    else {
+                      val homeResidents = homeResidentsUuids.flatMap(userStorage.get(_).toOption.map(_.getName))
+                      t""""$homeName": $YELLOW${homeResidents.mkString(", ")}$RESET $details"""
+                    }
+                }
+          }
 
-					val limitText = t"Limit: $limit"
+          val limitText = t"Limit: $limit"
 
-					builder.contents(limitText +: residentText: _*)
+          builder.contents(limitText +: residentText: _*)
 
-					builder.sendTo(src)
-					CommandResult.builder().successCount(residents.values.flatten.size).build()
+          builder.sendTo(src)
+          CommandResult.builder().successCount(residents.values.flatten.size).build()
 
-				case Left(e) => throw e
-			}
-		}
-
-
-  }
+        case Left(e) => throw e
+      }
+    }
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.optional(GenericArguments.remainingJoinedStrings(LibCommandKey.Home)))
+      .arguments(
+        GenericArguments.user(LibCommonCommandKey.Player),
+        GenericArguments.optional(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      )
       .description(t"List the residents of a home for another player")
       .permission(LibPerm.HomeOtherResidentsList)
       .executor(this)

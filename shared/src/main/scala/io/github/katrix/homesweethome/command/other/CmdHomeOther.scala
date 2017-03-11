@@ -37,27 +37,25 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	private val list = new CmdHomeOtherList(homeHandler, this)
+  private val list = new CmdHomeOtherList(homeHandler, this)
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+  override def execute(src: CommandSource, args: CommandContext): CommandResult =
     if (args.hasAny(LibCommandKey.Home)) {
-			val data = for {
-				player   <- playerTypeable.cast(src).toRight(nonPlayerError)
-				target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-				homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-				home     <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError)
-			} yield (player, target, homeName, home)
+      val data = for {
+        player   <- playerTypeable.cast(src).toRight(nonPlayerError)
+        target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+        homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+        home     <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError)
+      } yield (player, target, homeName, home)
 
-			data match {
-				case Right((player, target, homeName, home)) if home.teleport(player) =>
-					src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${target.getName} successfully""")
-					CommandResult.success()
-				case Right(_)    => throw teleportError
-				case Left(error) => throw error
-			}
-		}
-		else list.execute(src, args)
-  }
+      data match {
+        case Right((player, target, homeName, home)) if home.teleport(player) =>
+          src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${target.getName} successfully""")
+          CommandResult.success()
+        case Right(_)    => throw teleportError
+        case Left(error) => throw error
+      }
+    } else list.execute(src, args)
 
   override def commandSpec: CommandSpec =
     CommandSpec
