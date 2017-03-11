@@ -37,55 +37,60 @@ import io.github.katrix.katlib.helper.Implicits._
 
 class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-		} yield (home._2, home._1.residents, homeHandler.getResidentLimit(player))
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player <- playerTypeable.cast(src).toRight(nonPlayerError)
+      home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
+    } yield (home._2, home._1.residents, homeHandler.getResidentLimit(player))
 
-		data match {
-			case Right((homeName, residents, limit)) =>
-				val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
-				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-				builder.title(t"""$YELLOW"$homeName"'s residents""")
+    data match {
+      case Right((homeName, residents, limit)) =>
+        val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
+        val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+        builder.title(t"""$YELLOW"$homeName"'s residents""")
 
-				val residentText = {
-					if(residents.isEmpty) Seq(t"${YELLOW}No residents")
-					else residents.sorted
-						.map(uuid => userStorage.get(uuid).toOption
-							.map(_.getName))
-						.collect { case Some(str) => str }
-						.map { residentName =>
-							val deleteButton = shiftButton(t"${RED}Delete", s"/home residents remove $residentName $homeName")
+        val residentText = {
+          if (residents.isEmpty) Seq(t"${YELLOW}No residents")
+          else
+            residents.sorted
+              .map(
+                uuid =>
+                  userStorage
+                    .get(uuid)
+                    .toOption
+                    .map(_.getName)
+              )
+              .collect { case Some(str) => str }
+              .map { residentName =>
+                val deleteButton = shiftButton(t"${RED}Delete", s"/home residents remove $residentName $homeName")
 
-							t"$residentName $deleteButton"
-						}
-				}
+                t"$residentName $deleteButton"
+              }
+        }
 
-				val limitText = t"Limit: $limit"
-				val newButton = shiftButton(t"${YELLOW}New resident", s"/home residents add <player> $homeName")
+        val limitText = t"Limit: $limit"
+        val newButton = shiftButton(t"${YELLOW}New resident", s"/home residents add <player> $homeName")
 
-				builder.contents(limitText +: newButton +: residentText: _*)
+        builder.contents(limitText +: newButton +: residentText: _*)
 
-				builder.sendTo(src)
-				CommandResult.builder().successCount(residents.size).build()
-			case Left(error) => throw error
-		}
-	}
+        builder.sendTo(src)
+        CommandResult.builder().successCount(residents.size).build()
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.description(t"List the residents of a home")
-		.permission(LibPerm.HomeResidentsList)
-		.executor(this)
-		.children(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .description(t"List the residents of a home")
+      .permission(LibPerm.HomeResidentsList)
+      .executor(this)
+      .children(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("residents")
+  override def aliases: Seq[String] = Seq("residents")
 
-	override def children: Seq[CommandBase] = Seq(
-		new CmdHomeResidentsAdd(homeHandler, this),
-		new CmdHomeResidentsLimit(homeHandler, this),
-		new CmdHomeResidentsRemove(homeHandler, this)
-	)
+  override def children: Seq[CommandBase] =
+    Seq(new CmdHomeResidentsAdd(homeHandler, this), new CmdHomeResidentsLimit(homeHandler, this), new CmdHomeResidentsRemove(homeHandler, this))
 }

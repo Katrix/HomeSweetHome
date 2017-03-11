@@ -36,43 +36,46 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			homeOwner <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-			home <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
-		} yield {
-			val isResident = home.residents.contains(player.getUniqueId)
-			val isInvited = homeHandler.isInvited(player, homeOwner.getUniqueId, home) && homeOwner.isOnline
-			(player, homeOwner, homeName, home, isResident || isInvited)
-		}
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player    <- playerTypeable.cast(src).toRight(nonPlayerError)
+      homeOwner <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
+    } yield {
+      val isResident = home.residents.contains(player.getUniqueId)
+      val isInvited  = homeHandler.isInvited(player, homeOwner.getUniqueId, home) && homeOwner.isOnline
+      (player, homeOwner, homeName, home, isResident || isInvited)
+    }
 
-		data match {
-			case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
-				src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${homeOwner.getName}""")
-				homeHandler.removeInvite(player, homeOwner.getUniqueId)
-				CommandResult.success()
-			case Right((_, _, _, _, true)) => throw teleportError
-			case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
-				homeHandler.addRequest(player, homeOwner.getUniqueId, home)
-				src.sendMessage(t"""${GREEN}Sent home request to ${homeOwner.getName} for "$homeName"""")
-				val acceptButton = shiftButton(t"${YELLOW}Accept", s"/home accept ${player.getName}")
-				homeOwner.getPlayer.get().sendMessage(
-					t"""$YELLOW${player.getName} has requested a to be teleported to "$homeName".${Text.NEW_LINE}$RESET$acceptButton""")
-				CommandResult.success()
-			case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}The player you tried to send a home request to is offline")
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
+        src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${homeOwner.getName}""")
+        homeHandler.removeInvite(player, homeOwner.getUniqueId)
+        CommandResult.success()
+      case Right((_, _, _, _, true)) => throw teleportError
+      case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
+        homeHandler.addRequest(player, homeOwner.getUniqueId, home)
+        src.sendMessage(t"""${GREEN}Sent home request to ${homeOwner.getName} for "$homeName"""")
+        val acceptButton = shiftButton(t"${YELLOW}Accept", s"/home accept ${player.getName}")
+        homeOwner.getPlayer
+          .get()
+          .sendMessage(t"""$YELLOW${player.getName} has requested a to be teleported to "$homeName".${Text.NEW_LINE}$RESET$acceptButton""")
+        CommandResult.success()
+      case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}The player you tried to send a home request to is offline")
+      case Left(error)                => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.description(t"Go to another players home if they are allowed to go there.")
-		.extendedDescription(t"To be allowed into a home you either need to be a resident, or be invited")
-		.permission(LibPerm.HomeGoto)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .description(t"Go to another players home if they are allowed to go there.")
+      .extendedDescription(t"To be allowed into a home you either need to be a resident, or be invited")
+      .permission(LibPerm.HomeGoto)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("goto")
+  override def aliases: Seq[String] = Seq("goto")
 }

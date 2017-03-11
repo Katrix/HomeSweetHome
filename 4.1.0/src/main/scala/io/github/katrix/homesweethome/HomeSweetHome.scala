@@ -49,62 +49,69 @@ import ninja.leaping.configurate.objectmapping.serialize.{TypeSerializer, TypeSe
 
 object HomeSweetHome {
 
-	final val Version         = s"${KatLib.CompiledAgainst}-2.0.4"
-	final val ConstantVersion = "4.1.0-2.0.4"
-	assert(Version == ConstantVersion)
+  final val Version         = s"${KatLib.CompiledAgainst}-2.0.4"
+  final val ConstantVersion = "4.1.0-2.0.4"
+  assert(Version == ConstantVersion)
 
-	private var _plugin: HomeSweetHome = _
-	implicit def plugin: HomeSweetHome = _plugin
+  private var _plugin: HomeSweetHome = _
+  implicit def plugin: HomeSweetHome = _plugin
 
-	def init(event: GameInitializationEvent): Unit = {
-		val serializers = TypeSerializers.getDefaultSerializers
-		implicit val uuidSerializer = TypeSerializerImpl.fromTypeSerializer(serializers.get(typeToken[UUID]), classOf[UUID])
-		serializers.registerType(typeToken[HomeV1], HomeSerializer)
-		serializers.registerType(typeToken[Home], implicitly[TypeSerializer[Home]])
-		plugin._config = plugin.configLoader.loadData
+  def init(event: GameInitializationEvent): Unit = {
+    val serializers             = TypeSerializers.getDefaultSerializers
+    implicit val uuidSerializer = TypeSerializerImpl.fromTypeSerializer(serializers.get(typeToken[UUID]), classOf[UUID])
+    serializers.registerType(typeToken[HomeV1], HomeSerializer)
+    serializers.registerType(typeToken[Home], implicitly[TypeSerializer[Home]])
+    plugin._config = plugin.configLoader.loadData
 
-		val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
-			override def getHomeLimit(player: Subject): Int = player match {
-				case sub: OptionSubject =>
-					sub.getOption(LibPerm.HomeLimitOption).toOption.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
-				case _ => plugin.config.homeLimitDefault.value
-			}
-			override def getResidentLimit(player: Subject): Int = player match {
-				case sub: OptionSubject => sub.getOption(LibPerm.ResidentLimitOption).toOption
-					.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.residentLimitDefault.value)
-				case _ => plugin.config.homeLimitDefault.value
-			}
-		}
-		homeHandler.reloadHomeData()
+    val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
+      override def getHomeLimit(player: Subject): Int = player match {
+        case sub: OptionSubject =>
+          sub.getOption(LibPerm.HomeLimitOption).toOption.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
+        case _ => plugin.config.homeLimitDefault.value
+      }
+      override def getResidentLimit(player: Subject): Int = player match {
+        case sub: OptionSubject =>
+          sub
+            .getOption(LibPerm.ResidentLimitOption)
+            .toOption
+            .flatMap(s => Try(s.toInt).toOption)
+            .getOrElse(plugin.config.residentLimitDefault.value)
+        case _ => plugin.config.homeLimitDefault.value
+      }
+    }
+    homeHandler.reloadHomeData()
 
-		val cmdHome = new CmdHome(homeHandler)
-		cmdHome.registerHelp()
-		Sponge.getCommandManager.register(plugin, plugin.pluginCmd.commandSpec, plugin.pluginCmd.aliases: _*)
-		Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases: _*)
-		Sponge.getCommandManager.register(plugin, cmdHome.homeList.commandSpec, "homes")
-	}
+    val cmdHome = new CmdHome(homeHandler)
+    cmdHome.registerHelp()
+    Sponge.getCommandManager.register(plugin, plugin.pluginCmd.commandSpec, plugin.pluginCmd.aliases: _*)
+    Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases:                   _*)
+    Sponge.getCommandManager.register(plugin, cmdHome.homeList.commandSpec, "homes")
+  }
 }
 
-@Plugin(id = LibPlugin.Id, name = LibPlugin.Name, version = HomeSweetHome.ConstantVersion, dependencies = Array(new Dependency(
-	id = LibKatLibPlugin.Id, version = KatLib.ConstantVersion)))
+@Plugin(
+  id = LibPlugin.Id,
+  name = LibPlugin.Name,
+  version = HomeSweetHome.ConstantVersion,
+  dependencies = Array(new Dependency(id = LibKatLibPlugin.Id, version = KatLib.ConstantVersion))
+)
 class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfgDir: Path, spongeContainer: PluginContainer)
-	extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
+    extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
 
-	implicit val plugin: HomeSweetHome = this
+  implicit val plugin: HomeSweetHome = this
 
-	private lazy val configLoader  = new HomeConfigLoader(configDir)
-	lazy         val storageLoader = new StorageLoader(configDir)
+  private lazy val configLoader = new HomeConfigLoader(configDir)
+  lazy val storageLoader        = new StorageLoader(configDir)
 
-	private var _config: HomeConfig = _
-	def config: HomeConfig = _config
+  private var _config: HomeConfig = _
+  def config:          HomeConfig = _config
 
-	@Listener
-	def gameConstruct(event: GameConstructionEvent) {
-		HomeSweetHome._plugin = this
-	}
+  @Listener
+  def gameConstruct(event: GameConstructionEvent) {
+    HomeSweetHome._plugin = this
+  }
 
-	@Listener
-	def init(event: GameInitializationEvent): Unit = {
-		HomeSweetHome.init(event)
-	}
+  @Listener
+  def init(event: GameInitializationEvent): Unit =
+    HomeSweetHome.init(event)
 }

@@ -28,12 +28,12 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode
 
 class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(implicit plugin: KatPlugin) extends HomeConfig {
 
-	override val homeLimitDefault     = ConfigValue(cfgRoot, default.homeLimitDefault)
-	override val residentLimitDefault = ConfigValue(cfgRoot, default.residentLimitDefault)
-	override val version              = ConfigValue(cfgRoot, default.version)
-	override val timeout              = ConfigValue(cfgRoot, default.timeout)
+  override val homeLimitDefault     = ConfigValue(cfgRoot, default.homeLimitDefault)
+  override val residentLimitDefault = ConfigValue(cfgRoot, default.residentLimitDefault)
+  override val version              = ConfigValue(cfgRoot, default.version)
+  override val timeout              = ConfigValue(cfgRoot, default.timeout)
 
-	//Bad, yes, something I forgot, yes. I'll fix it eventually
-	private implicit def toCommented[A](configValue: ConfigValue[A, CommentedConfigurationNode]): CommentedConfigValue[A] =
-		configValue.asInstanceOf[CommentedConfigValue[A]]
+  //Bad, yes, something I forgot, yes. I'll fix it eventually
+  private implicit def toCommented[A](configValue: ConfigValue[A, CommentedConfigurationNode]): CommentedConfigValue[A] =
+    configValue.asInstanceOf[CommentedConfigValue[A]]
 }

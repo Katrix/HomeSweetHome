@@ -35,44 +35,46 @@ import io.github.katrix.katlib.helper.Implicits._
 
 class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-		} yield (homeHandler.allHomesForPlayer(player.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(player))
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player <- playerTypeable.cast(src).toRight(nonPlayerError)
+    } yield (homeHandler.allHomesForPlayer(player.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(player))
 
-		data match {
-			case Right((Seq(), _)) =>
-				src.sendMessage(t"${YELLOW}You don't have any homes")
-				CommandResult.empty()
-			case Right((homes, limit)) =>
-				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-				builder.title(t"${YELLOW}Homes")
-				val homeText = homes.sorted.map { homeName =>
-					val teleportButton = shiftButton(t"${YELLOW}Teleport", s"/home $homeName")
-					val setButton = shiftButton(t"${YELLOW}Set", s"/home set $homeName")
-					val inviteButton = shiftButton(t"${YELLOW}Invite", s"/home invite <player> $homeName")
-					val deleteButton = shiftButton(t"${RED}Delete", s"/home delete $homeName")
+    data match {
+      case Right((Seq(), _)) =>
+        src.sendMessage(t"${YELLOW}You don't have any homes")
+        CommandResult.empty()
+      case Right((homes, limit)) =>
+        val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+        builder.title(t"${YELLOW}Homes")
+        val homeText = homes.sorted.map { homeName =>
+          val teleportButton = shiftButton(t"${YELLOW}Teleport", s"/home $homeName")
+          val setButton      = shiftButton(t"${YELLOW}Set", s"/home set $homeName")
+          val inviteButton   = shiftButton(t"${YELLOW}Invite", s"/home invite <player> $homeName")
+          val deleteButton   = shiftButton(t"${RED}Delete", s"/home delete $homeName")
 
-					val residentsButton = shiftButton(t"${YELLOW}Residents", s"/home residents $homeName")
+          val residentsButton = shiftButton(t"${YELLOW}Residents", s"/home residents $homeName")
 
-					t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
-				}
+          t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
+        }
 
-				val limitText = t"Limit: $limit"
-				val newButton = shiftButton(t"${YELLOW}New home", "/home set <homeName>")
+        val limitText = t"Limit: $limit"
+        val newButton = shiftButton(t"${YELLOW}New home", "/home set <homeName>")
 
-				builder.contents(limitText +: newButton +: homeText: _*)
-				builder.sendTo(src)
-				CommandResult.builder().successCount(homes.size).build()
-			case Left(error) => throw error
-		}
-	}
+        builder.contents(limitText +: newButton +: homeText: _*)
+        builder.sendTo(src)
+        CommandResult.builder().successCount(homes.size).build()
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Lists all of your current homes")
-		.permission(LibPerm.HomeList)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Lists all of your current homes")
+      .permission(LibPerm.HomeList)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("list")
+  override def aliases: Seq[String] = Seq("list")
 }

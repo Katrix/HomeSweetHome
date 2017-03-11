@@ -36,28 +36,30 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-		} yield (target, homeName)
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+    } yield (target, homeName)
 
-		data match {
-			case Right((target, homeName)) if homeHandler.homeExist(target.getUniqueId, homeName) =>
-				homeHandler.deleteHome(target.getUniqueId, homeName)
-				src.sendMessage(t"""${GREEN}Deleted "$homeName" for ${target.getName} successfully""")
-				CommandResult.success()
-			case Right(_) => throw homeNotFoundError
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((target, homeName)) if homeHandler.homeExist(target.getUniqueId, homeName) =>
+        homeHandler.deleteHome(target.getUniqueId, homeName)
+        src.sendMessage(t"""${GREEN}Deleted "$homeName" for ${target.getName} successfully""")
+        CommandResult.success()
+      case Right(_)    => throw homeNotFoundError
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Deletes a home for another user")
-		.permission(LibPerm.HomeOtherDelete)
-		.arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Deletes a home for another user")
+      .permission(LibPerm.HomeOtherDelete)
+      .arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("delete", "remove")
+  override def aliases: Seq[String] = Seq("delete", "remove")
 }

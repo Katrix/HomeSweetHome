@@ -24,16 +24,11 @@ import io.github.katrix.katlib.persistant.{CommentedConfigValue, Config}
 
 abstract class HomeConfig extends Config {
 
-	val version: CommentedConfigValue[String]
+  val version: CommentedConfigValue[String]
 
-	val homeLimitDefault    : CommentedConfigValue[Int]
-	val residentLimitDefault: CommentedConfigValue[Int]
-	val timeout             : CommentedConfigValue[Int]
+  val homeLimitDefault:     CommentedConfigValue[Int]
+  val residentLimitDefault: CommentedConfigValue[Int]
+  val timeout:              CommentedConfigValue[Int]
 
-	override def seq: Seq[CommentedConfigValue[_]] = Seq(
-		version,
-		homeLimitDefault,
-		residentLimitDefault,
-		timeout
-	)
+  override def seq: Seq[CommentedConfigValue[_]] = Seq(version, homeLimitDefault, residentLimitDefault, timeout)
 }

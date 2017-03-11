@@ -27,43 +27,42 @@ import scala.collection.JavaConverters._
 import com.google.common.reflect.TypeToken
 
 import io.github.katrix.homesweethome.home.HomeV1
-import io.github.katrix.katlib.helper.Implicits.{RichConfigurationNode, typeToken}
+import io.github.katrix.katlib.helper.Implicits.{typeToken, RichConfigurationNode}
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.objectmapping.ObjectMappingException
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer
 
 object HomeSerializer extends TypeSerializer[HomeV1] {
 
-	private final val X         = "x"
-	private final val Y         = "y"
-	private final val Z         = "z"
-	private final val Yaw       = "yaw"
-	private final val Pitch     = "pitch"
-	private final val World     = "world"
-	private final val Residents = "residents"
+  private final val X         = "x"
+  private final val Y         = "y"
+  private final val Z         = "z"
+  private final val Yaw       = "yaw"
+  private final val Pitch     = "pitch"
+  private final val World     = "world"
+  private final val Residents = "residents"
 
-	override def serialize(`type`: TypeToken[_], home: HomeV1, value: ConfigurationNode): Unit = {
-		val uuidListType = typeToken[JList[UUID]]
-		value.getNode(X).value_=(home.x)
-		value.getNode(Y).value_=(home.y)
-		value.getNode(Z).value_=(home.z)
-		value.getNode(Yaw).value_=(home.yaw)
-		value.getNode(Pitch).value_=(home.pitch)
-		value.getNode(World).value_=(home.worldUuid)
-		value.getNode(Residents).value_=(home.residents.asJava)(uuidListType)
-	}
+  override def serialize(`type`: TypeToken[_], home: HomeV1, value: ConfigurationNode): Unit = {
+    val uuidListType = typeToken[JList[UUID]]
+    value.getNode(X).value_=(home.x)
+    value.getNode(Y).value_=(home.y)
+    value.getNode(Z).value_=(home.z)
+    value.getNode(Yaw).value_=(home.yaw)
+    value.getNode(Pitch).value_=(home.pitch)
+    value.getNode(World).value_=(home.worldUuid)
+    value.getNode(Residents).value_=(home.residents.asJava)(uuidListType)
+  }
 
-	override def deserialize(`type`: TypeToken[_], value: ConfigurationNode): HomeV1 = {
-		(for {
-			x <- Option(value.getNode(X).value[Double])
-			y <- Option(value.getNode(Y).value[Double])
-			z <- Option(value.getNode(Z).value[Double])
-			yaw <- Option(value.getNode(Yaw).value[Float])
-			pitch <- Option(value.getNode(Pitch).value[Float])
-			worldUUID <- Option(value.getNode(World).value[UUID])
-		} yield {
-			val residents = Option(value.getNode(Residents).list[UUID]).getOrElse(Seq())
-			HomeV1(x, y, z, yaw, pitch, worldUUID, residents)
-		}).getOrElse(throw new ObjectMappingException("Missing values"))
-	}
+  override def deserialize(`type`: TypeToken[_], value: ConfigurationNode): HomeV1 =
+    (for {
+      x         <- Option(value.getNode(X).value[Double])
+      y         <- Option(value.getNode(Y).value[Double])
+      z         <- Option(value.getNode(Z).value[Double])
+      yaw       <- Option(value.getNode(Yaw).value[Float])
+      pitch     <- Option(value.getNode(Pitch).value[Float])
+      worldUUID <- Option(value.getNode(World).value[UUID])
+    } yield {
+      val residents = Option(value.getNode(Residents).list[UUID]).getOrElse(Seq())
+      HomeV1(x, y, z, yaw, pitch, worldUUID, residents)
+    }).getOrElse(throw new ObjectMappingException("Missing values"))
 }

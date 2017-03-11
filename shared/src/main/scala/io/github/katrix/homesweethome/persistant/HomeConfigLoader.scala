@@ -28,24 +28,24 @@ import io.github.katrix.katlib.persistant.{ConfigValue, ConfigLoader => Abstract
 
 class HomeConfigLoader(dir: Path)(implicit plugin: KatPlugin) extends AbstractConfigLoader[HomeConfig](dir, identity) {
 
-	override def loadData: HomeConfig = {
-		val loaded = cfgRoot.getNode("version").getString("2") match {
-			case "1" =>
-				cfgRoot.removeChild("text")
-				new HomeConfigV1(cfgRoot, default)
-			case "2" => new HomeConfigV1(cfgRoot, default)
-		}
+  override def loadData: HomeConfig = {
+    val loaded = cfgRoot.getNode("version").getString("2") match {
+      case "1" =>
+        cfgRoot.removeChild("text")
+        new HomeConfigV1(cfgRoot, default)
+      case "2" => new HomeConfigV1(cfgRoot, default)
+    }
 
-		saveData(loaded)
-		loaded
-	}
+    saveData(loaded)
+    loaded
+  }
 
-	val default: HomeConfig = new HomeConfig {
-		override val homeLimitDefault     = ConfigValue(3, "Type = Int\nThe default limit to how many homes someone can have", Seq("home", "homeLimit"))
-		override val residentLimitDefault = ConfigValue(2, "Type = Int\nThe default limit to how many residents a home can have", Seq("home",
-			"residentLimit"))
-		override val version              = ConfigValue("2", "Please don't change this", Seq("version"))
-		override val timeout              = ConfigValue(60 * 5, "Type = Int\nThe amount of time in seconds before an invite or request times out", Seq(
-			"home", "timeout"))
-	}
+  val default: HomeConfig = new HomeConfig {
+    override val homeLimitDefault = ConfigValue(3, "Type = Int\nThe default limit to how many homes someone can have", Seq("home", "homeLimit"))
+    override val residentLimitDefault =
+      ConfigValue(2, "Type = Int\nThe default limit to how many residents a home can have", Seq("home", "residentLimit"))
+    override val version = ConfigValue("2", "Please don't change this", Seq("version"))
+    override val timeout =
+      ConfigValue(60 * 5, "Type = Int\nThe amount of time in seconds before an invite or request times out", Seq("home", "timeout"))
+  }
 }

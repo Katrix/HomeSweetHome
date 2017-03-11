@@ -26,6 +26,6 @@ import io.github.katrix.katlib.helper.Implicits.RichString
 
 object LibCommandKey {
 
-	final val Home: Text = "home".text
+  final val Home: Text = "home".text
 
 }

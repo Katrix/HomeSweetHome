@@ -32,11 +32,11 @@ import shapeless.Typeable
 
 package object command {
 
-	val playerTypeable: Typeable[Player] = Typeable[Player]
+  val playerTypeable: Typeable[Player] = Typeable[Player]
 
-	def homeNotFoundError: CommandException = CommandBase.notFoundError("A home", "with that name")
-	def teleportError: CommandException =
-		new CommandException(t"${RED}A teleport error occurred, is the home in a safe place, and does the world exist")
+  def homeNotFoundError: CommandException = CommandBase.notFoundError("A home", "with that name")
+  def teleportError: CommandException =
+    new CommandException(t"${RED}A teleport error occurred, is the home in a safe place, and does the world exist")
 
-	def shiftButton(button: Text, text: String): Text = t"[$button]".toBuilder.onClick(TextActions.suggestCommand(text)).build()
+  def shiftButton(button: Text, text: String): Text = t"[$button]".toBuilder.onClick(TextActions.suggestCommand(text)).build()
 }

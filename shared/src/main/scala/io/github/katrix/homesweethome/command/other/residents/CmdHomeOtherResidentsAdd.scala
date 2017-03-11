@@ -34,42 +34,45 @@ import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(
-	parent)) {
+class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin)
+    extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError)
-			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-			home <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
-		} yield (homeOwner, target, home, homeName, home.residents.size < homeHandler.getResidentLimit(homeOwner))
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError)
+      target    <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
+    } yield (homeOwner, target, home, homeName, home.residents.size < homeHandler.getResidentLimit(homeOwner))
 
-		data match {
-			case Right((homeOwner, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
-				val newHome = home.addResident(target.getUniqueId)
-				homeHandler.updateHome(homeOwner.getUniqueId, homeName, newHome)
-				src.sendMessage(t"""${GREEN}Added ${target.getName} as a resident to "$homeName" for ${homeOwner.getName}""")
-				target.sendMessage(t"""${YELLOW}You have been added as a resident to "$homeName" for ${homeOwner.getName}""")
-				CommandResult.success()
-			case Right((homeOwner, target, _, homeName, true)) =>
-				src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName" for ${homeOwner.getName}""")
-				CommandResult.empty()
-			case Right((homeOwner, _, homeName, _, false)) =>
-				throw new CommandException(t"""Residents limit reached for "$homeName" for ${homeOwner.getName}""")
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((homeOwner, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
+        val newHome = home.addResident(target.getUniqueId)
+        homeHandler.updateHome(homeOwner.getUniqueId, homeName, newHome)
+        src.sendMessage(t"""${GREEN}Added ${target.getName} as a resident to "$homeName" for ${homeOwner.getName}""")
+        target.sendMessage(t"""${YELLOW}You have been added as a resident to "$homeName" for ${homeOwner.getName}""")
+        CommandResult.success()
+      case Right((homeOwner, target, _, homeName, true)) =>
+        src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName" for ${homeOwner.getName}""")
+        CommandResult.empty()
+      case Right((homeOwner, _, homeName, _, false)) =>
+        throw new CommandException(t"""Residents limit reached for "$homeName" for ${homeOwner.getName}""")
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(
-			GenericArguments.user(t"homeOwner"),
-			GenericArguments.player(LibCommonCommandKey.Player),
-			GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.description(t"Add a user as a resident to a home for another player")
-		.permission(LibPerm.HomeOtherResidentsAdd)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(
+        GenericArguments.user(t"homeOwner"),
+        GenericArguments.player(LibCommonCommandKey.Player),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+      )
+      .description(t"Add a user as a resident to a home for another player")
+      .permission(LibPerm.HomeOtherResidentsAdd)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("add")
+  override def aliases: Seq[String] = Seq("add")
 }

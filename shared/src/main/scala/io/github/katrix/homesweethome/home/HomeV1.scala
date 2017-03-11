@@ -26,7 +26,6 @@ import shapeless.Generic
 
 case class HomeV1(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, worldUuid: UUID, residents: Seq[UUID]) {
 
-	def toCurrent[Repr](implicit newGeneric: Generic.Aux[Home, Repr], oldGeneric: Generic.Aux[HomeV1, Repr]): Home = {
-		newGeneric.from(oldGeneric.to(this))
-	}
+  def toCurrent[Repr](implicit newGeneric: Generic.Aux[Home, Repr], oldGeneric: Generic.Aux[HomeV1, Repr]): Home =
+    newGeneric.from(oldGeneric.to(this))
 }

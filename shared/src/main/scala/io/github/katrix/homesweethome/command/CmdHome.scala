@@ -37,48 +37,48 @@ import io.github.katrix.katlib.helper.Implicits._
 
 class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends CommandBase(None) {
 
-	val homeList = new CmdHomeList(homeHandler, this)
+  val homeList = new CmdHomeList(homeHandler, this)
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		if(args.hasAny(LibCommandKey.Home)) {
-			val data = for {
-				player <- playerTypeable.cast(src).toRight(nonPlayerError)
-				home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-			} yield (player, home._2, home._1)
+  override def execute(src: CommandSource, args: CommandContext): CommandResult =
+    if (args.hasAny(LibCommandKey.Home)) {
+      val data = for {
+        player <- playerTypeable.cast(src).toRight(nonPlayerError)
+        home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
+      } yield (player, home._2, home._1)
 
-			data match {
-				case Right((player, homeName, home)) if home.teleport(player) =>
-					src.sendMessage(t"""${GREEN}Teleported to "$homeName" successfully""")
-					CommandResult.success()
-				case Right(_) => throw teleportError
-				case Left(error) => throw error
-			}
-		}
-		else homeList.execute(src, args)
-	}
+      data match {
+        case Right((player, homeName, home)) if home.teleport(player) =>
+          src.sendMessage(t"""${GREEN}Teleported to "$homeName" successfully""")
+          CommandResult.success()
+        case Right(_)    => throw teleportError
+        case Left(error) => throw error
+      }
+    } else homeList.execute(src, args)
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Teleports to a home you have set")
-		.extendedDescription(t"You can set a home using ${
-			Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>"))
-		}")
-		.permission(LibPerm.HomeTp)
-		.arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.executor(this)
-		.children(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Teleports to a home you have set")
+      .extendedDescription(
+        t"You can set a home using ${Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>"))}"
+      )
+      .permission(LibPerm.HomeTp)
+      .arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .executor(this)
+      .children(this)
+      .build()
 
-	override def children: Seq[CommandBase] = Seq(
-		homeList,
-		new CmdHomeSet(homeHandler, this),
-		new CmdHomeDelete(homeHandler, this),
-		new CmdHomeAccept(homeHandler, this),
-		new CmdHomeGoto(homeHandler, this),
-		new CmdHomeInvite(homeHandler, this),
-		new CmdHomeLimit(homeHandler, this),
-		new CmdHomeOther(homeHandler, this),
-		new CmdHomeResidents(homeHandler, this)
-	)
+  override def children: Seq[CommandBase] = Seq(
+    homeList,
+    new CmdHomeSet(homeHandler, this),
+    new CmdHomeDelete(homeHandler, this),
+    new CmdHomeAccept(homeHandler, this),
+    new CmdHomeGoto(homeHandler, this),
+    new CmdHomeInvite(homeHandler, this),
+    new CmdHomeLimit(homeHandler, this),
+    new CmdHomeOther(homeHandler, this),
+    new CmdHomeResidents(homeHandler, this)
+  )
 
-	override def aliases: Seq[String] = Seq("home")
+  override def aliases: Seq[String] = Seq("home")
 }

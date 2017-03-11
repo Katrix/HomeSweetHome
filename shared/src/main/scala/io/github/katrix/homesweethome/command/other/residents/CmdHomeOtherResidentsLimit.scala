@@ -34,23 +34,25 @@ import io.github.katrix.katlib.command.CommandBase
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(
-	parent)) {
+class CmdHomeOtherResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin)
+    extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
-		case Some(player) =>
-			val limit = homeHandler.getResidentLimit(player)
-			src.sendMessage(t"$YELLOW${player.getName}'s resident limit is: $limit")
-			CommandResult.builder().successCount(limit).build()
-		case None => throw nonPlayerError
-	}
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
+    case Some(player) =>
+      val limit = homeHandler.getResidentLimit(player)
+      src.sendMessage(t"$YELLOW${player.getName}'s resident limit is: $limit")
+      CommandResult.builder().successCount(limit).build()
+    case None => throw nonPlayerError
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(GenericArguments.user(LibCommonCommandKey.Player))
-		.description(t"See how many residents another player can have for a home")
-		.permission(LibPerm.HomeOtherResidentsLimit)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(GenericArguments.user(LibCommonCommandKey.Player))
+      .description(t"See how many residents another player can have for a home")
+      .permission(LibPerm.HomeOtherResidentsLimit)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("limit")
+  override def aliases: Seq[String] = Seq("limit")
 }

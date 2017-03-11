@@ -36,30 +36,32 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-		} yield (player, target, home._2, home._1)
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player <- playerTypeable.cast(src).toRight(nonPlayerError)
+      target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
+    } yield (player, target, home._2, home._1)
 
-		data match {
-			case Right((player, target, homeName, home)) =>
-				homeHandler.addInvite(target, player.getUniqueId, home)
-				val gotoButton = shiftButton(t"""${YELLOW}Go to "$homeName"""", s"/home goto ${player.getName} $homeName")
-				player.sendMessage(t"""${GREEN}Invited ${target.getName} to "$homeName"""")
-				target.sendMessage(t"""${YELLOW}You have been invited to "$homeName" by ${player.getName}${Text.NEW_LINE}$RESET$gotoButton""")
-				CommandResult.success()
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, target, homeName, home)) =>
+        homeHandler.addInvite(target, player.getUniqueId, home)
+        val gotoButton = shiftButton(t"""${YELLOW}Go to "$homeName"""", s"/home goto ${player.getName} $homeName")
+        player.sendMessage(t"""${GREEN}Invited ${target.getName} to "$homeName"""")
+        target.sendMessage(t"""${YELLOW}You have been invited to "$homeName" by ${player.getName}${Text.NEW_LINE}$RESET$gotoButton""")
+        CommandResult.success()
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.description(t"Invite someone else to your home")
-		.permission(LibPerm.HomeInvite)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .description(t"Invite someone else to your home")
+      .permission(LibPerm.HomeInvite)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("invite")
+  override def aliases: Seq[String] = Seq("invite")
 }

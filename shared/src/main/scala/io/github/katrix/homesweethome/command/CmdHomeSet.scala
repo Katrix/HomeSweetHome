@@ -33,33 +33,35 @@ import io.github.katrix.katlib.helper.Implicits._
 
 class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-		} yield {
-			val replace = homeHandler.homeExist(player.getUniqueId, homeName)
-			val limit = homeHandler.getHomeLimit(player)
-			val newLimit = if(replace) limit + 1 else limit
-			(player, homeName, homeHandler.allHomesForPlayer(player.getUniqueId).size < newLimit)
-		}
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player   <- playerTypeable.cast(src).toRight(nonPlayerError)
+      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+    } yield {
+      val replace  = homeHandler.homeExist(player.getUniqueId, homeName)
+      val limit    = homeHandler.getHomeLimit(player)
+      val newLimit = if (replace) limit + 1 else limit
+      (player, homeName, homeHandler.allHomesForPlayer(player.getUniqueId).size < newLimit)
+    }
 
-		data match {
-			case Right((player, homeName, true)) =>
-				homeHandler.makeHome(player, homeName)
-				src.sendMessage(t"""${GREEN}Set "$homeName" successfully""")
-				CommandResult.success()
-			case Right((_, _, false)) => throw new CommandException(t"${RED}Home limit reached")
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, homeName, true)) =>
+        homeHandler.makeHome(player, homeName)
+        src.sendMessage(t"""${GREEN}Set "$homeName" successfully""")
+        CommandResult.success()
+      case Right((_, _, false)) => throw new CommandException(t"${RED}Home limit reached")
+      case Left(error)          => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Set a new home where you are standing")
-		.permission(LibPerm.HomeSet)
-		.arguments(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Set a new home where you are standing")
+      .permission(LibPerm.HomeSet)
+      .arguments(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("set")
+  override def aliases: Seq[String] = Seq("set")
 }

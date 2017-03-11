@@ -37,36 +37,40 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError)
-			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-			home <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
-		} yield (player, homeOwner, target, homeName, home)
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player    <- playerTypeable.cast(src).toRight(nonPlayerError)
+      homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError)
+      target    <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
+    } yield (player, homeOwner, target, homeName, home)
 
-		data match {
-			case Right((player, homeOwner, target, homeName, home)) =>
-				homeHandler.addInvite(target, homeOwner.getUniqueId, home)
-				val gotoButton = shiftButton(t"""${YELLOW}Go to "$homeName"""", s"/home goto ${homeOwner.getName} $homeName")
-				src.sendMessage(t"""${GREEN}Invited ${target.getName} to "$homeName" for ${homeOwner.getName}""")
-				target.sendMessage(
-					t"""${YELLOW}You have been invited to "$homeName" for ${homeOwner.getName} by ${player.getName}${Text.NEW_LINE}$RESET$gotoButton""")
-				CommandResult.success()
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, homeOwner, target, homeName, home)) =>
+        homeHandler.addInvite(target, homeOwner.getUniqueId, home)
+        val gotoButton = shiftButton(t"""${YELLOW}Go to "$homeName"""", s"/home goto ${homeOwner.getName} $homeName")
+        src.sendMessage(t"""${GREEN}Invited ${target.getName} to "$homeName" for ${homeOwner.getName}""")
+        target.sendMessage(
+          t"""${YELLOW}You have been invited to "$homeName" for ${homeOwner.getName} by ${player.getName}${Text.NEW_LINE}$RESET$gotoButton"""
+        )
+        CommandResult.success()
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(
-			GenericArguments.user("homeOwner".text),
-			GenericArguments.player(LibCommonCommandKey.Player),
-			GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.description(t"Invite someone else to another player's home")
-		.permission(LibPerm.HomeOtherInvite)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(
+        GenericArguments.user("homeOwner".text),
+        GenericArguments.player(LibCommonCommandKey.Player),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+      )
+      .description(t"Invite someone else to another player's home")
+      .permission(LibPerm.HomeOtherInvite)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("invite")
+  override def aliases: Seq[String] = Seq("invite")
 }

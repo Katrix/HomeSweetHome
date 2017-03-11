@@ -35,30 +35,32 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			home <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(t"That player has not sent a home request"))
-		} yield (player, requester, home)
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player    <- playerTypeable.cast(src).toRight(nonPlayerError)
+      requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      home      <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(t"That player has not sent a home request"))
+    } yield (player, requester, home)
 
-		data match {
-			case Right((homeOwner, requester, home)) if home.teleport(requester) =>
-				requester.sendMessage(t"${YELLOW}Teleported you to your requested home")
-				src.sendMessage(t"${GREEN}Teleported ${requester.getName} to their requested home")
-				homeHandler.removeRequest(requester, homeOwner.getUniqueId)
-				CommandResult.success()
-			case Right((_, _, _)) => throw teleportError
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((homeOwner, requester, home)) if home.teleport(requester) =>
+        requester.sendMessage(t"${YELLOW}Teleported you to your requested home")
+        src.sendMessage(t"${GREEN}Teleported ${requester.getName} to their requested home")
+        homeHandler.removeRequest(requester, homeOwner.getUniqueId)
+        CommandResult.success()
+      case Right((_, _, _)) => throw teleportError
+      case Left(error)      => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(GenericArguments.player(LibCommonCommandKey.Player))
-		.description(t"Accept a home request")
-		.permission(LibPerm.HomeAccept)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(GenericArguments.player(LibCommonCommandKey.Player))
+      .description(t"Accept a home request")
+      .permission(LibPerm.HomeAccept)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("accept")
+  override def aliases: Seq[String] = Seq("accept")
 }

@@ -36,33 +36,35 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-		} yield (player, target, home._1, home._2, home._1.residents.size < homeHandler.getResidentLimit(player))
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player <- playerTypeable.cast(src).toRight(nonPlayerError)
+      target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
+    } yield (player, target, home._1, home._2, home._1.residents.size < homeHandler.getResidentLimit(player))
 
-		data match {
-			case Right((player, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
-				val newHome = home.addResident(target.getUniqueId)
-				homeHandler.updateHome(player.getUniqueId, homeName, newHome)
-				src.sendMessage(t"""${GREEN}Adding ${target.getName} as a resident to "$homeName"""")
-				CommandResult.success()
-			case Right((_, target, _, homeName, true)) =>
-				src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName"""")
-				CommandResult.empty()
-			case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}Resident limit reached")
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
+        val newHome = home.addResident(target.getUniqueId)
+        homeHandler.updateHome(player.getUniqueId, homeName, newHome)
+        src.sendMessage(t"""${GREEN}Adding ${target.getName} as a resident to "$homeName"""")
+        CommandResult.success()
+      case Right((_, target, _, homeName, true)) =>
+        src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName"""")
+        CommandResult.empty()
+      case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}Resident limit reached")
+      case Left(error)                => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.description(t"Add a user as a resident to a home")
-		.permission(LibPerm.HomeResidentsAdd)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .description(t"Add a user as a resident to a home")
+      .permission(LibPerm.HomeResidentsAdd)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("add")
+  override def aliases: Seq[String] = Seq("add")
 }

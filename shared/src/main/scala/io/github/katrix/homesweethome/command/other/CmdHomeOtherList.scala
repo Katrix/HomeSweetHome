@@ -38,47 +38,49 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-		} yield (target, homeHandler.allHomesForPlayer(target.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(target))
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+    } yield (target, homeHandler.allHomesForPlayer(target.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(target))
 
-		data match {
-			case Right((target, Seq(), _)) =>
-				src.sendMessage(t"$YELLOW${target.getName} doesn't have any homes yet")
-				CommandResult.empty()
-			case Right((target, homes, limit)) =>
-				val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-				val homeOwner = target.getName
-				builder.title(t"$YELLOW$homeOwner's homes")
+    data match {
+      case Right((target, Seq(), _)) =>
+        src.sendMessage(t"$YELLOW${target.getName} doesn't have any homes yet")
+        CommandResult.empty()
+      case Right((target, homes, limit)) =>
+        val builder   = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+        val homeOwner = target.getName
+        builder.title(t"$YELLOW$homeOwner's homes")
 
-				val homeText = homes.sorted.map { homeName =>
-					val teleportButton = shiftButton(t"${YELLOW}Teleport", s"/home other $homeOwner $homeName")
-					val setButton = shiftButton(t"${YELLOW}Set", s"/home other set $homeOwner $homeName")
-					val inviteButton = shiftButton(t"${YELLOW}Invite", s"/home other invite $homeOwner <player> $homeName")
-					val deleteButton = shiftButton(t"${RED}Delete", s"/home other delete $homeOwner $homeName")
+        val homeText = homes.sorted.map { homeName =>
+          val teleportButton = shiftButton(t"${YELLOW}Teleport", s"/home other $homeOwner $homeName")
+          val setButton      = shiftButton(t"${YELLOW}Set", s"/home other set $homeOwner $homeName")
+          val inviteButton   = shiftButton(t"${YELLOW}Invite", s"/home other invite $homeOwner <player> $homeName")
+          val deleteButton   = shiftButton(t"${RED}Delete", s"/home other delete $homeOwner $homeName")
 
-					val residentsButton = shiftButton(t"${YELLOW}Residents", s"/home other residents $homeOwner $homeName")
+          val residentsButton = shiftButton(t"${YELLOW}Residents", s"/home other residents $homeOwner $homeName")
 
-					t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
-				}
+          t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
+        }
 
-				val limitText = t"Limit: $limit"
-				val newButton = shiftButton(t"${YELLOW}New home", s"/home other set $homeOwner <homeName>")
+        val limitText = t"Limit: $limit"
+        val newButton = shiftButton(t"${YELLOW}New home", s"/home other set $homeOwner <homeName>")
 
-				builder.contents(limitText +: newButton +: homeText: _*)
-				builder.sendTo(src)
-				CommandResult.builder().successCount(homes.size).build()
-			case Left(error) => throw error
-		}
-	}
+        builder.contents(limitText +: newButton +: homeText: _*)
+        builder.sendTo(src)
+        CommandResult.builder().successCount(homes.size).build()
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Lists all of the homes of someone else")
-		.permission(LibPerm.HomeOtherList)
-		.arguments(GenericArguments.player(LibCommonCommandKey.Player))
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Lists all of the homes of someone else")
+      .permission(LibPerm.HomeOtherList)
+      .arguments(GenericArguments.player(LibCommonCommandKey.Player))
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("list", "homes")
+  override def aliases: Seq[String] = Seq("list", "homes")
 }

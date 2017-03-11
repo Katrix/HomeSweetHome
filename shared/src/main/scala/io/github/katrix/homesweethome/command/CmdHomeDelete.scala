@@ -33,27 +33,29 @@ import io.github.katrix.katlib.helper.Implicits._
 
 class CmdHomeDelete(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-		} yield (player, home._2)
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player <- playerTypeable.cast(src).toRight(nonPlayerError)
+      home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
+    } yield (player, home._2)
 
-		data match {
-			case Right((player, homeName)) =>
-				homeHandler.deleteHome(player.getUniqueId, homeName)
-				src.sendMessage(t"""${GREEN}Deleted "$homeName" successfully""")
-				CommandResult.success()
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, homeName)) =>
+        homeHandler.deleteHome(player.getUniqueId, homeName)
+        src.sendMessage(t"""${GREEN}Deleted "$homeName" successfully""")
+        CommandResult.success()
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Deletes a home")
-		.permission(LibPerm.HomeDelete)
-		.arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Deletes a home")
+      .permission(LibPerm.HomeDelete)
+      .arguments(new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("delete", "remove")
+  override def aliases: Seq[String] = Seq("delete", "remove")
 }

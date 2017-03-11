@@ -36,20 +36,22 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherLimit(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
-		case Some(player) =>
-			val limit = homeHandler.getHomeLimit(player)
-			src.sendMessage(t"$YELLOW${player.getName}'s home limit is: $limit")
-			CommandResult.builder().successCount(limit).build()
-		case None => throw playerNotFoundError
-	}
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = args.getOne[User](LibCommonCommandKey.Player).toOption match {
+    case Some(player) =>
+      val limit = homeHandler.getHomeLimit(player)
+      src.sendMessage(t"$YELLOW${player.getName}'s home limit is: $limit")
+      CommandResult.builder().successCount(limit).build()
+    case None => throw playerNotFoundError
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.arguments(GenericArguments.user(LibCommonCommandKey.Player))
-		.description(t"See how many homes another player can have")
-		.permission(LibPerm.HomeOtherLimit)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .arguments(GenericArguments.user(LibCommonCommandKey.Player))
+      .description(t"See how many homes another player can have")
+      .permission(LibPerm.HomeOtherLimit)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("limit")
+  override def aliases: Seq[String] = Seq("limit")
 }

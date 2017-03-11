@@ -34,19 +34,21 @@ import io.github.katrix.katlib.helper.Implicits._
 
 class CmdHomeLimit(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = src match {
-		case player: Player =>
-			val limit = homeHandler.getHomeLimit(player)
-			src.sendMessage(t"${YELLOW}Your home limit is: $limit")
-			CommandResult.builder().successCount(limit).build()
-		case _ => throw nonPlayerError
-	}
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = src match {
+    case player: Player =>
+      val limit = homeHandler.getHomeLimit(player)
+      src.sendMessage(t"${YELLOW}Your home limit is: $limit")
+      CommandResult.builder().successCount(limit).build()
+    case _ => throw nonPlayerError
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"See how many homes you can have")
-		.permission(LibPerm.HomeLimit)
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"See how many homes you can have")
+      .permission(LibPerm.HomeLimit)
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("limit")
+  override def aliases: Seq[String] = Seq("limit")
 }

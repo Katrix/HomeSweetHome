@@ -40,57 +40,55 @@ import io.github.katrix.katlib.helper.Implicits._
 //Copy of PatternMatchingCommandElement to get player and use more than one string
 class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) extends CommandElement(key) {
 
-	private final val NullKeyArg = t("argument")
+  private final val NullKeyArg = t("argument")
 
-	@Nullable
-	@throws[ArgumentParseException]
-	protected def parseValue(source: CommandSource, args: CommandArgs): AnyRef = {
-		source match {
-			case player: Player =>
-				args.next
-				val unformattedPattern = args.getRaw.substring(args.getRawPosition)
-				while(args.hasNext) args.next //Consume remaining args
+  @Nullable
+  @throws[ArgumentParseException]
+  protected def parseValue(source: CommandSource, args: CommandArgs): AnyRef =
+    source match {
+      case player: Player =>
+        args.next
+        val unformattedPattern = args.getRaw.substring(args.getRawPosition)
+        while (args.hasNext) args.next //Consume remaining args
 
-				val pattern = getFormattedPattern(unformattedPattern)
-				val filteredChoices = getChoices(source).filter(element => pattern.matcher(element).find())
-				for(el <- filteredChoices) {
-					// Match a single value
-					if(el.equalsIgnoreCase(unformattedPattern)) return Collections.singleton(getValue(player, el))
-				}
+        val pattern         = getFormattedPattern(unformattedPattern)
+        val filteredChoices = getChoices(source).filter(element => pattern.matcher(element).find())
+        for (el <- filteredChoices) {
+          // Match a single value
+          if (el.equalsIgnoreCase(unformattedPattern)) return Collections.singleton(getValue(player, el))
+        }
 
-				val ret = filteredChoices.map(c => getValue(player, c))
-				if(!ret.iterator.hasNext) throw args.createError(t(
-					"No values matching pattern '%s' present for %s!", unformattedPattern, {if(getKey == null) NullKeyArg else getKey}))
+        val ret = filteredChoices.map(c => getValue(player, c))
+        if (!ret.iterator.hasNext) throw args.createError(t("No values matching pattern '%s' present for %s!", unformattedPattern, {
+          if (getKey == null) NullKeyArg else getKey
+        }))
 
-				ret.asJava
-			case _ => throw args.createError(t"This command can only be used by players")
-		}
-	}
+        ret.asJava
+      case _ => throw args.createError(t"This command can only be used by players")
+    }
 
-	def complete(src: CommandSource, args: CommandArgs, context: CommandContext): util.List[String] = {
-		val choices = getChoices(src)
-		args.nextIfPresent.toOption match {
-			case Some(nextArg) => choices.filter(input => getFormattedPattern(nextArg).matcher(input).find()).toSeq.asJava
-			case None => choices.toSeq.asJava
-		}
-	}
+  def complete(src: CommandSource, args: CommandArgs, context: CommandContext): util.List[String] = {
+    val choices = getChoices(src)
+    args.nextIfPresent.toOption match {
+      case Some(nextArg) => choices.filter(input => getFormattedPattern(nextArg).matcher(input).find()).toSeq.asJava
+      case None          => choices.toSeq.asJava
+    }
+  }
 
-	private def getFormattedPattern(input: String): Pattern = {
-		val usedInput = if(!input.startsWith("^")) {
-			// Anchor matches to the beginning -- this lets us use find()
-			"^" + input
-		}
-		else input
-		Pattern.compile(usedInput, Pattern.CASE_INSENSITIVE)
-	}
+  private def getFormattedPattern(input: String): Pattern = {
+    val usedInput = if (!input.startsWith("^")) {
+      // Anchor matches to the beginning -- this lets us use find()
+      "^" + input
+    } else input
+    Pattern.compile(usedInput, Pattern.CASE_INSENSITIVE)
+  }
 
-	protected def getChoices(source: CommandSource): Iterable[String] = source match {
-		case player: Player => homeHandler.allHomesForPlayer(player.getUniqueId).keys
-		case _ => Nil
-	}
+  protected def getChoices(source: CommandSource): Iterable[String] = source match {
+    case player: Player => homeHandler.allHomesForPlayer(player.getUniqueId).keys
+    case _ => Nil
+  }
 
-	@throws[IllegalArgumentException]
-	protected def getValue(player: Player, choice: String): AnyRef = {
-		homeHandler.specificHome(player.getUniqueId, choice).map((_, choice)).getOrElse(throw new IllegalArgumentException)
-	}
+  @throws[IllegalArgumentException]
+  protected def getValue(player: Player, choice: String): AnyRef =
+    homeHandler.specificHome(player.getUniqueId, choice).map((_, choice)).getOrElse(throw new IllegalArgumentException)
 }

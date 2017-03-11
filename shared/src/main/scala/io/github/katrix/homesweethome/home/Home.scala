@@ -32,16 +32,16 @@ import io.github.katrix.katlib.helper.Implicits.RichOptional
 
 case class Home(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, worldUuid: UUID, residents: Seq[UUID]) {
 
-	def this(location: Location[World], rotation: Vector3d) {
-		this(location.getX, location.getY, location.getZ, rotation.getX, rotation.getY, location.getExtent.getUniqueId, Seq())
-	}
+  def this(location: Location[World], rotation: Vector3d) {
+    this(location.getX, location.getY, location.getZ, rotation.getX, rotation.getY, location.getExtent.getUniqueId, Seq())
+  }
 
-	def world: Option[World] = Sponge.getServer.getWorld(worldUuid).toOption
-	def location: Option[Location[World]] = world.map(new Location[World](_, x, y, z))
-	def rotation: Vector3d = new Vector3d(yaw, pitch, 0)
+  def world:    Option[World]           = Sponge.getServer.getWorld(worldUuid).toOption
+  def location: Option[Location[World]] = world.map(new Location[World](_, x, y, z))
+  def rotation: Vector3d                = new Vector3d(yaw, pitch, 0)
 
-	def teleport(player: Player): Boolean = location.exists(loc => player.setLocationAndRotationSafely(loc, rotation))
+  def teleport(player: Player): Boolean = location.exists(loc => player.setLocationAndRotationSafely(loc, rotation))
 
-	def addResident(resident: UUID): Home = copy(residents = resident +: residents)
-	def removeResident(resident: UUID): Home = copy(residents = residents.filter(_ != resident))
+  def addResident(resident:    UUID): Home = copy(residents = resident +: residents)
+  def removeResident(resident: UUID): Home = copy(residents = residents.filter(_ != resident))
 }

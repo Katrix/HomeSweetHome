@@ -22,6 +22,6 @@ package io.github.katrix.homesweethome.lib
 
 object LibPlugin {
 
-	final val Id   = "homesweethome"
-	final val Name = "HomeSweetHome"
+  final val Id   = "homesweethome"
+  final val Name = "HomeSweetHome"
 }

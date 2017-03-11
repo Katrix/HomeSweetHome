@@ -36,35 +36,37 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-		} yield {
-			val replace = homeHandler.homeExist(target.getUniqueId, homeName)
-			val limit = homeHandler.getHomeLimit(target)
-			val newLimit = if(replace) limit + 1 else limit
-			(player, target, homeName, homeHandler.allHomesForPlayer(target.getUniqueId).size < newLimit)
-		}
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player   <- playerTypeable.cast(src).toRight(nonPlayerError)
+      target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+    } yield {
+      val replace  = homeHandler.homeExist(target.getUniqueId, homeName)
+      val limit    = homeHandler.getHomeLimit(target)
+      val newLimit = if (replace) limit + 1 else limit
+      (player, target, homeName, homeHandler.allHomesForPlayer(target.getUniqueId).size < newLimit)
+    }
 
-		data match {
-			case Right((player, target, homeName, true)) =>
-				homeHandler.makeHome(target.getUniqueId, homeName, player.getLocation, player.getRotation)
-				src.sendMessage(t"""${GREEN}Set "$homeName" for ${target.getName} successfully""")
-				CommandResult.success()
-			case Right((_, target, _, false)) =>
-				throw new CommandException(t"${RED}Home limit reached for ${target.getName}")
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, target, homeName, true)) =>
+        homeHandler.makeHome(target.getUniqueId, homeName, player.getLocation, player.getRotation)
+        src.sendMessage(t"""${GREEN}Set "$homeName" for ${target.getName} successfully""")
+        CommandResult.success()
+      case Right((_, target, _, false)) =>
+        throw new CommandException(t"${RED}Home limit reached for ${target.getName}")
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Set a new home where you are standing for another player")
-		.permission(LibPerm.HomeOtherSet)
-		.arguments(GenericArguments.player(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.executor(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Set a new home where you are standing for another player")
+      .permission(LibPerm.HomeOtherSet)
+      .arguments(GenericArguments.player(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .executor(this)
+      .build()
 
-	override def aliases: Seq[String] = Seq("set")
+  override def aliases: Seq[String] = Seq("set")
 }

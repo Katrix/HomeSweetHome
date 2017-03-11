@@ -37,39 +37,41 @@ import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-			homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-			home <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError)
-		} yield (player, target, homeName, home)
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+    val data = for {
+      player   <- playerTypeable.cast(src).toRight(nonPlayerError)
+      target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
+      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      home     <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError)
+    } yield (player, target, homeName, home)
 
-		data match {
-			case Right((player, target, homeName, home)) if home.teleport(player) =>
-				src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${target.getName} successfully""")
-				CommandResult.success()
-			case Right(_) => throw teleportError
-			case Left(error) => throw error
-		}
-	}
+    data match {
+      case Right((player, target, homeName, home)) if home.teleport(player) =>
+        src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${target.getName} successfully""")
+        CommandResult.success()
+      case Right(_)    => throw teleportError
+      case Left(error) => throw error
+    }
+  }
 
-	override def commandSpec: CommandSpec = CommandSpec.builder()
-		.description(t"Teleports to a home of someone else")
-		.permission(LibPerm.HomeOtherTp)
-		.arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-		.executor(this)
-		.children(this)
-		.build()
+  override def commandSpec: CommandSpec =
+    CommandSpec
+      .builder()
+      .description(t"Teleports to a home of someone else")
+      .permission(LibPerm.HomeOtherTp)
+      .arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .executor(this)
+      .children(this)
+      .build()
 
-	override def children: Seq[CommandBase] = Seq(
-		new CmdHomeOtherList(homeHandler, this),
-		new CmdHomeOtherSet(homeHandler, this),
-		new CmdHomeOtherDelete(homeHandler, this),
-		new CmdHomeOtherLimit(homeHandler, this),
-		new CmdHomeOtherInvite(homeHandler, this),
-		new CmdHomeOtherResidents(homeHandler, this)
-	)
+  override def children: Seq[CommandBase] = Seq(
+    new CmdHomeOtherList(homeHandler, this),
+    new CmdHomeOtherSet(homeHandler, this),
+    new CmdHomeOtherDelete(homeHandler, this),
+    new CmdHomeOtherLimit(homeHandler, this),
+    new CmdHomeOtherInvite(homeHandler, this),
+    new CmdHomeOtherResidents(homeHandler, this)
+  )
 
-	override def aliases: Seq[String] = Seq("other")
+  override def aliases: Seq[String] = Seq("other")
 }
