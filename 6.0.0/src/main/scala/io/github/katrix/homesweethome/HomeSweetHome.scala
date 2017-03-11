@@ -74,6 +74,7 @@ object HomeSweetHome {
 		cmdHome.registerHelp()
 		Sponge.getCommandManager.register(plugin, plugin.pluginCmd.commandSpec, plugin.pluginCmd.aliases: _*)
 		Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases: _*)
+		Sponge.getCommandManager.register(plugin, cmdHome.homeList.commandSpec, "homes")
 	}
 }
 
