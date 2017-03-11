@@ -74,5 +74,5 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 		.executor(this)
 		.build()
 
-	override def aliases: Seq[String] = Seq("list", "homes")
+	override def aliases: Seq[String] = Seq("list")
 }

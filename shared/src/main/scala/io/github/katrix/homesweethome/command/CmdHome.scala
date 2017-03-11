@@ -37,19 +37,24 @@ import io.github.katrix.katlib.helper.Implicits._
 
 class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends CommandBase(None) {
 
-	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
-		val data = for {
-			player <- playerTypeable.cast(src).toRight(nonPlayerError)
-			home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-		} yield (player, home._2, home._1)
+	val homeList = new CmdHomeList(homeHandler, this)
 
-		data match {
-			case Right((player, homeName, home)) if home.teleport(player) =>
-				src.sendMessage(t"""${GREEN}Teleported to "$homeName" successfully""")
-				CommandResult.success()
-			case Right(_) => throw teleportError
-			case Left(error) => throw error
+	override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+		if(args.hasAny(LibCommandKey.Home)) {
+			val data = for {
+				player <- playerTypeable.cast(src).toRight(nonPlayerError)
+				home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
+			} yield (player, home._2, home._1)
+
+			data match {
+				case Right((player, homeName, home)) if home.teleport(player) =>
+					src.sendMessage(t"""${GREEN}Teleported to "$homeName" successfully""")
+					CommandResult.success()
+				case Right(_) => throw teleportError
+				case Left(error) => throw error
+			}
 		}
+		else homeList.execute(src, args)
 	}
 
 	override def commandSpec: CommandSpec = CommandSpec.builder()
@@ -64,7 +69,7 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Comm
 		.build()
 
 	override def children: Seq[CommandBase] = Seq(
-		new CmdHomeList(homeHandler, this),
+		homeList,
 		new CmdHomeSet(homeHandler, this),
 		new CmdHomeDelete(homeHandler, this),
 		new CmdHomeAccept(homeHandler, this),
