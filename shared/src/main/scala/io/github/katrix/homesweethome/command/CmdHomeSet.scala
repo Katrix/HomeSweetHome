@@ -37,6 +37,7 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
     val data = for {
       player   <- playerTypeable.cast(src).toRight(nonPlayerError)
       homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      _        <- Either.cond(parent.children.flatMap(_.aliases).exists(homeName.startsWith), (), new CommandException(t"${RED}That name is not allowed"))
     } yield {
       val replace  = homeHandler.homeExist(player.getUniqueId, homeName)
       val limit    = homeHandler.getHomeLimit(player)

@@ -41,6 +41,11 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
       player   <- playerTypeable.cast(src).toRight(nonPlayerError)
       target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
       homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      _ <- Either.cond(
+        parent.parent.flatMap(_.parent).exists(_.children.flatMap(_.aliases).exists(homeName.startsWith)), //We travel down to the root home command
+        (),
+        new CommandException(t"${RED}That name is not allowed")
+      )
     } yield {
       val replace  = homeHandler.homeExist(target.getUniqueId, homeName)
       val limit    = homeHandler.getHomeLimit(target)
