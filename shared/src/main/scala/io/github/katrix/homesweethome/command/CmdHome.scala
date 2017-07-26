@@ -20,6 +20,8 @@
  */
 package io.github.katrix.homesweethome.command
 
+import java.util.Locale
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
@@ -27,41 +29,47 @@ import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.action.TextActions
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.command.other.CmdHomeOther
 import io.github.katrix.homesweethome.command.residents.CmdHomeResidents
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.{CommandBase, LocalizedCommand}
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 
-class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends CommandBase(None) {
+class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends LocalizedCommand(None) {
 
   val homeList = new CmdHomeList(homeHandler, this)
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult =
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player <- playerTypeable.cast(src).toRight(nonPlayerError)
+        player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
         home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
       } yield (player, home._2, home._1)
 
       data match {
         case Right((player, homeName, home)) if home.teleport(player) =>
-          src.sendMessage(t"""${GREEN}Teleported to "$homeName" successfully""")
+          src.sendMessage(t"$GREEN${HSHResource.get("cmd.home.success", "homeName" -> homeName)}")
           CommandResult.success()
         case Right(_)    => throw teleportError
         case Left(error) => throw error
       }
     } else homeList.execute(src, args)
+  }
+
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.home.description"))
+  override def localizedExtendedDescription(implicit locale: Locale): Option[Text] =
+    Some(t"${HSHResource.getText("cmd.home.extendedDescription", "command" ->
+      Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>")))}")
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .description(t"Teleports to a home you have set")
-      .extendedDescription(
-        t"You can set a home using ${Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>"))}"
-      )
+      .description(this)
+      .extendedDescription(this)
       .permission(LibPerm.HomeTp)
       .arguments(GenericArguments.optional(new CommandElementHome(LibCommandKey.Home, homeHandler)))
       .executor(this)

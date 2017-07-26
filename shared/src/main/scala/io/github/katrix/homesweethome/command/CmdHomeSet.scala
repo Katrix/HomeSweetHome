@@ -20,24 +20,29 @@
  */
 package io.github.katrix.homesweethome.command
 
+import java.util.Locale
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 
-class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player   <- playerTypeable.cast(src).toRight(nonPlayerError)
-      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
-      _        <- Either.cond(parent.children.flatMap(_.aliases).exists(homeName.startsWith), (), new CommandException(t"${RED}That name is not allowed"))
+      player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
+      _        <- Either.cond(parent.children.flatMap(_.aliases).exists(homeName.startsWith), (), new CommandException(HSHResource.getText("command.error.illegalName")))
     } yield {
       val replace  = homeHandler.homeExist(player.getUniqueId, homeName)
       val limit    = homeHandler.getHomeLimit(player)
@@ -48,17 +53,19 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
     data match {
       case Right((player, homeName, true)) =>
         homeHandler.makeHome(player, homeName)
-        src.sendMessage(t"""${GREEN}Set "$homeName" successfully""")
+        src.sendMessage(t"$GREEN${HSHResource.get("cmd.set.success", "homeName" -> homeName)}")
         CommandResult.success()
-      case Right((_, _, false)) => throw new CommandException(t"${RED}Home limit reached")
+      case Right((_, _, false)) => throw new CommandException(HSHResource.getText("command.error.homeLimitReached"))
       case Left(error)          => throw error
     }
   }
 
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.set.description"))
+
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .description(t"Set a new home where you are standing")
+      .description(this)
       .permission(LibPerm.HomeSet)
       .arguments(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
       .executor(this)

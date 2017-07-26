@@ -20,46 +20,51 @@
  */
 package io.github.katrix.homesweethome.command
 
+import java.util.Locale
+
 import org.spongepowered.api.Sponge
 import org.spongepowered.api.command.args.CommandContext
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
 import org.spongepowered.api.service.pagination.PaginationService
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.LibPerm
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 
-class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player <- playerTypeable.cast(src).toRight(nonPlayerError)
+      player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
     } yield (homeHandler.allHomesForPlayer(player.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(player))
 
     data match {
       case Right((Seq(), _)) =>
-        src.sendMessage(t"${YELLOW}You don't have any homes")
+        src.sendMessage(t"$YELLOW${HSHResource.get("cmd.list.noHomes")}")
         CommandResult.empty()
       case Right((homes, limit)) =>
         val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-        builder.title(t"${YELLOW}Homes")
+        builder.title(t"$YELLOW${HSHResource.get("cmd.list.title")}")
         val homeText = homes.sorted.map { homeName =>
-          val teleportButton = shiftButton(t"${YELLOW}Teleport", s"/home $homeName")
-          val setButton      = shiftButton(t"${YELLOW}Set", s"/home set $homeName")
-          val inviteButton   = shiftButton(t"${YELLOW}Invite", s"/home invite <player> $homeName")
-          val deleteButton   = shiftButton(t"${RED}Delete", s"/home delete $homeName")
+          val teleportButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home $homeName")
+          val setButton      = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home set $homeName")
+          val inviteButton   = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home invite <player> $homeName")
+          val deleteButton   = shiftButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home delete $homeName")
 
-          val residentsButton = shiftButton(t"${YELLOW}Residents", s"/home residents $homeName")
+          val residentsButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home residents $homeName")
 
           t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
         }
 
-        val limitText = t"Limit: $limit"
-        val newButton = shiftButton(t"${YELLOW}New home", "/home set <homeName>")
+        val limitText = t"${HSHResource.get("cmd.list.limit")}: $limit"
+        val newButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", "/home set <homeName>")
 
         builder.contents(limitText +: newButton +: homeText: _*)
         builder.sendTo(src)
@@ -68,10 +73,12 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
     }
   }
 
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.list.description"))
+
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .description(t"Lists all of your current homes")
+      .description(this)
       .permission(LibPerm.HomeList)
       .executor(this)
       .build()

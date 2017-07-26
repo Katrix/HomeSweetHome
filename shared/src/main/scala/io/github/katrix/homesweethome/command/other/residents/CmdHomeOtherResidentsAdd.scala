@@ -21,27 +21,32 @@
 package io.github.katrix.homesweethome.command
 package other.residents
 
+import java.util.Locale
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
 import org.spongepowered.api.entity.living.player.{Player, User}
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherResidents)(implicit plugin: KatPlugin)
-    extends CommandBase(Some(parent)) {
+    extends LocalizedCommand(Some(parent)) {
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundError)
-      target    <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundErrorLocalized)
+      target    <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
+      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
       home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
     } yield (homeOwner, target, home, homeName, home.residents.size < homeHandler.getResidentLimit(homeOwner))
 
@@ -49,17 +54,23 @@ class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherRes
       case Right((homeOwner, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
         val newHome = home.addResident(target.getUniqueId)
         homeHandler.updateHome(homeOwner.getUniqueId, homeName, newHome)
-        src.sendMessage(t"""${GREEN}Added ${target.getName} as a resident to "$homeName" for ${homeOwner.getName}""")
-        target.sendMessage(t"""${YELLOW}You have been added as a resident to "$homeName" for ${homeOwner.getName}""")
+        src.sendMessage(t"$GREEN${HSHResource
+          .get("cmd.other.residentsAdd.playerSuccess", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
+        target.sendMessage(
+          t"$YELLOW${HSHResource.get("cmd.other.residentsAdd.targetSuccess", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
+        )
         CommandResult.success()
       case Right((homeOwner, target, _, homeName, true)) =>
-        src.sendMessage(t"""$RED${target.getName} is already a resident of "$homeName" for ${homeOwner.getName}""")
+        src.sendMessage(t"$RED${HSHResource
+          .get("cmd.other.residentsAdd.alreadyResident", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
         CommandResult.empty()
-      case Right((homeOwner, _, homeName, _, false)) =>
-        throw new CommandException(t"""Residents limit reached for "$homeName" for ${homeOwner.getName}""")
+      case Right((_, _, _, _, false)) =>
+        throw new CommandException(HSHResource.getText("command.error.residentLimitReached"))
       case Left(error) => throw error
     }
   }
+
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.residentsAdd.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
@@ -69,7 +80,7 @@ class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherRes
         GenericArguments.player(LibCommonCommandKey.Player),
         GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
       )
-      .description(t"Add a user as a resident to a home for another player")
+      .description(this)
       .permission(LibPerm.HomeOtherResidentsAdd)
       .executor(this)
       .build()

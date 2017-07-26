@@ -34,8 +34,10 @@ import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.util.SpongeApiTranslationHelper.t
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 
 //Copy of PatternMatchingCommandElement to get player and use more than one string
 class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) extends CommandElement(key) {
@@ -44,7 +46,7 @@ class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) exte
 
   @Nullable
   @throws[ArgumentParseException]
-  protected def parseValue(source: CommandSource, args: CommandArgs): AnyRef =
+  protected def parseValue(source: CommandSource, args: CommandArgs): AnyRef = Localized(source) { implicit locale =>
     source match {
       case player: Player =>
         args.next
@@ -59,13 +61,16 @@ class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) exte
         }
 
         val ret = filteredChoices.map(c => getValue(player, c))
-        if (!ret.iterator.hasNext) throw args.createError(t("No values matching pattern '%s' present for %s!", unformattedPattern, {
-          if (getKey == null) NullKeyArg else getKey
-        }))
+        if (!ret.iterator.hasNext) throw {
+          args.createError(HSHResource.getText("command.homeElement.noMatchingPattern", "unformattedPattern" -> unformattedPattern, "key" -> {
+            if (getKey == null) NullKeyArg else getKey
+          }.toPlain))
+        }
 
         ret.asJava
-      case _ => throw args.createError(t"This command can only be used by players")
+      case _ => throw args.createError(HSHResource.getText("command.homeElement.nonPlayerError"))
     }
+  }
 
   def complete(src: CommandSource, args: CommandArgs, context: CommandContext): util.List[String] = {
     val choices = getChoices(src)

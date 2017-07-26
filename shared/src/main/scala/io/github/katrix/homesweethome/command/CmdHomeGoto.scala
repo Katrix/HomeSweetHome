@@ -20,6 +20,8 @@
  */
 package io.github.katrix.homesweethome.command
 
+import java.util.Locale
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
@@ -27,20 +29,22 @@ import org.spongepowered.api.entity.living.player.User
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player    <- playerTypeable.cast(src).toRight(nonPlayerError)
-      homeOwner <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+      player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      homeOwner <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
+      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
       home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
     } yield {
       val isResident = home.residents.contains(player.getUniqueId)
@@ -50,29 +54,32 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
     data match {
       case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
-        src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${homeOwner.getName}""")
+        src.sendMessage(t"$GREEN${HSHResource.get("cmd.goto.successTeleport", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
         homeHandler.removeInvite(player, homeOwner.getUniqueId)
         CommandResult.success()
       case Right((_, _, _, _, true)) => throw teleportError
       case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
         homeHandler.addRequest(player, homeOwner.getUniqueId, home)
-        src.sendMessage(t"""${GREEN}Sent home request to ${homeOwner.getName} for "$homeName"""")
+        src.sendMessage(t"$GREEN${HSHResource.get("cmd.goto.successRequest", "homeOwner" -> homeOwner.getName, "homeName" -> homeName)}")
         val acceptButton = shiftButton(t"${YELLOW}Accept", s"/home accept ${player.getName}")
         homeOwner.getPlayer
           .get()
-          .sendMessage(t"""$YELLOW${player.getName} has requested a to be teleported to "$homeName".${Text.NEW_LINE}$RESET$acceptButton""")
+          .sendMessage(t"$YELLOW${HSHResource.get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}.${Text.NEW_LINE}$RESET$acceptButton")
         CommandResult.success()
-      case Right((_, _, _, _, false)) => throw new CommandException(t"${RED}The player you tried to send a home request to is offline")
+      case Right((_, _, _, _, false)) => throw new CommandException(HSHResource.getText("cmd.goto.offlineError"))
       case Left(error)                => throw error
     }
   }
+
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.goto.description"))
+  override def localizedExtendedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.goto.extendedDescription"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
       .arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
-      .description(t"Go to another players home if they are allowed to go there.")
-      .extendedDescription(t"To be allowed into a home you either need to be a resident, or be invited")
+      .description(this)
+      .extendedDescription(this)
       .permission(LibPerm.HomeGoto)
       .executor(this)
       .build()

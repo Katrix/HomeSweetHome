@@ -21,37 +21,42 @@
 package io.github.katrix.homesweethome.command
 package residents
 
+import java.util.Locale
+
 import org.spongepowered.api.Sponge
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
 import org.spongepowered.api.service.pagination.PaginationService
 import org.spongepowered.api.service.user.UserStorageService
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.{Home, HomeHandler}
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.{CommandBase, LocalizedCommand}
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 
-class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult =
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player <- playerTypeable.cast(src).toRight(nonPlayerError)
-        home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
+        player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+        home <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
       } yield (home._2, home._1.residents, homeHandler.getResidentLimit(player))
 
       data match {
         case Right((homeName, residents, limit)) =>
           val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
-          val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-          builder.title(t"""$YELLOW"$homeName"'s residents""")
+          val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+          builder.title(t"$YELLOW${HSHResource.get("cmd.residents.homeTitle", "homeName" -> homeName)}")
 
           val residentText = {
-            if (residents.isEmpty) Seq(t"${YELLOW}No residents")
+            if (residents.isEmpty) Seq(t"$YELLOW${HSHResource.get("cmd.residents.noResidents")}")
             else
               residents.sorted
                 .map(
@@ -63,14 +68,14 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
                 )
                 .collect { case Some(str) => str }
                 .map { residentName =>
-                  val deleteButton = shiftButton(t"${RED}Delete", s"/home residents remove $residentName $homeName")
+                  val deleteButton = shiftButton(t"$RED${HSHResource.get("cmd.residents.delete")}", s"/home residents remove $residentName $homeName")
 
                   t"$residentName $deleteButton"
                 }
           }
 
-          val limitText = t"Limit: $limit"
-          val newButton = shiftButton(t"${YELLOW}New resident", s"/home residents add <player> $homeName")
+          val limitText = t"${HSHResource.get("cmd.residents.limit")}: $limit"
+          val newButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.residents.newResident")}", s"/home residents add <player> $homeName")
 
           builder.contents(limitText +: newButton +: residentText: _*)
 
@@ -80,24 +85,24 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
       }
     } else {
       val data = for {
-        player <- playerTypeable.cast(src).toRight(nonPlayerError)
+        player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
       } yield (player, homeHandler.allHomesForPlayer(player.getUniqueId).mapValues(_.residents), homeHandler.getResidentLimit(player))
 
       data match {
         case Right((player, residents, limit)) =>
           val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
-          val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
-          builder.title(t"""$YELLOW${player.getName}'s residents""")
+          val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+          builder.title(t"$YELLOW${HSHResource.get("cmd.residents.playerTitle", "player" -> player.getName)}")
 
           val residentText = {
-            if (residents.isEmpty) Seq(t"${YELLOW}No homes")
+            if (residents.isEmpty) Seq(t"$YELLOW${HSHResource.get("cmd.residents.noHomes")}")
             else
               residents.toSeq
                 .sortBy(_._1)
                 .map {
                   case (homeName, homeResidentsUuids) =>
-                    val details = shiftButton(t"${YELLOW}Details", s"/home residents $homeName")
-                    if (homeResidentsUuids.isEmpty) t"$homeName: ${YELLOW}No residents$RESET $details"
+                    val details = shiftButton(t"$YELLOW${HSHResource.get("cmd.residents.details")}", s"/home residents $homeName")
+                    if (homeResidentsUuids.isEmpty) t"$homeName: $YELLOW${HSHResource.get("cmd.residents.noResidents")}$RESET $details"
                     else {
                       val homeResidents = homeResidentsUuids.flatMap(userStorage.get(_).toOption.map(_.getName))
                       t""""$homeName": $YELLOW${homeResidents.mkString(", ")}$RESET $details"""
@@ -105,7 +110,7 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
                 }
           }
 
-          val limitText = t"Limit: $limit"
+          val limitText = t"${HSHResource.get("cmd.residents.limit")}: $limit"
 
           builder.contents(limitText +: residentText: _*)
 
@@ -115,12 +120,15 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
         case Left(e) => throw e
       }
     }
+  }
+
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.residents.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
       .arguments(GenericArguments.optional(new CommandElementHome(LibCommandKey.Home, homeHandler)))
-      .description(t"List the residents of a home")
+      .description(this)
       .permission(LibPerm.HomeResidentsList)
       .executor(this)
       .children(this)

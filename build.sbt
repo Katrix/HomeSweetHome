@@ -1,5 +1,5 @@
 def removeSnapshot(str:     String): String = if (str.endsWith("-SNAPSHOT")) str.substring(0, str.length - 9) else str
-def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "2.0.1" % Provided
+def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "c4e680ab85" % Provided
 
 lazy val publishResolver = {
   val artifactPattern = s"""${file("publish").absolutePath}/[revision]/[artifact]-[revision](-[classifier]).[ext]"""
@@ -10,9 +10,10 @@ lazy val commonSettings = Seq(
     name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
     organization := "io.github.katrix",
     version := "2.1.0",
-    scalaVersion := "2.12.0",
+    scalaVersion := "2.12.2",
     resolvers += "jitpack" at "https://jitpack.io",
     libraryDependencies += katLibDependecy("shared"),
+    libraryDependencies += "org.jetbrains" % "annotations" % "15.0" % Provided,
     scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlint", "-Yno-adapted-args", "-Ywarn-dead-code", "-Ywarn-unused-import"),
     crossPaths := false,
     assemblyShadeRules in assembly := Seq(

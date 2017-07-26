@@ -20,32 +20,37 @@
  */
 package io.github.katrix.homesweethome.command
 
+import java.util.Locale
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
 import org.spongepowered.api.entity.living.player.Player
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.LibPerm
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult = {
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player    <- playerTypeable.cast(src).toRight(nonPlayerError)
-      requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-      home      <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(t"That player has not sent a home request"))
+      player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
+      home      <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(HSHResource.getText("cmd.accept.notSentRequest")))
     } yield (player, requester, home)
 
     data match {
       case Right((homeOwner, requester, home)) if home.teleport(requester) =>
-        requester.sendMessage(t"${YELLOW}Teleported you to your requested home")
-        src.sendMessage(t"${GREEN}Teleported ${requester.getName} to their requested home")
+        requester.sendMessage(t"$YELLOW${HSHResource.get("cmd.accept.requesterSuccess")}")
+        src.sendMessage(t"$GREEN${HSHResource.get("cmd.accept.ownerSuccess", "requester" -> requester.getName)}")
         homeHandler.removeRequest(requester, homeOwner.getUniqueId)
         CommandResult.success()
       case Right((_, _, _)) => throw teleportError
@@ -53,11 +58,13 @@ class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
     }
   }
 
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.accept.description"))
+
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
       .arguments(GenericArguments.player(LibCommonCommandKey.Player))
-      .description(t"Accept a home request")
+      .description(this)
       .permission(LibPerm.HomeAccept)
       .executor(this)
       .build()

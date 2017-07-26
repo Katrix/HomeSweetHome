@@ -21,46 +21,54 @@
 package io.github.katrix.homesweethome.command
 package other
 
+import java.util.Locale
+
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
 import org.spongepowered.api.entity.living.player.User
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
+import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.command.other.residents.CmdHomeOtherResidents
 import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.CommandBase
+import io.github.katrix.katlib.command.{CommandBase, LocalizedCommand}
 import io.github.katrix.katlib.helper.Implicits._
+import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends CommandBase(Some(parent)) {
+class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
 
   private val list = new CmdHomeOtherList(homeHandler, this)
 
-  override def execute(src: CommandSource, args: CommandContext): CommandResult =
+  override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player   <- playerTypeable.cast(src).toRight(nonPlayerError)
-        target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundError)
-        homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterError)
+        player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+        target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
+        homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
         home     <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError)
       } yield (player, target, homeName, home)
 
       data match {
         case Right((player, target, homeName, home)) if home.teleport(player) =>
-          src.sendMessage(t"""${GREEN}Teleported to "$homeName" for ${target.getName} successfully""")
+          src.sendMessage(t"$GREEN${HSHResource.get("cmd.other.home.success", "homeName" -> homeName, "target" -> target.getName)}")
           CommandResult.success()
         case Right(_)    => throw teleportError
         case Left(error) => throw error
       }
     } else list.execute(src, args)
+  }
+
+  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.home.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .description(t"Teleports to a home of someone else")
+      .description(this)
       .permission(LibPerm.HomeOtherTp)
       .arguments(
         GenericArguments.user(LibCommonCommandKey.Player),
