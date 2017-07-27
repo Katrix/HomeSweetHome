@@ -28,7 +28,7 @@ import org.spongepowered.api.text.Text
 import io.github.katrix.katlib.i18n.Resource
 
 object HSHResource extends Resource {
-  final val ResourceLocation = "homesweethome.resources"
+  final val ResourceLocation = "assets.homesweethome.lang"
 
   override def getBundle(implicit locale: Locale): ResourceBundle = ResourceBundle.getBundle(ResourceLocation, locale)
 
