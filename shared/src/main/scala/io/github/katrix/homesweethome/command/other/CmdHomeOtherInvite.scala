@@ -54,7 +54,7 @@ class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
       case Right((player, homeOwner, target, homeName, home)) =>
         homeHandler.addInvite(target, homeOwner.getUniqueId, home)
         val gotoButton =
-          shiftButton(t"$YELLOW${HSHResource.get("cmd.invite.goto", "homeName" -> homeName)}", s"/home goto ${homeOwner.getName} $homeName")
+          button(t"$YELLOW${HSHResource.get("cmd.invite.goto", "homeName" -> homeName)}", s"/home goto ${homeOwner.getName} $homeName")
         src.sendMessage(
           t"$GREEN${HSHResource.get("cmd.other.invite.playerSuccess", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
         )

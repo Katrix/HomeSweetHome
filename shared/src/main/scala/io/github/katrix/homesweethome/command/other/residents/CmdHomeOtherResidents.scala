@@ -73,14 +73,14 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
                 )
                 .collect { case Some(str) => str }
                 .map { residentName =>
-                  val deleteButton = shiftButton(t"$RED${HSHResource.get("cmd.residents.delete")}", s"/home other residents remove $homeOwner $residentName $homeName")
+                  val deleteButton = button(t"$RED${HSHResource.get("cmd.residents.delete")}", s"/home other residents remove $homeOwner $residentName $homeName")
 
                   t"$YELLOW$residentName $deleteButton"
                 }
           }
 
           val limitText = t"${HSHResource.get("cmd.residents.limit")}: $limit"
-          val newButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.residents.newResident")}", s"/home other residents add $homeOwner <player> $homeName")
+          val newButton = manualButton(t"$YELLOW${HSHResource.get("cmd.residents.newResident")}", s"/home other residents add $homeOwner <player> $homeName")
 
           builder.contents(limitText +: newButton +: residentText: _*)
 
@@ -106,7 +106,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
                 .sortBy(_._1)
                 .map {
                   case (homeName, homeResidentsUuids) =>
-                    val details = shiftButton(t"$YELLOW${HSHResource.get("cmd.residents.details")}", s"/home other residents ${homeOwner.getName} $homeName")
+                    val details = button(t"$YELLOW${HSHResource.get("cmd.residents.details")}", s"/home other residents ${homeOwner.getName} $homeName")
                     if (homeResidentsUuids.isEmpty) t"$homeName: $YELLOW${HSHResource.get("cmd.residents.noResidents")}$RESET $details"
                     else {
                       val homeResidents = homeResidentsUuids.flatMap(userStorage.get(_).toOption.map(_.getName))

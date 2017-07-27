@@ -61,7 +61,7 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
       case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
         homeHandler.addRequest(player, homeOwner.getUniqueId, home)
         src.sendMessage(t"$GREEN${HSHResource.get("cmd.goto.successRequest", "homeOwner" -> homeOwner.getName, "homeName" -> homeName)}")
-        val acceptButton = shiftButton(t"${YELLOW}Accept", s"/home accept ${player.getName}")
+        val acceptButton = button(t"${YELLOW}Accept", s"/home accept ${player.getName}")
         homeOwner.getPlayer
           .get()
           .sendMessage(t"$YELLOW${HSHResource.get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}${Text.NEW_LINE}$RESET$acceptButton")

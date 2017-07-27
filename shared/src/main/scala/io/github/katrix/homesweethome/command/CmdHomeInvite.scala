@@ -50,7 +50,7 @@ class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
     data match {
       case Right((player, target, homeName, home)) =>
         homeHandler.addInvite(target, player.getUniqueId, home)
-        val gotoButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.invite.goto", "homeName" -> homeName)}", s"/home goto ${player.getName} $homeName")
+        val gotoButton = button(t"$YELLOW${HSHResource.get("cmd.invite.goto", "homeName" -> homeName)}", s"/home goto ${player.getName} $homeName")
         player.sendMessage(t"""$GREEN${HSHResource.get("cmd.invite.playerSuccess", "target" -> target.getName, "homeName" -> homeName)}""")
         target.sendMessage(t"""$YELLOW${HSHResource.get("cmd.invite.targetSuccess", "homeName" -> homeName, "player" -> player.getName)}${Text.NEW_LINE}$RESET$gotoButton""")
         CommandResult.success()

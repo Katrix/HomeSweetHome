@@ -58,18 +58,18 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
         builder.title(t"$YELLOW${HSHResource.get("cmd.other.list.title", "homeOwner" -> homeOwner)}")
 
         val homeText = homes.sorted.map { homeName =>
-          val teleportButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home other $homeOwner $homeName")
-          val setButton      = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home other set $homeOwner $homeName")
-          val inviteButton   = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home other invite $homeOwner <player> $homeName")
-          val deleteButton   = shiftButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home other delete $homeOwner $homeName")
+          val teleportButton = button(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home other $homeOwner $homeName")
+          val setButton      = manualButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home other set $homeOwner $homeName")
+          val inviteButton   = manualButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home other invite $homeOwner <player> $homeName")
+          val deleteButton   = manualButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home other delete $homeOwner $homeName")
 
-          val residentsButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home other residents $homeOwner $homeName")
+          val residentsButton = button(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home other residents $homeOwner $homeName")
 
           t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
         }
 
         val limitText = t"${HSHResource.get("cmd.list.limit")}: $limit"
-        val newButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", s"/home other set $homeOwner <homeName>")
+        val newButton = manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", s"/home other set $homeOwner <homeName>")
 
         builder.contents(limitText +: newButton +: homeText: _*)
         builder.sendTo(src)

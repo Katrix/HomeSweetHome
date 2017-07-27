@@ -52,20 +52,20 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
         val homeText = {
           if(homes.isEmpty) Seq(t"$YELLOW${HSHResource.get("cmd.list.noHomes")}")
           else homes.sorted.map { homeName =>
-            val teleportButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home $homeName")
-            val setButton      = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home set $homeName")
-            val inviteButton   = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home invite <player> $homeName")
-            val deleteButton   = shiftButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home delete $homeName")
+            val teleportButton = button(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home $homeName")
+            val setButton      = manualButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home set $homeName")
+            val inviteButton   = manualButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home invite <player> $homeName")
+            val deleteButton   = manualButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home delete $homeName")
 
-            val residentsButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home residents $homeName")
+            val residentsButton = button(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home residents $homeName")
 
             t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
           }
         }
 
-        val helpButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.help")}", "/home help [command]")
+        val helpButton = manualButton(t"$YELLOW${HSHResource.get("cmd.list.help")}", "/home help [command]")
         val limitText = t"${HSHResource.get("cmd.list.limit")}: $limit"
-        val newButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", "/home set <homeName>")
+        val newButton = manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", "/home set <homeName>")
 
         builder.contents(helpButton +: limitText +: newButton +: homeText: _*)
         builder.sendTo(src)

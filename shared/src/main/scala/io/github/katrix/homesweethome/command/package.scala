@@ -37,5 +37,6 @@ package object command {
   def homeNotFoundError(implicit locale: Locale): CommandException = new CommandException(HSHResource.getText("command.error.homeNotFound"))
   def teleportError(implicit locale: Locale): CommandException = new CommandException(HSHResource.getText("command.error.teleportError"))
 
-  def shiftButton(button: Text, text: String): Text = t"[$button]".toBuilder.onClick(TextActions.suggestCommand(text)).build()
+  def button(button: Text, command: String): Text = t"[$button]".toBuilder.onClick(TextActions.runCommand(command)).onHover(TextActions.showText(t"$command")).build()
+  def manualButton(button: Text, command: String): Text = t"[[$button]]".toBuilder.onClick(TextActions.suggestCommand(command)).build()
 }
