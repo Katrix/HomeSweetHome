@@ -47,7 +47,7 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
       target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
       homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
       _ <- Either.cond(
-        parent.parent.flatMap(_.parent).exists(_.children.flatMap(_.aliases).exists(homeName.startsWith)), //We travel down to the root home command
+        parent.parent.exists(_.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s))), //We travel down to the root home command
         (),
         new CommandException(HSHResource.getText("command.error.illegalName"))
       )

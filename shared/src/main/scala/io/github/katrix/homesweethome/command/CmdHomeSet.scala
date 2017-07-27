@@ -42,7 +42,7 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
     val data = for {
       player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
       homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
-      _        <- Either.cond(parent.children.flatMap(_.aliases).exists(homeName.startsWith), (), new CommandException(HSHResource.getText("command.error.illegalName")))
+      _        <- Either.cond(parent.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s)), (), new CommandException(HSHResource.getText("command.error.illegalName")))
     } yield {
       val replace  = homeHandler.homeExist(player.getUniqueId, homeName)
       val limit    = homeHandler.getHomeLimit(player)
