@@ -23,12 +23,11 @@ package other
 
 import java.util.Locale
 
-import org.spongepowered.api.Sponge
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
 import org.spongepowered.api.entity.living.player.User
-import org.spongepowered.api.service.pagination.PaginationService
+import org.spongepowered.api.service.pagination.PaginationList
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
@@ -53,7 +52,7 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
         src.sendMessage(t"$YELLOW${HSHResource.get("cmd.other.list.noHomes", "homeOwner" -> homeOwner.getName)}")
         CommandResult.empty()
       case Right((homeOwnerUser, homes, limit)) =>
-        val builder   = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+        val builder   = PaginationList.builder()
         val homeOwner = homeOwnerUser.getName
         builder.title(t"$YELLOW${HSHResource.get("cmd.other.list.title", "homeOwner" -> homeOwner)}")
 

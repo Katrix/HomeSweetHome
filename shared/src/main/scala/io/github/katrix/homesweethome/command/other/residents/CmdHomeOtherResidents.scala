@@ -28,7 +28,7 @@ import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
 import org.spongepowered.api.entity.living.player.User
-import org.spongepowered.api.service.pagination.PaginationService
+import org.spongepowered.api.service.pagination.PaginationList
 import org.spongepowered.api.service.user.UserStorageService
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
@@ -56,7 +56,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
       data match {
         case Right((homeOwnerUser, homeName, residents, limit)) =>
           val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
-          val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+          val builder     = PaginationList.builder()
           val homeOwner   = homeOwnerUser.getName
           builder.title(t"$YELLOW${HSHResource.get("cmd.other.residents.homeTitle", "homeOwner" -> homeOwner, "homeName" -> homeName)}")
 
@@ -96,7 +96,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
       data match {
         case Right((homeOwner, residents, limit)) =>
           val userStorage = Sponge.getServiceManager.provideUnchecked(classOf[UserStorageService])
-          val builder     = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
+          val builder     = PaginationList.builder()
           builder.title(t"$YELLOW${HSHResource.get("cmd.residents.playerTitle", "player" -> homeOwner.getName)}")
 
           val residentText = {
