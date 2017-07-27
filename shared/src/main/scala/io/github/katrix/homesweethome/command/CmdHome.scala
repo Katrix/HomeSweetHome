@@ -85,7 +85,8 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Loca
     new CmdHomeInvite(homeHandler, this),
     new CmdHomeLimit(homeHandler, this),
     new CmdHomeOther(homeHandler, this),
-    new CmdHomeResidents(homeHandler, this)
+    new CmdHomeResidents(homeHandler, this),
+    plugin.pluginCmd.cmdHelp
   )
 
   override def aliases: Seq[String] = Seq("home")

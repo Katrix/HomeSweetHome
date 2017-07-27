@@ -63,10 +63,11 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
           }
         }
 
+        val helpButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.help")}", "/home help [command]")
         val limitText = t"${HSHResource.get("cmd.list.limit")}: $limit"
         val newButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", "/home set <homeName>")
 
-        builder.contents(limitText +: newButton +: homeText: _*)
+        builder.contents(helpButton +: limitText +: newButton +: homeText: _*)
         builder.sendTo(src)
         CommandResult.builder().successCount(homes.size).build()
       case Left(error) => throw error
