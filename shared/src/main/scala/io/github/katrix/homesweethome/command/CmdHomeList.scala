@@ -46,21 +46,21 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
     } yield (homeHandler.allHomesForPlayer(player.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(player))
 
     data match {
-      case Right((Seq(), _)) =>
-        src.sendMessage(t"$YELLOW${HSHResource.get("cmd.list.noHomes")}")
-        CommandResult.empty()
       case Right((homes, limit)) =>
         val builder = Sponge.getServiceManager.provideUnchecked(classOf[PaginationService]).builder()
         builder.title(t"$YELLOW${HSHResource.get("cmd.list.title")}")
-        val homeText = homes.sorted.map { homeName =>
-          val teleportButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home $homeName")
-          val setButton      = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home set $homeName")
-          val inviteButton   = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home invite <player> $homeName")
-          val deleteButton   = shiftButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home delete $homeName")
+        val homeText = {
+          if(homes.isEmpty) Seq(t"$YELLOW${HSHResource.get("cmd.list.noHomes")}")
+          else homes.sorted.map { homeName =>
+            val teleportButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home $homeName")
+            val setButton      = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home set $homeName")
+            val inviteButton   = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home invite <player> $homeName")
+            val deleteButton   = shiftButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home delete $homeName")
 
-          val residentsButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home residents $homeName")
+            val residentsButton = shiftButton(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home residents $homeName")
 
-          t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
+            t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
+          }
         }
 
         val limitText = t"${HSHResource.get("cmd.list.limit")}: $limit"
