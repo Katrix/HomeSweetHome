@@ -66,7 +66,7 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
         val limitText = t"${HSHResource.get("cmd.list.limit")}: $limit"
         val newButton = manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", "/home set <homeName>")
 
-        builder.contents(helpButton +: limitText +: newButton +: homeText: _*)
+        builder.contents(limitText +: helpButton +: newButton +: homeText: _*)
         builder.sendTo(src)
         CommandResult.builder().successCount(homes.size).build()
       case Left(error) => throw error
