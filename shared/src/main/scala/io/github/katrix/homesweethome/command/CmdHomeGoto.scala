@@ -64,7 +64,7 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
         val acceptButton = shiftButton(t"${YELLOW}Accept", s"/home accept ${player.getName}")
         homeOwner.getPlayer
           .get()
-          .sendMessage(t"$YELLOW${HSHResource.get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}.${Text.NEW_LINE}$RESET$acceptButton")
+          .sendMessage(t"$YELLOW${HSHResource.get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}${Text.NEW_LINE}$RESET$acceptButton")
         CommandResult.success()
       case Right((_, _, _, _, false)) => throw new CommandException(HSHResource.getText("cmd.goto.offlineError"))
       case Left(error)                => throw error

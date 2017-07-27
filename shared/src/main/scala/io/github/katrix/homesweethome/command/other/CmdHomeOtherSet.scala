@@ -61,7 +61,7 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
     data match {
       case Right((player, homeOwner, homeName, true)) =>
         homeHandler.makeHome(homeOwner.getUniqueId, homeName, player.getLocation, player.getRotation)
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.other.set.success", "homeName" -> homeName)}")
+        src.sendMessage(t"$GREEN${HSHResource.get("cmd.other.set.success", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
         CommandResult.success()
       case Right((_, _, _, false)) =>
         throw new CommandException(HSHResource.getText("command.error.homeLimitReached"))
