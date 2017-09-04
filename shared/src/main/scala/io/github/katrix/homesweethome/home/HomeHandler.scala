@@ -33,6 +33,7 @@ import org.spongepowered.api.world.{Location, World}
 import com.flowpowered.math.vector.Vector3d
 import com.google.common.cache.CacheBuilder
 
+import io.github.katrix.homesweethome.NestedMap
 import io.github.katrix.homesweethome.persistant.{HomeConfig, StorageLoader}
 
 /**
@@ -42,13 +43,10 @@ import io.github.katrix.homesweethome.persistant.{HomeConfig, StorageLoader}
 	*/
 abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 
-  private val homeMap = new mutable.HashMap[UUID, mutable.Map[String, Home]]()
-    .withDefault(_ => new mutable.HashMap[String, Home]())
+  private val homeMap: NestedMap[UUID, String, Home] = NestedMap(mutable.HashMap.empty, mutable.HashMap.empty _)
 
-  private var requests: mutable.Map[Player, mutable.Map[UUID, Home]] =
-    new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
-  private var invites: mutable.Map[Player, mutable.Map[UUID, Home]] =
-    new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
+  private val requests: NestedMap[Player, UUID, Home] = NestedMap(mutable.HashMap.empty, createInvitesRequests _)
+  private val invites:  NestedMap[Player, UUID, Home] = NestedMap(mutable.HashMap.empty, createInvitesRequests _)
 
   /**
 		* Clears the current homes and reloads them from disk.
@@ -58,66 +56,51 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
     requests.clear()
     invites.clear()
 
-    requests = requests.withDefault(
-      _ =>
-        CacheBuilder
-          .newBuilder()
-          .expireAfterWrite(config.timeout.value, TimeUnit.SECONDS)
-          .build[UUID, Home]()
-          .asMap
-          .asScala
-    )
-    invites = invites.withDefault(
-      _ =>
-        CacheBuilder
-          .newBuilder()
-          .expireAfterWrite(config.timeout.value, TimeUnit.SECONDS)
-          .build[UUID, Home]()
-          .asMap
-          .asScala
-    )
+    val toAdd = for {
+      (uuid, innerMap) <- storage.loadData
+      (name, home)     <- innerMap
+    } yield (uuid, name, home)
 
-    val toAdd = storage.loadData.map { case (k, v) => (k, mutable.Map(v.toSeq: _*)) }
     homeMap ++= toAdd
   }
+
+  private def createInvitesRequests[A, B]: mutable.Map[A, B] =
+    CacheBuilder
+      .newBuilder()
+      .expireAfterWrite(config.timeout.value, TimeUnit.SECONDS)
+      .build[A, B]()
+      .asMap
+      .asScala
 
   /**
 		* Add a home request
 		*/
-  def addRequest(requester: Player, homeOwner: UUID, home: Home): Unit = {
-    val playerRequests = requests(requester)
-    playerRequests.put(homeOwner, home)
-    requests.put(requester, playerRequests)
-  }
+  def addRequest(requester: Player, homeOwner: UUID, home: Home): Unit = requests.put(requester, homeOwner, home)
 
   /**
 		* Removed a home request
 		*/
-  def removeRequest(requester: Player, homeOwner: UUID): Unit = requests(requester).remove(homeOwner)
+  def removeRequest(requester: Player, homeOwner: UUID): Unit = requests.remove(requester, homeOwner)
 
   /**
 		* Get a home request
 		*/
-  def getRequest(requester: Player, homeOwner: UUID): Option[Home] = requests(requester).get(homeOwner)
+  def getRequest(requester: Player, homeOwner: UUID): Option[Home] = requests.get(requester, homeOwner)
 
   /**
 		* Add a new invite to a specific home for a homeowner
 		*/
-  def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = {
-    val playerInvites = invites(target)
-    playerInvites.put(homeOwner, home)
-    invites.put(target, playerInvites)
-  }
+  def addInvite(target: Player, homeOwner: UUID, home: Home): Unit = invites.put(target, homeOwner, home)
 
   /**
 		* Removed an invite
 		*/
-  def removeInvite(player: Player, homeOwner: UUID): Unit = invites(player).remove(homeOwner)
+  def removeInvite(player: Player, homeOwner: UUID): Unit = invites.remove(player, homeOwner)
 
   /**
 		* Check if a player is invited to a specific home
 		*/
-  def isInvited(target: Player, homeOwner: UUID, home: Home): Boolean = invites(target).get(homeOwner).contains(home)
+  def isInvited(target: Player, homeOwner: UUID, home: Home): Boolean = invites.get(target, homeOwner).contains(home)
 
   /**
 		* Gets all the homes for a specific player.
@@ -125,7 +108,7 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* @return A map containing all the homes for a specific player.
 		* The map itself is a copy.
 		*/
-  def allHomesForPlayer(uuid: UUID): Map[String, Home] = Map(homeMap(uuid).toSeq: _*)
+  def allHomesForPlayer(uuid: UUID): Map[String, Home] = homeMap.getAll(uuid)
 
   /**
 		* Gets a specific home for a player.
@@ -134,7 +117,7 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* @param name Name of player
 		* @return Home if it was found
 		*/
-  def specificHome(uuid: UUID, name: String): Option[Home] = homeMap(uuid).get(name)
+  def specificHome(uuid: UUID, name: String): Option[Home] = homeMap.get(uuid, name)
 
   /**
 		* Check if a player has a home with the specific name.
@@ -143,7 +126,7 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* @param name Name of home
 		* @return If home exist
 		*/
-  def homeExist(uuid: UUID, name: String): Boolean = homeMap(uuid).contains(name)
+  def homeExist(uuid: UUID, name: String): Boolean = homeMap.contains(uuid, name)
 
   /**
 		* Creates a new home for a player.
@@ -164,10 +147,7 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* @param rotation The rotation of the new home
 		*/
   def makeHome(uuid: UUID, name: String, location: Location[World], rotation: Vector3d): Unit = {
-    val playerMap = homeMap(uuid)
-    playerMap.put(name, new Home(location, rotation))
-    homeMap.put(uuid, playerMap) //We put the map back as we could have made a new one
-
+    homeMap.put(uuid, name, new Home(location, rotation))
     save()
   }
 
@@ -178,7 +158,7 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* @param name The name of the home to delete.
 		*/
   def deleteHome(uuid: UUID, name: String): Unit = {
-    homeMap(uuid).remove(name)
+    homeMap.remove(uuid, name)
     save()
   }
 
@@ -190,9 +170,7 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* @param newHome The new home to use
 		*/
   def updateHome(homeOwner: UUID, homeName: String, newHome: Home): Unit = {
-    val playerHomes = homeMap(homeOwner)
-    playerHomes.put(homeName, newHome)
-    homeMap.put(homeOwner, playerHomes)
+    homeMap.put(homeOwner, homeName, newHome)
     save()
   }
 
@@ -206,8 +184,5 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		*/
   def getResidentLimit(player: Subject): Int
 
-  private def save(): Unit = {
-    val toSave = Map(homeMap.map { case (key, map) => (key, Map(map.toSeq: _*)) }.toSeq: _*)
-    storage.saveMap(toSave)
-  }
+  private def save(): Unit = storage.saveMap(homeMap.toNormalMap)
 }
