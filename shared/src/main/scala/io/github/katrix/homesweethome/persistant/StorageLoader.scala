@@ -45,30 +45,36 @@ class StorageLoader(dir: Path)(implicit plugin: KatPlugin)
   private val v1MapTypeToken = typeToken[JMap[UUID, JMap[String, HomeV1]]]
 
   override def loadData: Map[UUID, Map[String, Home]] = {
-    val node = homeNode
     versionNode.getString("2") match {
-      case "1" =>
-        val ver1: Map[UUID, Map[String, Home]] = Option(node.getValue(v1MapTypeToken)) match {
-          case Some(map) =>
-            Map(
-              map.asScala.map { case (key, value) => (key, Map(value.asScala.mapValues(_.toCurrent).toSeq: _*)) }.toSeq: _*
-            )
-          case None =>
-            LogHelper.error("Could not load homes from storage.")
-            Map()
-        }
-        saveData(ver1)
-        ver1
-      case "2" =>
-        Option(node.getValue(mapTypeToken)) match {
-          case Some(map) =>
-            Map(map.asScala.map { case (key, value) => (key, Map(value.asScala.toSeq: _*)) }.toSeq: _*)
-          case None =>
-            LogHelper.error("Could not load homes from storage.")
-            Map()
-        }
+      case "1" => loadV1Homes()
+      case "2" => loadV2Homes()
     }
   }
+
+  private def loadV1Homes(): Map[UUID, Map[String, Home]] = {
+    val ver1: Map[UUID, Map[String, Home]] = Option(homeNode.getValue(v1MapTypeToken)) match {
+      case Some(map) =>
+        scalaMap(map).map { case (k, v) => k -> scalaMap(v).map { case (k1, v1) => k1 -> v1.toCurrent } }
+      case None =>
+        LogHelper.error("Could not load homes from storage.")
+        Map.empty
+    }
+    //We save here to go up to v2
+    saveData(ver1)
+    ver1
+  }
+
+  private def loadV2Homes(): Map[UUID, Map[String, Home]] = {
+    Option(homeNode.getValue(mapTypeToken)) match {
+      case Some(map) =>
+        scalaMap(map).map { case (k, v) => k -> scalaMap(v) }
+      case None =>
+        LogHelper.error("Could not load homes from storage.")
+        Map.empty
+    }
+  }
+
+  private def scalaMap[A, B](map: JMap[A, B]): Map[A, B] = Map(map.asScala.toSeq: _*)
 
   override def saveData(data: Map[UUID, Map[String, Home]]): Unit = {
     versionNode.setValue("2")
