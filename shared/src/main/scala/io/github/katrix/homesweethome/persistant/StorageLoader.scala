@@ -50,7 +50,9 @@ class StorageLoader(dir: Path)(implicit plugin: KatPlugin)
       case "1" =>
         val ver1: Map[UUID, Map[String, Home]] = Option(node.getValue(v1MapTypeToken)) match {
           case Some(map) =>
-            Map(map.asScala.map { case (key, value) => (key, Map(value.asScala.mapValues(_.toCurrent).toSeq: _*)) }.toSeq: _*)
+            Map(
+              map.asScala.map { case (key, value) => (key, Map(value.asScala.mapValues(_.toCurrent).toSeq: _*)) }.toSeq: _*
+            )
           case None =>
             LogHelper.error("Could not load homes from storage.")
             Map()

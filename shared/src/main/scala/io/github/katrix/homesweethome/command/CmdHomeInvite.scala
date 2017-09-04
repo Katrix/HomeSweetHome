@@ -38,7 +38,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
@@ -50,20 +51,32 @@ class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
     data match {
       case Right((player, target, homeName, home)) =>
         homeHandler.addInvite(target, player.getUniqueId, home)
-        val gotoButton = button(t"$YELLOW${HSHResource.get("cmd.invite.goto", "homeName" -> homeName)}", s"/home goto ${player.getName} $homeName")
-        player.sendMessage(t"""$GREEN${HSHResource.get("cmd.invite.playerSuccess", "target" -> target.getName, "homeName" -> homeName)}""")
-        target.sendMessage(t"""$YELLOW${HSHResource.get("cmd.invite.targetSuccess", "homeName" -> homeName, "player" -> player.getName)}${Text.NEW_LINE}$RESET$gotoButton""")
+        val gotoButton = button(
+          t"$YELLOW${HSHResource.get("cmd.invite.goto", "homeName" -> homeName)}",
+          s"/home goto ${player.getName} $homeName"
+        )
+        player.sendMessage(t"""$GREEN${HSHResource
+          .get("cmd.invite.playerSuccess", "target" -> target.getName, "homeName" -> homeName)}""")
+        target.sendMessage(t"""$YELLOW${HSHResource.get(
+          "cmd.invite.targetSuccess",
+          "homeName" -> homeName,
+          "player"   -> player.getName
+        )}${Text.NEW_LINE}$RESET$gotoButton""")
         CommandResult.success()
       case Left(error) => throw error
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.invite.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.invite.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .arguments(
+        GenericArguments.player(LibCommonCommandKey.Player),
+        new CommandElementHome(LibCommandKey.Home, homeHandler)
+      )
       .description(this)
       .permission(LibPerm.HomeInvite)
       .executor(this)

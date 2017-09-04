@@ -62,9 +62,12 @@ class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) exte
 
         val ret = filteredChoices.map(c => getValue(player, c))
         if (!ret.iterator.hasNext) throw {
-          args.createError(HSHResource.getText("command.homeElement.noMatchingPattern", "unformattedPattern" -> unformattedPattern, "key" -> {
-            if (getKey == null) NullKeyArg else getKey
-          }.toPlain))
+          args.createError(
+            HSHResource
+              .getText("command.homeElement.noMatchingPattern", "unformattedPattern" -> unformattedPattern, "key" -> {
+                if (getKey == null) NullKeyArg else getKey
+              }.toPlain)
+          )
         }
 
         ret.asJava
@@ -90,7 +93,7 @@ class CommandElementHome(@Nullable val key: Text, homeHandler: HomeHandler) exte
 
   protected def getChoices(source: CommandSource): Iterable[String] = source match {
     case player: Player => homeHandler.allHomesForPlayer(player.getUniqueId).keys
-    case _ => Nil
+    case _              => Nil
   }
 
   @throws[IllegalArgumentException]

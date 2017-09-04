@@ -66,7 +66,11 @@ object HomeSweetHome {
     val homeHandler = new HomeHandler(plugin.storageLoader, plugin.config) {
       override def getHomeLimit(player: Subject): Int = player match {
         case sub: OptionSubject =>
-          sub.getOption(LibPerm.HomeLimitOption).toOption.flatMap(s => Try(s.toInt).toOption).getOrElse(plugin.config.homeLimitDefault.value)
+          sub
+            .getOption(LibPerm.HomeLimitOption)
+            .toOption
+            .flatMap(s => Try(s.toInt).toOption)
+            .getOrElse(plugin.config.homeLimitDefault.value)
         case _ => plugin.config.homeLimitDefault.value
       }
       override def getResidentLimit(player: Subject): Int = player match {
@@ -84,7 +88,7 @@ object HomeSweetHome {
     val cmdHome = new CmdHome(homeHandler)
     cmdHome.registerHelp()
     Sponge.getCommandManager.register(plugin, plugin.pluginCmd.commandSpec, plugin.pluginCmd.aliases: _*)
-    Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases:                   _*)
+    Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases: _*)
     Sponge.getCommandManager.register(plugin, cmdHome.homeList.commandSpec, "homes")
   }
 }
@@ -95,8 +99,11 @@ object HomeSweetHome {
   version = HomeSweetHome.ConstantVersion,
   dependencies = Array(new Dependency(id = LibKatLibPlugin.Id, version = KatLib.ConstantVersion))
 )
-class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfgDir: Path, spongeContainer: PluginContainer)
-    extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
+class HomeSweetHome @Inject()(
+    logger: Logger,
+    @ConfigDir(sharedRoot = false) cfgDir: Path,
+    spongeContainer: PluginContainer
+) extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
 
   implicit val plugin: HomeSweetHome = this
 

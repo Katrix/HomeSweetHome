@@ -45,8 +45,10 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
   private val homeMap = new mutable.HashMap[UUID, mutable.Map[String, Home]]()
     .withDefault(_ => new mutable.HashMap[String, Home]())
 
-  private var requests: mutable.Map[Player, mutable.Map[UUID, Home]] = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
-  private var invites:  mutable.Map[Player, mutable.Map[UUID, Home]] = new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
+  private var requests: mutable.Map[Player, mutable.Map[UUID, Home]] =
+    new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
+  private var invites: mutable.Map[Player, mutable.Map[UUID, Home]] =
+    new mutable.WeakHashMap[Player, mutable.Map[UUID, Home]]
 
   /**
 		* Clears the current homes and reloads them from disk.
@@ -150,7 +152,8 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* Also used to get location of new home
 		* @param name Name of new home
 		*/
-  def makeHome(player: Player, name: String): Unit = makeHome(player.getUniqueId, name, player.getLocation, player.getRotation)
+  def makeHome(player: Player, name: String): Unit =
+    makeHome(player.getUniqueId, name, player.getLocation, player.getRotation)
 
   /**
 		* Makes a new home for a player with a specific location.

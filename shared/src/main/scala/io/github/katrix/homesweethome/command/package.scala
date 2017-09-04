@@ -34,9 +34,13 @@ package object command {
 
   val playerTypeable: Typeable[Player] = Typeable[Player]
 
-  def homeNotFoundError(implicit locale: Locale): CommandException = new CommandException(HSHResource.getText("command.error.homeNotFound"))
-  def teleportError(implicit locale: Locale): CommandException = new CommandException(HSHResource.getText("command.error.teleportError"))
+  def homeNotFoundError(implicit locale: Locale): CommandException =
+    new CommandException(HSHResource.getText("command.error.homeNotFound"))
+  def teleportError(implicit locale: Locale): CommandException =
+    new CommandException(HSHResource.getText("command.error.teleportError"))
 
-  def button(button: Text, command: String): Text = t"[$button]".toBuilder.onClick(TextActions.runCommand(command)).onHover(TextActions.showText(t"$command")).build()
-  def manualButton(button: Text, command: String): Text = t"[[$button]]".toBuilder.onClick(TextActions.suggestCommand(command)).build()
+  def button(button: Text, command: String): Text =
+    t"[$button]".toBuilder.onClick(TextActions.runCommand(command)).onHover(TextActions.showText(t"$command")).build()
+  def manualButton(button: Text, command: String): Text =
+    t"[[$button]]".toBuilder.onClick(TextActions.suggestCommand(command)).build()
 }

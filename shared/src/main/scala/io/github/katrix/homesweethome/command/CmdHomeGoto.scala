@@ -38,7 +38,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
@@ -54,30 +55,42 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
 
     data match {
       case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.goto.successTeleport", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource.get("cmd.goto.successTeleport", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
+        )
         homeHandler.removeInvite(player, homeOwner.getUniqueId)
         CommandResult.success()
       case Right((_, _, _, _, true)) => throw teleportError
       case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
         homeHandler.addRequest(player, homeOwner.getUniqueId, home)
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.goto.successRequest", "homeOwner" -> homeOwner.getName, "homeName" -> homeName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource.get("cmd.goto.successRequest", "homeOwner" -> homeOwner.getName, "homeName" -> homeName)}"
+        )
         val acceptButton = button(t"${YELLOW}Accept", s"/home accept ${player.getName}")
         homeOwner.getPlayer
           .get()
-          .sendMessage(t"$YELLOW${HSHResource.get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}${Text.NEW_LINE}$RESET$acceptButton")
+          .sendMessage(
+            t"$YELLOW${HSHResource
+              .get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}${Text.NEW_LINE}$RESET$acceptButton"
+          )
         CommandResult.success()
       case Right((_, _, _, _, false)) => throw new CommandException(HSHResource.getText("cmd.goto.offlineError"))
       case Left(error)                => throw error
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.goto.description"))
-  override def localizedExtendedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.goto.extendedDescription"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.goto.description"))
+  override def localizedExtendedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.goto.extendedDescription"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .arguments(
+        GenericArguments.user(LibCommonCommandKey.Player),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+      )
       .description(this)
       .extendedDescription(this)
       .permission(LibPerm.HomeGoto)

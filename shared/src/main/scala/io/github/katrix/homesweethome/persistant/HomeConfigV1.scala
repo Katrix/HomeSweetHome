@@ -26,7 +26,8 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.persistant.{CommentedConfigValue, ConfigValue}
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 
-class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(implicit plugin: KatPlugin) extends HomeConfig {
+class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(implicit plugin: KatPlugin)
+    extends HomeConfig {
 
   override val homeLimitDefault     = ConfigValue(cfgRoot, default.homeLimitDefault)
   override val residentLimitDefault = ConfigValue(cfgRoot, default.residentLimitDefault)
@@ -34,6 +35,8 @@ class HomeConfigV1(cfgRoot: CommentedConfigurationNode, default: HomeConfig)(imp
   override val timeout              = ConfigValue(cfgRoot, default.timeout)
 
   //Bad, yes, something I forgot, yes. I'll fix it eventually
-  private implicit def toCommented[A](configValue: ConfigValue[A, CommentedConfigurationNode]): CommentedConfigValue[A] =
+  private implicit def toCommented[A](
+      configValue: ConfigValue[A, CommentedConfigurationNode]
+  ): CommentedConfigValue[A] =
     configValue.asInstanceOf[CommentedConfigValue[A]]
 }

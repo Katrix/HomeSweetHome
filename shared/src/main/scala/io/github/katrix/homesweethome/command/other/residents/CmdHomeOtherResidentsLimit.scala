@@ -46,13 +46,16 @@ class CmdHomeOtherResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeOtherR
     args.getOne[User](LibCommonCommandKey.Player).toOption match {
       case Some(homeOwner) =>
         val limit = homeHandler.getResidentLimit(homeOwner)
-        src.sendMessage(t"$YELLOW${HSHResource.get("cmd.other.residentsLimit.success", "homeOwner" -> homeOwner.getName, "limit" -> limit.toString)}")
+        src.sendMessage(
+          t"$YELLOW${HSHResource.get("cmd.other.residentsLimit.success", "homeOwner" -> homeOwner.getName, "limit" -> limit.toString)}"
+        )
         CommandResult.builder().successCount(limit).build()
       case None => throw nonPlayerErrorLocalized
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.residentsLimit.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.residentsLimit.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

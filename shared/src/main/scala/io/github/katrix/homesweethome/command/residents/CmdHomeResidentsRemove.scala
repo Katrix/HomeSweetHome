@@ -39,7 +39,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
@@ -52,21 +53,31 @@ class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)
       case Right((player, target, home, homeName)) if home.residents.contains(target.getUniqueId) =>
         val newHome = home.removeResident(target.getUniqueId)
         homeHandler.updateHome(player.getUniqueId, homeName, newHome)
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.residentsRemove.playerSuccess", "target" -> target.getName, "homeName" -> homeName)}")
-        target.sendMessage(t"$YELLOW${HSHResource.get("cmd.residentsRemove.targetSuccess", "homeName" -> homeName, "player" -> player.getName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource.get("cmd.residentsRemove.playerSuccess", "target" -> target.getName, "homeName" -> homeName)}"
+        )
+        target.sendMessage(
+          t"$YELLOW${HSHResource.get("cmd.residentsRemove.targetSuccess", "homeName" -> homeName, "player" -> player.getName)}"
+        )
         CommandResult.success()
       case Right((_, target, _, homeName)) =>
-        throw new CommandException(t"$RED${HSHResource.get("cmd.residentsRemove.notAResident", "target" -> target.getName, "homeName" -> homeName)}")
+        throw new CommandException(
+          t"$RED${HSHResource.get("cmd.residentsRemove.notAResident", "target" -> target.getName, "homeName" -> homeName)}"
+        )
       case Left(error) => throw error
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.residentsRemove.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.residentsRemove.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .arguments(
+        GenericArguments.player(LibCommonCommandKey.Player),
+        new CommandElementHome(LibCommandKey.Home, homeHandler)
+      )
       .description(this)
       .permission(LibPerm.HomeResidentsRemove)
       .executor(this)

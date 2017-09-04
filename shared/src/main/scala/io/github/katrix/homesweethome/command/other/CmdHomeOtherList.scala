@@ -40,7 +40,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
@@ -57,18 +58,26 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
         builder.title(t"$YELLOW${HSHResource.get("cmd.other.list.title", "homeOwner" -> homeOwner)}")
 
         val homeText = homes.sorted.map { homeName =>
-          val teleportButton = button(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home other $homeOwner $homeName")
-          val setButton      = manualButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home other set $homeOwner $homeName")
-          val inviteButton   = manualButton(t"$YELLOW${HSHResource.get("cmd.list.invite")}", s"/home other invite $homeOwner <player> $homeName")
-          val deleteButton   = manualButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home other delete $homeOwner $homeName")
+          val teleportButton =
+            button(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home other $homeOwner $homeName")
+          val setButton =
+            manualButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home other set $homeOwner $homeName")
+          val inviteButton = manualButton(
+            t"$YELLOW${HSHResource.get("cmd.list.invite")}",
+            s"/home other invite $homeOwner <player> $homeName"
+          )
+          val deleteButton =
+            manualButton(t"$RED${HSHResource.get("cmd.list.delete")}", s"/home other delete $homeOwner $homeName")
 
-          val residentsButton = button(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home other residents $homeOwner $homeName")
+          val residentsButton =
+            button(t"$YELLOW${HSHResource.get("cmd.list.residents")}", s"/home other residents $homeOwner $homeName")
 
           t""""$homeName" $teleportButton $setButton $inviteButton $residentsButton $deleteButton"""
         }
 
         val limitText = t"${HSHResource.get("cmd.list.limit")}: $limit"
-        val newButton = manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", s"/home other set $homeOwner <homeName>")
+        val newButton =
+          manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", s"/home other set $homeOwner <homeName>")
 
         builder.contents(limitText +: newButton +: homeText: _*)
         builder.sendTo(src)
@@ -77,7 +86,8 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.list.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.list.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

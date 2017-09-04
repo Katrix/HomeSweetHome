@@ -36,13 +36,18 @@ import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 
-class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
       player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
       homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
-      _        <- Either.cond(parent.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s)), (), new CommandException(HSHResource.getText("command.error.illegalName")))
+      _ <- Either.cond(
+        parent.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s)),
+        (),
+        new CommandException(HSHResource.getText("command.error.illegalName"))
+      )
     } yield {
       val replace  = homeHandler.homeExist(player.getUniqueId, homeName)
       val limit    = homeHandler.getHomeLimit(player)
@@ -60,7 +65,8 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.set.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.set.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

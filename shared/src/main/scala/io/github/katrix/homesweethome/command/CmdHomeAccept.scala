@@ -38,13 +38,16 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
       player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
       requester <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-      home      <- homeHandler.getRequest(requester, player.getUniqueId).toRight(new CommandException(HSHResource.getText("cmd.accept.notSentRequest")))
+      home <- homeHandler
+        .getRequest(requester, player.getUniqueId)
+        .toRight(new CommandException(HSHResource.getText("cmd.accept.notSentRequest")))
     } yield (player, requester, home)
 
     data match {
@@ -58,7 +61,8 @@ class CmdHomeAccept(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.accept.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.accept.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

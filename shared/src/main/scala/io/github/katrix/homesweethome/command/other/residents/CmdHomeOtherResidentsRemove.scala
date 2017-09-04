@@ -54,16 +54,28 @@ class CmdHomeOtherResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeOther
       case Right((homeOwner, target, home, homeName)) if home.residents.contains(target.getUniqueId) =>
         val newHome = home.removeResident(target.getUniqueId)
         homeHandler.updateHome(homeOwner.getUniqueId, homeName, newHome)
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.other.residentsRemove.playerSuccess", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
-        target.sendMessage(t"$YELLOW${HSHResource.get("cmd.other.residentsRemove.targetSuccess", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource.get("cmd.other.residentsRemove.playerSuccess", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
+        )
+        target.sendMessage(
+          t"$YELLOW${HSHResource.get("cmd.other.residentsRemove.targetSuccess", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
+        )
         CommandResult.success()
       case Right((homeOwner, target, _, homeName)) =>
-        throw new CommandException(HSHResource.getText("cmd.other.residentsRemove.notAResident", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName))
+        throw new CommandException(
+          HSHResource.getText(
+            "cmd.other.residentsRemove.notAResident",
+            "target"    -> target.getName,
+            "homeName"  -> homeName,
+            "homeOwner" -> homeOwner.getName
+          )
+        )
       case Left(error) => throw error
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.residentsRemove.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.residentsRemove.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

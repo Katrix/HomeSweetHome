@@ -37,7 +37,8 @@ import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 
-class CmdHomeResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     src match {
@@ -49,7 +50,8 @@ class CmdHomeResidentsLimit(homeHandler: HomeHandler, parent: CmdHomeResidents)(
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.residentsLimit.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.residentsLimit.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

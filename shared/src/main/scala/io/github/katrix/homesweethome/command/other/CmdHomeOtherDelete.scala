@@ -39,7 +39,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
@@ -50,21 +51,27 @@ class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
     data match {
       case Right((target, homeName)) if homeHandler.homeExist(target.getUniqueId, homeName) =>
         homeHandler.deleteHome(target.getUniqueId, homeName)
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.other.delete.success", "homeName" -> homeName, "target" -> target.getName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource.get("cmd.other.delete.success", "homeName" -> homeName, "target" -> target.getName)}"
+        )
         CommandResult.success()
       case Right(_)    => throw homeNotFoundError
       case Left(error) => throw error
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.delete.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.delete.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
       .description(this)
       .permission(LibPerm.HomeOtherDelete)
-      .arguments(GenericArguments.user(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .arguments(
+        GenericArguments.user(LibCommonCommandKey.Player),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+      )
       .executor(this)
       .build()
 

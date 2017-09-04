@@ -39,19 +39,23 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherLimit(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeOtherLimit(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     args.getOne[User](LibCommonCommandKey.Player).toOption match {
       case Some(homeOwner) =>
         val limit = homeHandler.getHomeLimit(homeOwner)
-        src.sendMessage(t"$YELLOW${HSHResource.get("cmd.other.limit.success", "homeOwner" -> homeOwner.getName, "limit" -> limit.toString)}")
+        src.sendMessage(
+          t"$YELLOW${HSHResource.get("cmd.other.limit.success", "homeOwner" -> homeOwner.getName, "limit" -> limit.toString)}"
+        )
         CommandResult.builder().successCount(limit).build()
       case None => throw playerNotFoundErrorLocalized
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.limit.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.limit.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

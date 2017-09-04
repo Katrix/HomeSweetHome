@@ -33,7 +33,15 @@ import io.github.katrix.katlib.helper.Implicits.RichOptional
 case class Home(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, worldUuid: UUID, residents: Seq[UUID]) {
 
   def this(location: Location[World], rotation: Vector3d) {
-    this(location.getX, location.getY, location.getZ, rotation.getX, rotation.getY, location.getExtent.getUniqueId, Seq())
+    this(
+      location.getX,
+      location.getY,
+      location.getZ,
+      rotation.getX,
+      rotation.getY,
+      location.getExtent.getUniqueId,
+      Seq()
+    )
   }
 
   def world:    Option[World]           = Sponge.getServer.getWorld(worldUuid).toOption
@@ -42,6 +50,6 @@ case class Home(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, wor
 
   def teleport(player: Player): Boolean = location.exists(loc => player.setLocationAndRotationSafely(loc, rotation))
 
-  def addResident(resident:    UUID): Home = copy(residents = resident +: residents)
+  def addResident(resident: UUID):    Home = copy(residents = resident +: residents)
   def removeResident(resident: UUID): Home = copy(residents = residents.filter(_ != resident))
 }

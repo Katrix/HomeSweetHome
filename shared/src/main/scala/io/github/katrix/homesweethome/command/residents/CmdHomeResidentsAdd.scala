@@ -39,7 +39,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
@@ -52,23 +53,34 @@ class CmdHomeResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeResidents)(im
       case Right((player, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
         val newHome = home.addResident(target.getUniqueId)
         homeHandler.updateHome(player.getUniqueId, homeName, newHome)
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.residentsAdd.playerSuccess", "target" -> target.getName, "homeName" -> homeName)}")
-        src.sendMessage(t"$YELLOW${HSHResource.get("cmd.residentsAdd.targetSuccess", "homeName" -> homeName, "player" -> player.getName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource.get("cmd.residentsAdd.playerSuccess", "target" -> target.getName, "homeName" -> homeName)}"
+        )
+        src.sendMessage(
+          t"$YELLOW${HSHResource.get("cmd.residentsAdd.targetSuccess", "homeName" -> homeName, "player" -> player.getName)}"
+        )
         CommandResult.success()
       case Right((_, target, _, homeName, true)) =>
-        src.sendMessage(t"$RED${HSHResource.get("cmd.residentsAdd.alreadyResident", "target" -> target.getName, "homeName" -> homeName)}")
+        src.sendMessage(
+          t"$RED${HSHResource.get("cmd.residentsAdd.alreadyResident", "target" -> target.getName, "homeName" -> homeName)}"
+        )
         CommandResult.empty()
-      case Right((_, _, _, _, false)) => throw new CommandException(HSHResource.getText("command.error.residentLimitReached"))
-      case Left(error)                => throw error
+      case Right((_, _, _, _, false)) =>
+        throw new CommandException(HSHResource.getText("command.error.residentLimitReached"))
+      case Left(error) => throw error
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.residentsAdd.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.residentsAdd.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .arguments(GenericArguments.player(LibCommonCommandKey.Player), new CommandElementHome(LibCommandKey.Home, homeHandler))
+      .arguments(
+        GenericArguments.player(LibCommonCommandKey.Player),
+        new CommandElementHome(LibCommandKey.Home, homeHandler)
+      )
       .description(this)
       .permission(LibPerm.HomeResidentsAdd)
       .executor(this)

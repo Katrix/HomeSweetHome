@@ -81,7 +81,7 @@ object HomeSweetHome {
     val cmdHome = new CmdHome(homeHandler)
     cmdHome.registerHelp()
     Sponge.getCommandManager.register(plugin, plugin.pluginCmd.commandSpec, plugin.pluginCmd.aliases: _*)
-    Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases:                   _*)
+    Sponge.getCommandManager.register(plugin, cmdHome.commandSpec, cmdHome.aliases: _*)
     Sponge.getCommandManager.register(plugin, cmdHome.homeList.commandSpec, "homes")
   }
 }
@@ -92,8 +92,11 @@ object HomeSweetHome {
   version = HomeSweetHome.ConstantVersion,
   dependencies = Array(new Dependency(id = LibKatLibPlugin.Id, version = KatLib.ConstantVersion))
 )
-class HomeSweetHome @Inject()(logger: Logger, @ConfigDir(sharedRoot = false) cfgDir: Path, spongeContainer: PluginContainer)
-    extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
+class HomeSweetHome @Inject()(
+    logger: Logger,
+    @ConfigDir(sharedRoot = false) cfgDir: Path,
+    spongeContainer: PluginContainer
+) extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
 
   implicit val plugin: HomeSweetHome = this
 

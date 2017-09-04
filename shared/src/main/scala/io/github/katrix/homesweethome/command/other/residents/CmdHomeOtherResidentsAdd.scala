@@ -54,15 +54,19 @@ class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherRes
       case Right((homeOwner, target, home, homeName, true)) if !home.residents.contains(target.getUniqueId) =>
         val newHome = home.addResident(target.getUniqueId)
         homeHandler.updateHome(homeOwner.getUniqueId, homeName, newHome)
-        src.sendMessage(t"$GREEN${HSHResource
-          .get("cmd.other.residentsAdd.playerSuccess", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource
+            .get("cmd.other.residentsAdd.playerSuccess", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
+        )
         target.sendMessage(
           t"$YELLOW${HSHResource.get("cmd.other.residentsAdd.targetSuccess", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
         )
         CommandResult.success()
       case Right((homeOwner, target, _, homeName, true)) =>
-        src.sendMessage(t"$RED${HSHResource
-          .get("cmd.other.residentsAdd.alreadyResident", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
+        src.sendMessage(
+          t"$RED${HSHResource
+            .get("cmd.other.residentsAdd.alreadyResident", "target" -> target.getName, "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
+        )
         CommandResult.empty()
       case Right((_, _, _, _, false)) =>
         throw new CommandException(HSHResource.getText("command.error.residentLimitReached"))
@@ -70,7 +74,8 @@ class CmdHomeOtherResidentsAdd(homeHandler: HomeHandler, parent: CmdHomeOtherRes
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.residentsAdd.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.residentsAdd.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

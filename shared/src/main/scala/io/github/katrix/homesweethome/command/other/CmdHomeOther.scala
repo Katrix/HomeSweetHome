@@ -40,7 +40,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   private val list = new CmdHomeOtherList(homeHandler, this)
 
@@ -55,7 +56,9 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
 
       data match {
         case Right((player, target, homeName, home)) if home.teleport(player) =>
-          src.sendMessage(t"$GREEN${HSHResource.get("cmd.other.home.success", "homeName" -> homeName, "target" -> target.getName)}")
+          src.sendMessage(
+            t"$GREEN${HSHResource.get("cmd.other.home.success", "homeName" -> homeName, "target" -> target.getName)}"
+          )
           CommandResult.success()
         case Right(_)    => throw teleportError
         case Left(error) => throw error
@@ -63,7 +66,8 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
     } else list.execute(src, args)
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.home.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.home.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec

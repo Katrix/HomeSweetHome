@@ -60,10 +60,14 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Loca
     } else homeList.execute(src, args)
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.home.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.home.description"))
   override def localizedExtendedDescription(implicit locale: Locale): Option[Text] =
-    Some(t"${HSHResource.getText("cmd.home.extendedDescription", "command" ->
-      Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>")))}")
+    Some(t"${HSHResource.getText(
+      "cmd.home.extendedDescription",
+      "command" ->
+        Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>"))
+    )}")
 
   override def commandSpec: CommandSpec =
     CommandSpec

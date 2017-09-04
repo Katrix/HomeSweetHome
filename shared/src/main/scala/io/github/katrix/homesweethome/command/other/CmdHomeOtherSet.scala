@@ -39,7 +39,8 @@ import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
 import io.github.katrix.katlib.lib.LibCommonCommandKey
 
-class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin) extends LocalizedCommand(Some(parent)) {
+class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
+    extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
@@ -47,7 +48,8 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
       target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
       homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
       _ <- Either.cond(
-        parent.parent.exists(_.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s))), //We travel down to the root home command
+        parent.parent
+          .exists(_.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s))), //We travel down to the root home command
         (),
         new CommandException(HSHResource.getText("command.error.illegalName"))
       )
@@ -61,7 +63,9 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
     data match {
       case Right((player, homeOwner, homeName, true)) =>
         homeHandler.makeHome(homeOwner.getUniqueId, homeName, player.getLocation, player.getRotation)
-        src.sendMessage(t"$GREEN${HSHResource.get("cmd.other.set.success", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}")
+        src.sendMessage(
+          t"$GREEN${HSHResource.get("cmd.other.set.success", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
+        )
         CommandResult.success()
       case Right((_, _, _, false)) =>
         throw new CommandException(HSHResource.getText("command.error.homeLimitReached"))
@@ -69,14 +73,18 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
     }
   }
 
-  override def localizedDescription(implicit locale: Locale): Option[Text] = Some(HSHResource.getText("cmd.other.set.description"))
+  override def localizedDescription(implicit locale: Locale): Option[Text] =
+    Some(HSHResource.getText("cmd.other.set.description"))
 
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
       .description(this)
       .permission(LibPerm.HomeOtherSet)
-      .arguments(GenericArguments.player(LibCommonCommandKey.Player), GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .arguments(
+        GenericArguments.player(LibCommonCommandKey.Player),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+      )
       .executor(this)
       .build()
 

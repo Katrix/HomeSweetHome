@@ -41,11 +41,20 @@ class HomeConfigLoader(dir: Path)(implicit plugin: KatPlugin) extends AbstractCo
   }
 
   val default: HomeConfig = new HomeConfig {
-    override val homeLimitDefault = ConfigValue(3, "Type = Int\nThe default limit to how many homes someone can have", Seq("home", "homeLimit"))
+    override val homeLimitDefault =
+      ConfigValue(3, "Type = Int\nThe default limit to how many homes someone can have", Seq("home", "homeLimit"))
     override val residentLimitDefault =
-      ConfigValue(2, "Type = Int\nThe default limit to how many residents a home can have", Seq("home", "residentLimit"))
+      ConfigValue(
+        2,
+        "Type = Int\nThe default limit to how many residents a home can have",
+        Seq("home", "residentLimit")
+      )
     override val version = ConfigValue("2", "Please don't change this", Seq("version"))
     override val timeout =
-      ConfigValue(60 * 5, "Type = Int\nThe amount of time in seconds before an invite or request times out", Seq("home", "timeout"))
+      ConfigValue(
+        60 * 5,
+        "Type = Int\nThe amount of time in seconds before an invite or request times out",
+        Seq("home", "timeout")
+      )
   }
 }
