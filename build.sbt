@@ -1,5 +1,5 @@
 def removeSnapshot(str: String): String = if (str.endsWith("-SNAPSHOT")) str.substring(0, str.length - 9) else str
-def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "c4e680ab85" % Provided
+def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "2.3.1" % Provided
 
 lazy val publishResolver = {
   val artifactPattern = s"""${file("publish").absolutePath}/[revision]/[artifact]-[revision](-[classifier]).[ext]"""
@@ -77,7 +77,12 @@ lazy val homeV500 = (project in file("5.0.0"))
 lazy val homeV600 = (project in file("6.0.0"))
   .enablePlugins(SpongePlugin)
   .dependsOn(homeShared)
-  .settings(commonSettings, spongeApiVersion := "6.0.0-SNAPSHOT", libraryDependencies += katLibDependecy("6-0-0"))
+  .settings(commonSettings, spongeApiVersion := "6.0.0", libraryDependencies += katLibDependecy("6-0-0"))
+
+lazy val homeV700 = (project in file("7.0.0"))
+  .enablePlugins(SpongePlugin)
+  .dependsOn(homeShared)
+  .settings(commonSettings, spongeApiVersion := "7.0.0-SNAPSHOT", libraryDependencies += katLibDependecy("6-0-0"))
 
 lazy val homeRoot = (project in file("."))
   .settings(
@@ -88,4 +93,4 @@ lazy val homeRoot = (project in file("."))
     publishLocal := {}
   )
   .disablePlugins(AssemblyPlugin)
-  .aggregate(homeV410, homeV500, homeV600)
+  .aggregate(homeV410, homeV500, homeV600, homeV700)
