@@ -20,12 +20,12 @@
  */
 package io.github.katrix.homesweethome.lib
 
-import org.spongepowered.api.text.Text
-
-import io.github.katrix.katlib.helper.Implicits.RichString
+import io.github.katrix.homesweethome.home.Home
+import io.github.katrix.katlib.helper.Implicits._
 
 object LibCommandKey {
 
-  final val Home: Text = "home".text
+  final val Home = cmdKey[(String, Home)](t"home")
+  final val HomeName = cmdKey[String](t"homeName")
 
 }

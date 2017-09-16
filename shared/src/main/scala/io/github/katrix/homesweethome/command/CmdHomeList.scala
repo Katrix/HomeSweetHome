@@ -41,18 +41,17 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
     extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
-    val data = for {
-      player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-    } yield (homeHandler.allHomesForPlayer(player.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(player))
+    val data = playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
 
     data match {
-      case Right((homes, limit)) =>
+      case Right(player) =>
         val builder = PaginationList.builder()
         builder.title(t"$YELLOW${HSHResource.get("cmd.list.title")}")
+        val homes = homeHandler.allHomesForPlayer(player.getUniqueId)
         val homeText = {
           if (homes.isEmpty) Seq(t"$YELLOW${HSHResource.get("cmd.list.noHomes")}")
           else
-            homes.sorted.map { homeName =>
+            homes.keys.toSeq.sorted.map { homeName =>
               val teleportButton = button(t"$YELLOW${HSHResource.get("cmd.list.teleport")}", s"/home $homeName")
               val setButton      = manualButton(t"$YELLOW${HSHResource.get("cmd.list.set")}", s"/home set $homeName")
               val inviteButton =
@@ -67,7 +66,7 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
         }
 
         val helpButton = manualButton(t"$YELLOW${HSHResource.get("cmd.list.help")}", "/home help [command]")
-        val limitText  = t"${HSHResource.get("cmd.list.limit")}: $limit"
+        val limitText  = t"${HSHResource.get("cmd.list.limit")}: ${homeHandler.getHomeLimit(player)}"
         val newButton  = manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", "/home set <homeName>")
 
         builder.contents(limitText +: helpButton +: newButton +: homeText: _*)

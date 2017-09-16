@@ -40,12 +40,12 @@ case class Home(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, wor
       rotation.getX,
       rotation.getY,
       location.getExtent.getUniqueId,
-      Seq()
+      Seq.empty
     )
   }
 
   def world:    Option[World]           = Sponge.getServer.getWorld(worldUuid).toOption
-  def location: Option[Location[World]] = world.map(new Location[World](_, x, y, z))
+  def location: Option[Location[World]] = world.map(new Location(_, x, y, z))
   def rotation: Vector3d                = new Vector3d(yaw, pitch, 0)
 
   def teleport(player: Player): Boolean = location.exists(loc => player.setLocationAndRotationSafely(loc, rotation))

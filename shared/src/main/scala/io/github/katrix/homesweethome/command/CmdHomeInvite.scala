@@ -25,28 +25,27 @@ import java.util.Locale
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
 import io.github.katrix.homesweethome.HSHResource
-import io.github.katrix.homesweethome.home.{Home, HomeHandler}
+import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonCommandKey
+import io.github.katrix.katlib.lib.LibCommonTCommandKey
 
 class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      target <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-      home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-    } yield (player, target, home._2, home._1)
+      player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      target           <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
+      (homeName, home) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+    } yield (player, target, homeName, home)
 
     data match {
       case Right((player, target, homeName, home)) =>
@@ -74,7 +73,7 @@ class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
     CommandSpec
       .builder()
       .arguments(
-        GenericArguments.player(LibCommonCommandKey.Player),
+        GenericArguments.player(LibCommonTCommandKey.Player),
         new CommandElementHome(LibCommandKey.Home, homeHandler)
       )
       .description(this)

@@ -46,9 +46,9 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Loca
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-        home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-      } yield (player, home._2, home._1)
+        player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+        (homeName, home) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+      } yield (player, homeName, home)
 
       data match {
         case Right((player, homeName, home)) if home.teleport(player) =>
@@ -66,7 +66,9 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Loca
     Some(t"${HSHResource.getText(
       "cmd.home.extendedDescription",
       "command" ->
-        Text.builder("/home set <name of home>").onShiftClick(TextActions.insertText("/home set <name of home>"))
+        Text
+          .builder("/home set <name of home>")
+          .onShiftClick(TextActions.insertText("/home set <name of home>"))
     )}")
 
   override def commandSpec: CommandSpec =
