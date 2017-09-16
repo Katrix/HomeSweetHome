@@ -26,7 +26,6 @@ import java.util.Locale
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.User
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
@@ -37,25 +36,24 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
-    } yield (target, homeName)
+      homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
+      homeName  <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
+      _         <- Either.cond(homeHandler.homeExist(homeOwner.getUniqueId, homeName), (), homeNotFoundError)
+    } yield (homeOwner, homeName)
 
     data match {
-      case Right((target, homeName)) if homeHandler.homeExist(target.getUniqueId, homeName) =>
-        homeHandler.deleteHome(target.getUniqueId, homeName)
+      case Right((homeOwner, homeName)) if homeHandler.homeExist(homeOwner.getUniqueId, homeName) =>
+        homeHandler.deleteHome(homeOwner.getUniqueId, homeName)
         src.sendMessage(
-          t"$GREEN${HSHResource.get("cmd.other.delete.success", "homeName" -> homeName, "target" -> target.getName)}"
+          t"$GREEN${HSHResource.get("cmd.other.delete.success", "homeName" -> homeName, "target" -> homeOwner.getName)}"
         )
         CommandResult.success()
-      case Right(_)    => throw homeNotFoundError
       case Left(error) => throw error
     }
   }
@@ -69,8 +67,8 @@ class CmdHomeOtherDelete(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
       .description(this)
       .permission(LibPerm.HomeOtherDelete)
       .arguments(
-        GenericArguments.user(LibCommonCommandKey.Player),
-        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+        GenericArguments.user(LibCommandKey.HomeOwner),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName)
       )
       .executor(this)
       .build()

@@ -20,6 +20,8 @@
  */
 package io.github.katrix.homesweethome.lib
 
+import org.spongepowered.api.entity.living.player.User
+
 import io.github.katrix.homesweethome.home.Home
 import io.github.katrix.katlib.helper.Implicits._
 
@@ -27,5 +29,6 @@ object LibCommandKey {
 
   final val Home = cmdKey[(Home, String)](t"home")
   final val HomeName = cmdKey[String](t"homeName")
+  final val HomeOwner = cmdKey[User](t"homeOwner")
 
 }

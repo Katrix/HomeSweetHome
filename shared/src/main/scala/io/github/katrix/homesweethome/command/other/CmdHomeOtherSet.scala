@@ -26,7 +26,6 @@ import java.util.Locale
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.User
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
@@ -37,7 +36,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonCommandKey
+import io.github.katrix.katlib.lib.LibCommonTCommandKey
 
 class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
@@ -45,8 +44,8 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
       player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-      homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
+      target   <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
+      homeName <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
       _ <- Either.cond(
         parent.parent
           .exists(_.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s))), //We travel down to the root home command
@@ -82,8 +81,8 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
       .description(this)
       .permission(LibPerm.HomeOtherSet)
       .arguments(
-        GenericArguments.player(LibCommonCommandKey.Player),
-        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+        GenericArguments.player(LibCommonTCommandKey.Player),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName)
       )
       .executor(this)
       .build()

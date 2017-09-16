@@ -43,24 +43,23 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
       player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      homeOwner <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
+      homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
       homeName  <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
       home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
-    } yield {
-      val isResident = home.residents.contains(player.getUniqueId)
-      val isInvited  = homeHandler.isInvited(player, homeOwner.getUniqueId, home) && homeOwner.isOnline
-      (player, homeOwner, homeName, home, isResident || isInvited)
-    }
+      isResident = home.residents.contains(player.getUniqueId)
+      isInvited  = homeHandler.isInvited(player, homeOwner.getUniqueId, home) && homeOwner.isOnline
+      _ <- Either.cond(isResident || isInvited, (), new CommandException(HSHResource.getText("cmd.goto.offlineError")))
+    } yield (player, homeOwner, homeName, home)
 
     data match {
-      case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
+      case Right((player, homeOwner, homeName, home)) if home.teleport(player) =>
         src.sendMessage(
           t"$GREEN${HSHResource.get("cmd.goto.successTeleport", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
         )
         homeHandler.removeInvite(player, homeOwner.getUniqueId)
         CommandResult.success()
-      case Right((_, _, _, _, true)) => throw teleportError
-      case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
+      case Right((_, _, _, _)) => throw teleportError
+      case Right((player, homeOwner, homeName, home)) if homeOwner.isOnline =>
         homeHandler.addRequest(player, homeOwner.getUniqueId, home)
         src.sendMessage(
           t"$GREEN${HSHResource.get("cmd.goto.successRequest", "homeOwner" -> homeOwner.getName, "homeName" -> homeName)}"
@@ -73,8 +72,7 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
               .get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}${Text.NEW_LINE}$RESET$acceptButton"
           )
         CommandResult.success()
-      case Right((_, _, _, _, false)) => throw new CommandException(HSHResource.getText("cmd.goto.offlineError"))
-      case Left(error)                => throw error
+      case Left(error) => throw error
     }
   }
 
@@ -87,8 +85,8 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
     CommandSpec
       .builder()
       .arguments(
-        GenericArguments.user(LibCommonTCommandKey.Player),
-        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+        GenericArguments.user(LibCommandKey.HomeOwner),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName)
       )
       .description(this)
       .extendedDescription(this)

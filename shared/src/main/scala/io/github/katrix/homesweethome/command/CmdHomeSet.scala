@@ -85,7 +85,7 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
       .builder()
       .description(this)
       .permission(LibPerm.HomeSet)
-      .arguments(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+      .arguments(GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName))
       .executor(this)
       .build()
 

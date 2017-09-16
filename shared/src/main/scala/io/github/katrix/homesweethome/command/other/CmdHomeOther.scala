@@ -38,7 +38,6 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.{CommandBase, LocalizedCommand}
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
@@ -48,16 +47,16 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-        target   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-        homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
-        home     <- homeHandler.specificHome(target.getUniqueId, homeName).toRight(homeNotFoundError)
-      } yield (player, target, homeName, home)
+        player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+        homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
+        homeName  <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
+        home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
+      } yield (player, homeOwner, homeName, home)
 
       data match {
-        case Right((player, target, homeName, home)) if home.teleport(player) =>
+        case Right((player, homeOwner, homeName, home)) if home.teleport(player) =>
           src.sendMessage(
-            t"$GREEN${HSHResource.get("cmd.other.home.success", "homeName" -> homeName, "target" -> target.getName)}"
+            t"$GREEN${HSHResource.get("cmd.other.home.success", "homeName" -> homeName, "target" -> homeOwner.getName)}"
           )
           CommandResult.success()
         case Right(_)    => throw teleportError
@@ -75,8 +74,8 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
       .description(this)
       .permission(LibPerm.HomeOtherTp)
       .arguments(
-        GenericArguments.user(LibCommonCommandKey.Player),
-        GenericArguments.optional(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+        GenericArguments.user(LibCommandKey.HomeOwner),
+        GenericArguments.optional(GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName))
       )
       .executor(this)
       .children(this)

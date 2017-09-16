@@ -27,7 +27,6 @@ import org.spongepowered.api.Sponge
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.User
 import org.spongepowered.api.service.pagination.PaginationList
 import org.spongepowered.api.service.user.UserStorageService
 import org.spongepowered.api.text.Text
@@ -41,7 +40,6 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.{CommandBase, LocalizedCommand}
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
@@ -49,10 +47,10 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player   <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-        homeName <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
-        home     <- homeHandler.specificHome(player.getUniqueId, homeName).toRight(homeNotFoundError)
-      } yield (player, homeName, home.residents, homeHandler.getResidentLimit(player))
+        homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
+        homeName  <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
+        home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
+      } yield (homeOwner, homeName, home.residents, homeHandler.getResidentLimit(homeOwner))
 
       data match {
         case Right((homeOwnerUser, homeName, residents, limit)) =>
@@ -99,12 +97,12 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
       }
     } else {
       val data = for {
-        player <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
+        homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
       } yield
         (
-          player,
-          homeHandler.allHomesForPlayer(player.getUniqueId).mapValues(_.residents),
-          homeHandler.getResidentLimit(player)
+          homeOwner,
+          homeHandler.allHomesForPlayer(homeOwner.getUniqueId).mapValues(_.residents),
+          homeHandler.getResidentLimit(homeOwner)
         )
 
       data match {
@@ -152,8 +150,8 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
     CommandSpec
       .builder()
       .arguments(
-        GenericArguments.user(LibCommonCommandKey.Player),
-        GenericArguments.optional(GenericArguments.remainingJoinedStrings(LibCommandKey.Home))
+        GenericArguments.user(LibCommandKey.HomeOwner),
+        GenericArguments.optional(GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName))
       )
       .description(this)
       .permission(LibPerm.HomeOtherResidentsList)

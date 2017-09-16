@@ -26,27 +26,26 @@ import java.util.Locale
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.User
 import org.spongepowered.api.service.pagination.PaginationList
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
 import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.home.HomeHandler
-import io.github.katrix.homesweethome.lib.LibPerm
+import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonCommandKey
 
 class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      target <- args.getOne[User](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-    } yield (target, homeHandler.allHomesForPlayer(target.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(target))
+      homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
+    } yield
+      (homeOwner, homeHandler.allHomesForPlayer(homeOwner.getUniqueId).keys.toSeq, homeHandler.getHomeLimit(homeOwner))
 
     data match {
       case Right((homeOwner, Seq(), _)) =>
@@ -94,7 +93,7 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
       .builder()
       .description(this)
       .permission(LibPerm.HomeOtherList)
-      .arguments(GenericArguments.player(LibCommonCommandKey.Player))
+      .arguments(GenericArguments.user(LibCommandKey.HomeOwner))
       .executor(this)
       .build()
 

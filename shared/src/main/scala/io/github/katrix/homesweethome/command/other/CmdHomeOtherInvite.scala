@@ -26,7 +26,6 @@ import java.util.Locale
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.{Player, User}
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
@@ -37,7 +36,7 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonCommandKey
+import io.github.katrix.katlib.lib.LibCommonTCommandKey
 
 class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
@@ -45,9 +44,9 @@ class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
       player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      homeOwner <- args.getOne[User]("homeOwner".text).toOption.toRight(playerNotFoundErrorLocalized)
-      target    <- args.getOne[Player](LibCommonCommandKey.Player).toOption.toRight(playerNotFoundErrorLocalized)
-      homeName  <- args.getOne[String](LibCommandKey.Home).toOption.toRight(invalidParameterErrorLocalized)
+      homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
+      target    <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
+      homeName  <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
       home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
     } yield (player, homeOwner, target, homeName, home)
 
@@ -78,9 +77,9 @@ class CmdHomeOtherInvite(homeHandler: HomeHandler, parent: CmdHomeOther)(implici
     CommandSpec
       .builder()
       .arguments(
-        GenericArguments.user("homeOwner".text),
-        GenericArguments.player(LibCommonCommandKey.Player),
-        GenericArguments.remainingJoinedStrings(LibCommandKey.Home)
+        GenericArguments.user(LibCommandKey.HomeOwner),
+        GenericArguments.player(LibCommonTCommandKey.Player),
+        GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName)
       )
       .description(this)
       .permission(LibPerm.HomeOtherInvite)
