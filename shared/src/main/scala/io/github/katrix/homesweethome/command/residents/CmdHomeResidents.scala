@@ -47,7 +47,7 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
         player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-        (homeName, home) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+        (home, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
       } yield (homeName, home.residents, homeHandler.getResidentLimit(player))
 
       data match {

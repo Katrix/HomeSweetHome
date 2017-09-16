@@ -47,7 +47,7 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Loca
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
         player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-        (homeName, home) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+        (home, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
       } yield (player, homeName, home)
 
       data match {

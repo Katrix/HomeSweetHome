@@ -45,7 +45,7 @@ class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)
     val data = for {
       player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
       target           <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
-      (homeName, home) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+      (home, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
       _ <- Either.cond(
         home.residents.contains(target.getUniqueId),
         (),

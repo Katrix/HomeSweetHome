@@ -25,7 +25,7 @@ import io.github.katrix.katlib.helper.Implicits._
 
 object LibCommandKey {
 
-  final val Home = cmdKey[(String, Home)](t"home")
+  final val Home = cmdKey[(Home, String)](t"home")
   final val HomeName = cmdKey[String](t"homeName")
 
 }
