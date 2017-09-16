@@ -36,38 +36,39 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonTCommandKey
 
 class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
 
+  private def validHomeName(homeName: String)(implicit locale: Locale): Either[CommandException, Unit] =
+    Either.cond(
+      parent.parent
+        .exists(_.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s))), //We travel down to the root home command
+      (),
+      new CommandException(HSHResource.getText("command.error.illegalName"))
+    )
+
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      target   <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
-      homeName <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
-      _ <- Either.cond(
-        parent.parent
-          .exists(_.children.flatMap(_.aliases).forall(s => !homeName.startsWith(s))), //We travel down to the root home command
-        (),
-        new CommandException(HSHResource.getText("command.error.illegalName"))
-      )
+      player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
+      homeName  <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
+      _ <- homeHandler
+        .canCreateHome(homeOwner.getUniqueId, homeName, homeOwner, player.getLocation)
+        .left
+        .map(new CommandException(_))
+      _ <- validHomeName(homeName)
     } yield {
-      val replace  = homeHandler.homeExist(target.getUniqueId, homeName)
-      val limit    = homeHandler.getHomeLimit(target)
-      val newLimit = if (replace) limit + 1 else limit
-      (player, target, homeName, homeHandler.allHomesForPlayer(target.getUniqueId).size < newLimit)
+      (player, homeOwner, homeName)
     }
 
     data match {
-      case Right((player, homeOwner, homeName, true)) =>
+      case Right((player, homeOwner, homeName)) =>
         homeHandler.makeHome(homeOwner.getUniqueId, homeName, player.getLocation, player.getRotation)
         src.sendMessage(
           t"$GREEN${HSHResource.get("cmd.other.set.success", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
         )
         CommandResult.success()
-      case Right((_, _, _, false)) =>
-        throw new CommandException(HSHResource.getText("command.error.homeLimitReached"))
       case Left(error) => throw error
     }
   }
@@ -81,7 +82,7 @@ class CmdHomeOtherSet(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit p
       .description(this)
       .permission(LibPerm.HomeOtherSet)
       .arguments(
-        GenericArguments.player(LibCommonTCommandKey.Player),
+        GenericArguments.player(LibCommandKey.HomeOwner),
         GenericArguments.remainingJoinedStrings(LibCommandKey.HomeName)
       )
       .executor(this)

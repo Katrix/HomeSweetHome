@@ -20,21 +20,25 @@
  */
 package io.github.katrix.homesweethome.home
 
-import java.util.UUID
+import java.util.{Locale, UUID}
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
+import org.spongepowered.api.Sponge
 import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.service.permission.Subject
+import org.spongepowered.api.text.Text
 import org.spongepowered.api.world.{Location, World}
 
 import com.flowpowered.math.vector.Vector3d
 import com.google.common.cache.CacheBuilder
 
-import io.github.katrix.homesweethome.NestedMap
+import io.github.katrix.homesweethome.lib.LibPerm
+import io.github.katrix.homesweethome.{HSHResource, NestedMap}
 import io.github.katrix.homesweethome.persistant.{HomeConfig, StorageLoader}
+import io.github.katrix.katlib.i18n.Localized
 
 /**
 	* The HomeHandler is what manages all the homes.
@@ -135,8 +139,9 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 		* Also used to get location of new home
 		* @param name Name of new home
 		*/
-  def makeHome(player: Player, name: String): Unit =
+  def makeHome(player: Player, name: String): Unit = Localized(player) { implicit locale =>
     makeHome(player.getUniqueId, name, player.getLocation, player.getRotation)
+  }
 
   /**
 		* Makes a new home for a player with a specific location.
@@ -149,6 +154,55 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
   def makeHome(uuid: UUID, name: String, location: Location[World], rotation: Vector3d): Unit = {
     homeMap.put(uuid, name, new Home(location, rotation))
     save()
+  }
+
+  def canCreateHome(player: Player, name: String): Either[Text, Unit] = Localized(player) { implicit locale =>
+    canCreateHome(player.getUniqueId, name, player, player.getLocation)
+  }
+
+  def canCreateHome(uuid: UUID, name: String, subject: Subject, location: Location[World])(
+      implicit locale: Locale
+  ): Either[Text, Unit] = {
+    for {
+      _ <- Right(())
+      _ <- Either.cond(
+        homeExist(uuid, name) || hasReachedHomeLimit(uuid, subject),
+        (),
+        HSHResource.getText("command.error.homeLimitReached")
+      )
+      _ <- canMakeHomeAtLocation(subject, location)
+    } yield ()
+  }
+
+  /**
+    * Check if a player has reached his home limit.
+    *
+    * @param uuid The uuid of the player
+    * @param subject The player
+    */
+  def hasReachedHomeLimit(uuid: UUID, subject: Subject): Boolean =
+    allHomesForPlayer(uuid).size < getHomeLimit(subject)
+
+  /**
+    * Check if a home can be placed at a specific location
+    * @param subject The player to check for
+    * @param location The location to check
+    * @return Left with error message if it's an invalid location, else right
+    */
+  def canMakeHomeAtLocation(subject: Subject, location: Location[World])(
+      implicit locale: Locale
+  ): Either[Text, Unit] = {
+    val isSafe = Sponge.getGame.getTeleportHelper.getSafeLocation(location).isPresent
+
+    for {
+      _     <- Either.cond(isSafe, (), HSHResource.getText("command.error.locationNotSafe"))
+      world <- Option(location.getExtent).toRight(HSHResource.getText("command.error.worldNotFound"))
+      _ <- Either.cond(
+        subject.hasPermission(LibPerm.HomeSetWorld(world.getName)),
+        (),
+        HSHResource.getText("command.error.notAllowedWorld")
+      )
+    } yield ()
   }
 
   /**

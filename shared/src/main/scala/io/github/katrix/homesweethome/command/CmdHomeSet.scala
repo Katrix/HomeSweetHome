@@ -47,25 +47,12 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
       new CommandException(HSHResource.getText("command.error.illegalName"))
     )
 
-  private def doesNotExceedsHomeLimit(player: Player, homeName: String)(
-      implicit locale: Locale
-  ): Either[CommandException, Unit] = {
-    val replace  = homeHandler.homeExist(player.getUniqueId, homeName)
-    val limit    = homeHandler.getHomeLimit(player)
-    val newLimit = if (replace) limit + 1 else limit
-    Either.cond(
-      homeHandler.allHomesForPlayer(player.getUniqueId).size < newLimit,
-      (),
-      new CommandException(HSHResource.getText("command.error.homeLimitReached"))
-    )
-  }
-
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
       player   <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
       homeName <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
       _        <- validHomeName(homeName)
-      _        <- doesNotExceedsHomeLimit(player, homeName)
+      _        <- homeHandler.canCreateHome(player, homeName).left.map(new CommandException(_))
     } yield (player, homeName)
 
     data match {
