@@ -46,9 +46,9 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-        home   <- args.getOne[(Home, String)](LibCommandKey.Home).toOption.toRight(homeNotFoundError)
-      } yield (home._2, home._1.residents, homeHandler.getResidentLimit(player))
+        player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+        (homeName, home) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+      } yield (homeName, home.residents, homeHandler.getResidentLimit(player))
 
       data match {
         case Right((homeName, residents, limit)) =>
@@ -59,15 +59,10 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
           val residentText = {
             if (residents.isEmpty) Seq(t"$YELLOW${HSHResource.get("cmd.residents.noResidents")}")
             else
-              residents.sorted
-                .map(
-                  uuid =>
-                    userStorage
-                      .get(uuid)
-                      .toOption
-                      .map(_.getName)
-                )
+              residents
+                .map(uuid => userStorage.get(uuid).toOption.map(_.getName))
                 .collect { case Some(str) => str }
+                .sorted
                 .map { residentName =>
                   val deleteButton = button(
                     t"$RED${HSHResource.get("cmd.residents.delete")}",
@@ -112,15 +107,15 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
               residents.toSeq
                 .sortBy(_._1)
                 .map {
-                  case (homeName, homeResidentsUuids) =>
+                  case (homeName, residentsUuids) =>
                     val details =
                       button(t"$YELLOW${HSHResource.get("cmd.residents.details")}", s"/home residents $homeName")
-                    if (homeResidentsUuids.isEmpty)
-                      t"$homeName: $YELLOW${HSHResource.get("cmd.residents.noResidents")}$RESET $details"
-                    else {
-                      val homeResidents = homeResidentsUuids.flatMap(userStorage.get(_).toOption.map(_.getName))
-                      t""""$homeName": $YELLOW${homeResidents.mkString(", ")}$RESET $details"""
-                    }
+
+                    val residentsText =
+                      if (residentsUuids.isEmpty) HSHResource.get("cmd.residents.noResidents")
+                      else residentsUuids.flatMap(userStorage.get(_).toOption.map(_.getName)).mkString(", ")
+
+                    t"$homeName: $YELLOW$residentsText$RESET $details"
                 }
           }
 
