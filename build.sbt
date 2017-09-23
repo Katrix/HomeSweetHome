@@ -9,7 +9,7 @@ lazy val publishResolver = {
 lazy val commonSettings = Seq(
   name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
   organization := "io.github.katrix",
-  version := "2.1.0",
+  version := "2.2.0",
   scalaVersion := "2.12.2",
   resolvers += "jitpack" at "https://jitpack.io",
   libraryDependencies += katLibDependecy("shared"),
@@ -45,7 +45,7 @@ lazy val commonSettings = Seq(
   spongePluginInfo := spongePluginInfo.value.copy(
     id = "homesweethome",
     name = Some("HomeSweetHome"),
-    version = Some(s"${removeSnapshot(spongeApiVersion.value)}-${version.value}"),
+    version = Some(s"${version.value}-${removeSnapshot(spongeApiVersion.value)}"),
     authors = Seq("Katrix"),
     dependencies = Set(
       DependencyInfo("spongeapi", Some(removeSnapshot(spongeApiVersion.value))),
