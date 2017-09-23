@@ -44,7 +44,7 @@ class CmdHomeOther(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: K
   private val list = new CmdHomeOtherList(homeHandler, this)
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
-    if (args.hasAny(LibCommandKey.Home)) {
+    if (args.hasAny(LibCommandKey.HomeName)) {
       val data = for {
         player    <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
         homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)

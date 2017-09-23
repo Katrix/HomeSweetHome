@@ -45,7 +45,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
     extends LocalizedCommand(Some(parent)) {
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
-    if (args.hasAny(LibCommandKey.Home)) {
+    if (args.hasAny(LibCommandKey.HomeName)) {
       val data = for {
         homeOwner <- args.one(LibCommandKey.HomeOwner).toRight(playerNotFoundErrorLocalized)
         homeName  <- args.one(LibCommandKey.HomeName).toRight(invalidParameterErrorLocalized)
@@ -79,7 +79,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
                     s"/home other residents remove $homeOwner $residentName $homeName"
                   )
 
-                  t"$YELLOW$residentName $deleteButton"
+                  t"$residentName $deleteButton"
                 }
           }
 
