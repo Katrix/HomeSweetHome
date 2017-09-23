@@ -26,7 +26,6 @@ import java.util.Locale
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.User
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 

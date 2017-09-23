@@ -33,7 +33,7 @@ import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
 import io.github.katrix.homesweethome.HSHResource
-import io.github.katrix.homesweethome.home.{Home, HomeHandler}
+import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.{CommandBase, LocalizedCommand}
@@ -46,9 +46,9 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-        (home, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
-      } yield (homeName, home.residents, homeHandler.getResidentLimit(player))
+        player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+        home   <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+      } yield (home._2, home._1.residents, homeHandler.getResidentLimit(player))
 
       data match {
         case Right((homeName, residents, limit)) =>

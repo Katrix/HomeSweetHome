@@ -58,7 +58,7 @@ class CmdHomeOtherLimit(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit
   override def commandSpec: CommandSpec =
     CommandSpec
       .builder()
-      .arguments(GenericArguments.user(LibLibCommandKey.HomeOwner))
+      .arguments(GenericArguments.user(LibCommandKey.HomeOwner))
       .description(this)
       .permission(LibPerm.HomeOtherLimit)
       .executor(this)

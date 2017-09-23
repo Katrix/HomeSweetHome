@@ -41,9 +41,9 @@ class CmdHomeDelete(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player        <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      (_, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
-    } yield (player, homeName)
+      player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      home   <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+    } yield (player, home._2)
 
     data match {
       case Right((player, homeName)) =>

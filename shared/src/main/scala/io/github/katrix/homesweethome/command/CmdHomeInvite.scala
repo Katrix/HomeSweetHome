@@ -42,10 +42,10 @@ class CmdHomeInvite(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: 
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      target           <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
-      (home, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
-    } yield (player, target, homeName, home)
+      player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      target <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
+      home   <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+    } yield (player, target, home._2, home._1)
 
     data match {
       case Right((player, target, homeName, home)) =>

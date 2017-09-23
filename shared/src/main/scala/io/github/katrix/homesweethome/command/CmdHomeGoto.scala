@@ -35,7 +35,6 @@ import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.LocalizedCommand
 import io.github.katrix.katlib.helper.Implicits._
 import io.github.katrix.katlib.i18n.Localized
-import io.github.katrix.katlib.lib.LibCommonTCommandKey
 
 class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: KatPlugin)
     extends LocalizedCommand(Some(parent)) {
@@ -48,18 +47,17 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
       home      <- homeHandler.specificHome(homeOwner.getUniqueId, homeName).toRight(homeNotFoundError)
       isResident = home.residents.contains(player.getUniqueId)
       isInvited  = homeHandler.isInvited(player, homeOwner.getUniqueId, home) && homeOwner.isOnline
-      _ <- Either.cond(isResident || isInvited, (), new CommandException(HSHResource.getText("cmd.goto.offlineError")))
-    } yield (player, homeOwner, homeName, home)
+    } yield (player, homeOwner, homeName, home, isResident || isInvited)
 
     data match {
-      case Right((player, homeOwner, homeName, home)) if home.teleport(player) =>
+      case Right((player, homeOwner, homeName, home, true)) if home.teleport(player) =>
         src.sendMessage(
           t"$GREEN${HSHResource.get("cmd.goto.successTeleport", "homeName" -> homeName, "homeOwner" -> homeOwner.getName)}"
         )
         homeHandler.removeInvite(player, homeOwner.getUniqueId)
         CommandResult.success()
-      case Right((_, _, _, _)) => throw teleportError
-      case Right((player, homeOwner, homeName, home)) if homeOwner.isOnline =>
+      case Right((_, _, _, _, true)) => throw teleportError
+      case Right((player, homeOwner, homeName, home, false)) if homeOwner.isOnline =>
         homeHandler.addRequest(player, homeOwner.getUniqueId, home)
         src.sendMessage(
           t"$GREEN${HSHResource.get("cmd.goto.successRequest", "homeOwner" -> homeOwner.getName, "homeName" -> homeName)}"
@@ -72,7 +70,8 @@ class CmdHomeGoto(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
               .get("cmd.goto.sentRequest", "player" -> player.getName, "homeName" -> homeName)}${Text.NEW_LINE}$RESET$acceptButton"
           )
         CommandResult.success()
-      case Left(error) => throw error
+      case Right((_, _, _, _, false)) => throw new CommandException(HSHResource.getText("cmd.goto.offlineError"))
+      case Left(error)                => throw error
     }
   }
 

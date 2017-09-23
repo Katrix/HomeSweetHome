@@ -47,10 +47,10 @@ import io.github.katrix.katlib.i18n.Localized
 	*/
 abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
 
-  private val homeMap: NestedMap[UUID, String, Home] = NestedMap(mutable.HashMap.empty, mutable.HashMap.empty _)
+  private val homeMap: NestedMap[UUID, String, Home] = NestedMap(mutable.HashMap.empty, () => mutable.HashMap.empty)
 
-  private val requests: NestedMap[Player, UUID, Home] = NestedMap(mutable.HashMap.empty, createInvitesRequests _)
-  private val invites:  NestedMap[Player, UUID, Home] = NestedMap(mutable.HashMap.empty, createInvitesRequests _)
+  private val requests: NestedMap[Player, UUID, Home] = NestedMap(mutable.HashMap.empty, () => createInvitesRequests)
+  private val invites:  NestedMap[Player, UUID, Home] = NestedMap(mutable.HashMap.empty, () => createInvitesRequests)
 
   /**
 		* Clears the current homes and reloads them from disk.
@@ -68,11 +68,11 @@ abstract class HomeHandler(storage: StorageLoader, config: => HomeConfig) {
     homeMap ++= toAdd
   }
 
-  private def createInvitesRequests[A, B]: mutable.Map[A, B] =
+  private def createInvitesRequests[A <: AnyRef, B <: AnyRef]: mutable.Map[A, B] =
     CacheBuilder
       .newBuilder()
       .expireAfterWrite(config.timeout.value, TimeUnit.SECONDS)
-      .build[A, B]()
+      .build[A, B]
       .asMap
       .asScala
 

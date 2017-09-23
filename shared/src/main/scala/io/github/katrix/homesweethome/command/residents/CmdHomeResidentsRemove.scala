@@ -43,17 +43,17 @@ class CmdHomeResidentsRemove(homeHandler: HomeHandler, parent: CmdHomeResidents)
 
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     val data = for {
-      player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-      target           <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
-      (home, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+      player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+      target <- args.one(LibCommonTCommandKey.Player).toRight(playerNotFoundErrorLocalized)
+      home   <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
       _ <- Either.cond(
-        home.residents.contains(target.getUniqueId),
+        home._1.residents.contains(target.getUniqueId),
         (),
         new CommandException(
-          t"$RED${HSHResource.get("cmd.residentsRemove.notAResident", "target" -> target.getName, "homeName" -> homeName)}"
+          t"$RED${HSHResource.get("cmd.residentsRemove.notAResident", "target" -> target.getName, "homeName" -> home._2)}"
         )
       )
-    } yield (player, target, home, homeName)
+    } yield (player, target, home._1, home._2)
 
     data match {
       case Right((player, target, home, homeName)) =>

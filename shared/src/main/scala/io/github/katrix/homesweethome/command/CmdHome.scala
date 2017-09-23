@@ -32,7 +32,7 @@ import org.spongepowered.api.text.format.TextColors._
 import io.github.katrix.homesweethome.HSHResource
 import io.github.katrix.homesweethome.command.other.CmdHomeOther
 import io.github.katrix.homesweethome.command.residents.CmdHomeResidents
-import io.github.katrix.homesweethome.home.{Home, HomeHandler}
+import io.github.katrix.homesweethome.home.HomeHandler
 import io.github.katrix.homesweethome.lib.{LibCommandKey, LibPerm}
 import io.github.katrix.katlib.KatPlugin
 import io.github.katrix.katlib.command.{CommandBase, LocalizedCommand}
@@ -46,9 +46,9 @@ class CmdHome(homeHandler: HomeHandler)(implicit plugin: KatPlugin) extends Loca
   override def execute(src: CommandSource, args: CommandContext): CommandResult = Localized(src) { implicit locale =>
     if (args.hasAny(LibCommandKey.Home)) {
       val data = for {
-        player           <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
-        (home, homeName) <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
-      } yield (player, homeName, home)
+        player <- playerTypeable.cast(src).toRight(nonPlayerErrorLocalized)
+        home   <- args.one(LibCommandKey.Home).toRight(homeNotFoundError)
+      } yield (player, home._2, home._1)
 
       data match {
         case Right((player, homeName, home)) if home.teleport(player) =>

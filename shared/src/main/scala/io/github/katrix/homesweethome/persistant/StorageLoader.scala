@@ -69,10 +69,9 @@ class StorageLoader(dir: Path)(implicit plugin: KatPlugin)
       case Some(map) =>
         scalaMap(map).map { case (k, v) => k -> scalaMap(v) }
       case None =>
-        if(versionNode.getString != null) {
+        if (versionNode.getString != null) {
           LogHelper.error("Could not load homes from storage.")
-        }
-        else {
+        } else {
           saveData(Map.empty)
         }
 

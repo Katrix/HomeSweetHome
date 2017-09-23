@@ -25,7 +25,6 @@ import java.util.Locale
 import org.spongepowered.api.command.args.{CommandContext, GenericArguments}
 import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.command.{CommandException, CommandResult, CommandSource}
-import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
@@ -60,7 +59,7 @@ class CmdHomeSet(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Kat
         homeHandler.makeHome(player, homeName)
         src.sendMessage(t"$GREEN${HSHResource.get("cmd.set.success", "homeName" -> homeName)}")
         CommandResult.success()
-      case Left(error)          => throw error
+      case Left(error) => throw error
     }
   }
 
