@@ -38,6 +38,10 @@ lazy val commonSettings = Seq(
     val art = (artifact in (Compile, assembly)).value
     art.copy(`classifier` = Some("assembly"))
   },
+  artifactName := { (sv, module, artifact) =>
+    s"${artifact.name}-${module.revision}.${artifact.extension}"
+  },
+  assemblyJarName := s"${name.value}-assembly-${version.value}.jar",
   spongePluginInfo := spongePluginInfo.value.copy(
     id = "homesweethome",
     name = Some("HomeSweetHome"),
