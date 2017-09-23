@@ -74,7 +74,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
                 )
                 .collect { case Some(str) => str }
                 .map { residentName =>
-                  val deleteButton = button(
+                  val deleteButton = manualButton(
                     t"$RED${HSHResource.get("cmd.residents.delete")}",
                     s"/home other residents remove $homeOwner $residentName $homeName"
                   )

@@ -64,7 +64,7 @@ class CmdHomeResidents(homeHandler: HomeHandler, parent: CmdHome)(implicit plugi
                 .collect { case Some(str) => str }
                 .sorted
                 .map { residentName =>
-                  val deleteButton = button(
+                  val deleteButton = manualButton(
                     t"$RED${HSHResource.get("cmd.residents.delete")}",
                     s"/home residents remove $residentName $homeName"
                   )
