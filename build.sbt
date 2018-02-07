@@ -1,5 +1,5 @@
 def removeSnapshot(str: String): String = if (str.endsWith("-SNAPSHOT")) str.substring(0, str.length - 9) else str
-def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "2.3.1" % Provided
+def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "f8003fc5f512ce58dc81fab8e180fd27f05f7904" % Provided
 
 lazy val publishResolver = {
   val artifactPattern = s"""${file("publish").absolutePath}/[revision]/[artifact]-[revision](-[classifier]).[ext]"""
@@ -9,7 +9,7 @@ lazy val publishResolver = {
 lazy val commonSettings = Seq(
   name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
   organization := "io.github.katrix",
-  version := "2.2.1",
+  version := "2.2.2",
   scalaVersion := "2.12.2",
   resolvers += "jitpack" at "https://jitpack.io",
   libraryDependencies += katLibDependecy("shared"),
@@ -65,13 +65,8 @@ lazy val homeShared = (project in file("shared"))
     publish := {},
     publishLocal := {},
     //Default version, needs to build correctly against all supported versions
-    spongeApiVersion := "4.1.0"
+    spongeApiVersion := "5.0.0"
   )
-
-lazy val homeV410 = (project in file("4.1.0"))
-  .enablePlugins(SpongePlugin)
-  .dependsOn(homeShared)
-  .settings(commonSettings, spongeApiVersion := "4.1.0", libraryDependencies += katLibDependecy("4-1-0"))
 
 lazy val homeV500 = (project in file("5.0.0"))
   .enablePlugins(SpongePlugin)
@@ -97,4 +92,4 @@ lazy val homeRoot = (project in file("."))
     publishLocal := {}
   )
   .disablePlugins(AssemblyPlugin)
-  .aggregate(homeV410, homeV500, homeV600, homeV700)
+  .aggregate(homeV500, homeV600, homeV700)
