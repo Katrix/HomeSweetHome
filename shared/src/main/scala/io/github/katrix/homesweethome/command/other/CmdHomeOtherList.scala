@@ -79,7 +79,7 @@ class CmdHomeOtherList(homeHandler: HomeHandler, parent: CmdHomeOther)(implicit 
           manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", s"/home other set $homeOwner <homeName>")
 
         builder.contents(limitText +: newButton +: homeText: _*)
-        builder.sendTo(src)
+        plugin.globalVersionAdapter.sendPagination(builder, src)
         CommandResult.builder().successCount(homes.size).build()
       case Left(error) => throw error
     }

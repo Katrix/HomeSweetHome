@@ -39,11 +39,11 @@ import io.github.katrix.homesweethome.command.CmdHome
 import io.github.katrix.homesweethome.home.{Home, HomeHandler, HomeV1}
 import io.github.katrix.homesweethome.lib.{LibPerm, LibPlugin}
 import io.github.katrix.homesweethome.persistant.{HomeConfig, HomeConfigLoader, HomeSerializer, StorageLoader}
-import io.github.katrix.katlib.helper.Implicits.{typeToken, RichOptional}
+import io.github.katrix.katlib.helper.Implicits.{RichOptional, typeToken}
 import io.github.katrix.katlib.lib.LibKatLibPlugin
 import io.github.katrix.katlib.serializer.TypeSerializerImpl
 import io.github.katrix.katlib.serializer.TypeSerializerImpl.typeSerializer
-import io.github.katrix.katlib.{ImplKatPlugin, KatLib}
+import io.github.katrix.katlib.{ImplKatPlugin, KatLib, KatPlugin700}
 import ninja.leaping.configurate.objectmapping.serialize.{TypeSerializer, TypeSerializers}
 
 object HomeSweetHome {
@@ -96,7 +96,8 @@ class HomeSweetHome @Inject()(
     logger: Logger,
     @ConfigDir(sharedRoot = false) cfgDir: Path,
     spongeContainer: PluginContainer
-) extends ImplKatPlugin(logger, cfgDir, spongeContainer) {
+) extends ImplKatPlugin(logger, cfgDir, spongeContainer)
+    with KatPlugin700 {
 
   implicit val plugin: HomeSweetHome = this
 

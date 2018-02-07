@@ -70,7 +70,7 @@ class CmdHomeList(homeHandler: HomeHandler, parent: CmdHome)(implicit plugin: Ka
         val newButton  = manualButton(t"$YELLOW${HSHResource.get("cmd.list.newHome")}", "/home set <homeName>")
 
         builder.contents(limitText +: helpButton +: newButton +: homeText: _*)
-        builder.sendTo(src)
+        plugin.globalVersionAdapter.sendPagination(builder, src)
         CommandResult.builder().successCount(homes.size).build()
       case Left(error) => throw error
     }

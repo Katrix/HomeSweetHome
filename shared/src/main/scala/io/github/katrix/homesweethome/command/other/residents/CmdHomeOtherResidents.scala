@@ -91,7 +91,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
 
           builder.contents(limitText +: newButton +: residentText: _*)
 
-          builder.sendTo(src)
+          plugin.globalVersionAdapter.sendPagination(builder, src)
           CommandResult.builder().successCount(residents.size).build()
         case Left(error) => throw error
       }
@@ -135,7 +135,7 @@ class CmdHomeOtherResidents(homeHandler: HomeHandler, parent: CmdHomeOther)(impl
 
           builder.contents(limitText +: residentText: _*)
 
-          builder.sendTo(src)
+          plugin.globalVersionAdapter.sendPagination(builder, src)
           CommandResult.builder().successCount(residents.values.flatten.size).build()
 
         case Left(e) => throw e
