@@ -1,2 +1,2 @@
 logLevel := Level.Warn
-addSbtPlugin("net.katsstuff" % "sbt-spongyinfo" % "1.0")
+addSbtPlugin("net.katsstuff" % "sbt-spongyinfo" % "1.2")

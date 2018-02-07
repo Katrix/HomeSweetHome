@@ -1,10 +1,7 @@
 def removeSnapshot(str: String): String = if (str.endsWith("-SNAPSHOT")) str.substring(0, str.length - 9) else str
 def katLibDependecy(module: String) = "com.github.Katrix-.KatLib" % s"katlib-$module" % "f8003fc5f512ce58dc81fab8e180fd27f05f7904" % Provided
 
-lazy val publishResolver = {
-  val artifactPattern = s"""${file("publish").absolutePath}/[revision]/[artifact]-[revision](-[classifier]).[ext]"""
-  Resolver.file("publish").artifacts(artifactPattern)
-}
+def deployKeySetting = oreDeploymentKey := (oreDeploymentKey in Scope.Global).?.value.flatten
 
 lazy val commonSettings = Seq(
   name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
@@ -29,18 +26,6 @@ lazy val commonSettings = Seq(
     ShadeRule.rename("shapeless.**" -> "io.github.katrix.katlib.shade.shapeless.@1").inAll
   ),
   autoScalaLibrary := false,
-  publishTo := Some(publishResolver),
-  publishArtifact in makePom := false,
-  publishArtifact in (Compile, packageBin) := false,
-  publishArtifact in (Compile, packageDoc) := false,
-  publishArtifact in (Compile, packageSrc) := false,
-  artifact in (Compile, assembly) := {
-    val art = (artifact in (Compile, assembly)).value
-    art.copy(`classifier` = Some("assembly"))
-  },
-  artifactName := { (sv, module, artifact) =>
-    s"${artifact.name}-${module.revision}.${artifact.extension}"
-  },
   assemblyJarName := s"${name.value}-assembly-${version.value}.jar",
   spongePluginInfo := spongePluginInfo.value.copy(
     id = "homesweethome",
@@ -48,22 +33,20 @@ lazy val commonSettings = Seq(
     version = Some(s"${version.value}-${removeSnapshot(spongeApiVersion.value)}"),
     authors = Seq("Katrix"),
     dependencies = Set(
-      DependencyInfo("spongeapi", Some(removeSnapshot(spongeApiVersion.value))),
-      DependencyInfo("katlib", Some(s"2.3.1-${removeSnapshot(spongeApiVersion.value)}"))
+      DependencyInfo(LoadOrder.None, "spongeapi", Some(removeSnapshot(spongeApiVersion.value)), optional = false),
+      DependencyInfo(LoadOrder.Before, "katlib", Some(s"2.4.0-${removeSnapshot(spongeApiVersion.value)}"), optional = false)
     )
   )
-) ++ addArtifact(artifact in (Compile, assembly), assembly)
+)
 
 lazy val homeShared = (project in file("shared"))
   .enablePlugins(SpongePlugin)
   .settings(
     commonSettings,
     name := "HomeSweetHome-Shared",
-    publishArtifact := false,
+    oreDeploy := None,
     assembleArtifact := false,
     spongeMetaCreate := false,
-    publish := {},
-    publishLocal := {},
     //Default version, needs to build correctly against all supported versions
     spongeApiVersion := "5.0.0"
   )
@@ -84,12 +67,5 @@ lazy val homeV700 = (project in file("7.0.0"))
   .settings(commonSettings, spongeApiVersion := "7.0.0-SNAPSHOT", libraryDependencies += katLibDependecy("7-0-0"))
 
 lazy val homeRoot = (project in file("."))
-  .settings(
-    publishArtifact := false,
-    assembleArtifact := false,
-    spongeMetaCreate := false,
-    publish := {},
-    publishLocal := {}
-  )
   .disablePlugins(AssemblyPlugin)
   .aggregate(homeV500, homeV600, homeV700)

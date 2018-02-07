@@ -27,6 +27,7 @@ run
 target
 project/target
 publish
+deployKey.sbt
 
 #mac
 .DS_Store
