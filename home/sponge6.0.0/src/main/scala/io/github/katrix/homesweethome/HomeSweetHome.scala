@@ -43,13 +43,13 @@ import io.github.katrix.katlib.helper.Implicits.{RichOptional, typeToken}
 import io.github.katrix.katlib.lib.LibKatLibPlugin
 import io.github.katrix.katlib.serializer.TypeSerializerImpl
 import io.github.katrix.katlib.serializer.TypeSerializerImpl.typeSerializer
-import io.github.katrix.katlib.{ImplKatPlugin, KatLib, KatPlugin500}
+import io.github.katrix.katlib.{ImplKatPlugin, KatLib, KatPlugin600}
 import ninja.leaping.configurate.objectmapping.serialize.{TypeSerializer, TypeSerializers}
 
 object HomeSweetHome {
 
-  final val Version         = s"2.2.0-${KatLib.CompiledAgainst}"
-  final val ConstantVersion = "2.2.0-5.0.0"
+  final val Version         = s"2.3.0-${KatLib.CompiledAgainst}"
+  final val ConstantVersion = "2.3.0-6.0.0"
   assert(Version == ConstantVersion)
 
   private var _plugin: HomeSweetHome = _
@@ -97,7 +97,7 @@ class HomeSweetHome @Inject()(
     @ConfigDir(sharedRoot = false) cfgDir: Path,
     spongeContainer: PluginContainer
 ) extends ImplKatPlugin(logger, cfgDir, spongeContainer)
-    with KatPlugin500 {
+    with KatPlugin600 {
 
   implicit val plugin: HomeSweetHome = this
 
