@@ -1,17 +1,23 @@
+lazy val exclusions = Seq(ExclusionRule("org.spongepowered", "spongeapi"), ExclusionRule("com.typesafe", "config"))
+
 def removeSnapshot(str: String): String = if (str.endsWith("-SNAPSHOT")) str.substring(0, str.length - 9) else str
 def katLibDependecy(module: String) =
-  "com.github.Katrix-.KatLib" % s"katlib-$module" % "f8003fc5f512ce58dc81fab8e180fd27f05f7904" % Provided
+  "com.github.Katrix-.KatLib" % s"katlib-$module" % "develop3.0.0-SNAPSHOT" excludeAll (exclusions: _*)
+
+lazy val circeVersion = "0.9.1"
 
 lazy val home =
   crossProject(SpongePlatform("5.0.0"), SpongePlatform("6.0.0"), SpongePlatform("7.0.0"))
+    .enablePlugins(SbtProguard)
     .settings(
       name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
-      organization := "io.github.katrix",
-      version := "2.3.0",
-      scalaVersion := "2.12.2",
+      organization := "net.katsstuff",
+      version := "3.0.0-SNAPSHOT",
+      scalaVersion := "2.12.4",
       resolvers += "jitpack" at "https://jitpack.io",
-      libraryDependencies += katLibDependecy("shared"),
+      addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4"),
       libraryDependencies += "org.jetbrains" % "annotations" % "15.0" % Provided,
+      libraryDependencies += "org.typelevel" %% "cats-effect" % "0.10",
       scalacOptions ++= Seq(
         "-deprecation",
         "-feature",
@@ -19,14 +25,57 @@ lazy val home =
         "-Xlint",
         "-Yno-adapted-args",
         "-Ywarn-dead-code",
-        "-Ywarn-unused-import"
+        "-Ywarn-unused-import",
+        "-opt:l:inline",
+        "-opt-inline-from:**",
+        "-opt-warnings:_"
       ),
+      proguardOptions in Proguard ++= Seq(
+        "-dontwarn", //"-dontwarn io.github.katrix.homesweethome.shade.scala.**",
+        "-dontnote",
+        "-dontoptimize",
+        "-dontobfuscate",
+        "-keepparameternames",
+        "-keepattributes *",
+        "-keep public class net.katsstuff.homesweethome.HomeSweetHome",
+        """|-keepclassmembers class * {
+           |    ** MODULE$;
+           |    @org.spongepowered.api.event.Listener *;
+           |    @com.google.inject.Inject *;
+           |}""".stripMargin
+      ),
+      proguardInputs in Proguard := Seq(assembly.value),
+      javaOptions in (Proguard, proguard) := Seq("-Xmx1G"),
       crossPaths := false,
       assemblyShadeRules in assembly := Seq(
-        ShadeRule.rename("scala.**"     -> "io.github.katrix.katlib.shade.scala.@1").inAll,
-        ShadeRule.rename("shapeless.**" -> "io.github.katrix.katlib.shade.shapeless.@1").inAll
+        ShadeRule.rename("cats.**"                     -> "net.katsstuff.homesweethomeshade.cats.@1").inAll,
+        ShadeRule.rename("com.google.protobuf.**"      -> "net.katsstuff.homesweethomeshade.protobuf.@1").inAll,
+        ShadeRule.rename("com.trueaccord.lenses.**"    -> "net.katsstuff.homesweethomeshade.lenses.@1").inAll,
+        ShadeRule.rename("com.trueaccord.scalapb.**"   -> "net.katsstuff.homesweethomeshade.scalapb.@1").inAll,
+        ShadeRule.rename("fansi.**"                    -> "net.katsstuff.homesweethomeshade.fansi.@1").inAll,
+        ShadeRule.rename("fastparse.**"                -> "net.katsstuff.homesweethomeshade.fastparse.@1").inAll,
+        ShadeRule.rename("io.circe.**"                 -> "net.katsstuff.homesweethomeshade.circe.@1").inAll,
+        ShadeRule.rename("jawn.**"                     -> "net.katsstuff.homesweethomeshade.jawn.@1").inAll,
+        ShadeRule.rename("machinist.**"                -> "net.katsstuff.homesweethomeshade.machinist.@1").inAll, //Zap?
+        ShadeRule.rename("metaconfig.**"               -> "net.katsstuff.homesweethomeshade.metaconfig.@1").inAll,
+        ShadeRule.rename("org.langmeta.**"             -> "net.katsstuff.homesweethomeshade.langmeta.@1").inAll,
+        ShadeRule.rename("org.scalameta.**"            -> "net.katsstuff.homesweethomeshade.scalameta.@1").inAll,
+        ShadeRule.rename("org.typelevel.paiges.**"     -> "net.katsstuff.homesweethomeshade.paiges.@1").inAll,
+        ShadeRule.rename("pprint.**"                   -> "net.katsstuff.homesweethomeshade.pprint.@1").inAll,
+        ShadeRule.rename("scala.**"                    -> "net.katsstuff.homesweethomeshade.scala.@1").inAll,
+        ShadeRule.rename("scalapb.**"                  -> "net.katsstuff.homesweethomeshade.scalapb.@1").inAll,
+        ShadeRule.rename("shapeless.**"                -> "net.katsstuff.homesweethomeshade.shapeless.@1").inAll,
+        ShadeRule.rename("sourcecode.**"               -> "net.katsstuff.homesweethomeshade.sourcecode.@1").inAll,
+        ShadeRule.rename("net.katsstuff.katlib.**"     -> "net.katsstuff.homesweethomeshade.katlib.@1").inAll,
+        ShadeRule.rename("net.katsstuff.scammander.**" -> "net.katsstuff.homesweethomeshade.scammander.@1").inAll,
+        ShadeRule.zap("macrocompat.**").inAll,
       ),
-      autoScalaLibrary := false,
+      assemblyMergeStrategy in assembly := {
+        case "mcmod.info" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
       assemblyJarName := s"${name.value}-assembly-${version.value}.jar",
       spongePluginInfo := spongePluginInfo.value.copy(
         id = "homesweethome",
