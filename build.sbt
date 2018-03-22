@@ -4,20 +4,17 @@ def removeSnapshot(str: String): String = if (str.endsWith("-SNAPSHOT")) str.sub
 def katLibDependecy(module: String) =
   "com.github.Katrix-.KatLib" % s"katlib-$module" % "develop3.0.0-SNAPSHOT" excludeAll (exclusions: _*)
 
-lazy val circeVersion = "0.9.1"
-
 lazy val home =
-  crossProject(SpongePlatform("5.0.0"), SpongePlatform("6.0.0"), SpongePlatform("7.0.0"))
+  crossProject(SpongePlatform("5.1.0"), SpongePlatform("6.0.0"), SpongePlatform("7.0.0"))
     .enablePlugins(SbtProguard)
     .settings(
       name := s"HomeSweetHome-${removeSnapshot(spongeApiVersion.value)}",
       organization := "net.katsstuff",
       version := "3.0.0-SNAPSHOT",
-      scalaVersion := "2.12.4",
+      scalaVersion := "2.12.5",
       resolvers += "jitpack" at "https://jitpack.io",
       addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4"),
       libraryDependencies += "org.jetbrains" % "annotations" % "15.0" % Provided,
-      libraryDependencies += "org.typelevel" %% "cats-effect" % "0.10",
       scalacOptions ++= Seq(
         "-deprecation",
         "-feature",
@@ -70,12 +67,6 @@ lazy val home =
         ShadeRule.rename("net.katsstuff.scammander.**" -> "net.katsstuff.homesweethomeshade.scammander.@1").inAll,
         ShadeRule.zap("macrocompat.**").inAll,
       ),
-      assemblyMergeStrategy in assembly := {
-        case "mcmod.info" => MergeStrategy.concat
-        case x =>
-          val oldStrategy = (assemblyMergeStrategy in assembly).value
-          oldStrategy(x)
-      },
       assemblyJarName := s"${name.value}-assembly-${version.value}.jar",
       spongePluginInfo := spongePluginInfo.value.copy(
         id = "homesweethome",
@@ -83,13 +74,7 @@ lazy val home =
         version = Some(s"${version.value}-${removeSnapshot(spongeApiVersion.value)}"),
         authors = Seq("Katrix"),
         dependencies = Set(
-          DependencyInfo(LoadOrder.None, "spongeapi", Some(removeSnapshot(spongeApiVersion.value)), optional = false),
-          DependencyInfo(
-            LoadOrder.Before,
-            "katlib",
-            Some(s"2.4.0-${removeSnapshot(spongeApiVersion.value)}"),
-            optional = false
-          )
+          DependencyInfo(LoadOrder.None, "spongeapi", Some(removeSnapshot(spongeApiVersion.value)), optional = false)
         )
       ),
       oreDeploymentKey := (oreDeploymentKey in Scope.Global).?.value.flatten,
@@ -103,11 +88,11 @@ lazy val home =
         }
       })
     )
-    .spongeSettings("5.0.0")(libraryDependencies += katLibDependecy("5-0-0"))
+    .spongeSettings("5.1.0")(libraryDependencies += katLibDependecy("5-1-0"))
     .spongeSettings("6.0.0")(libraryDependencies += katLibDependecy("6-0-0"))
     .spongeSettings("7.0.0")(libraryDependencies += katLibDependecy("7-0-0"))
 
-lazy val homeV500 = home.spongeProject("5.0.0")
+lazy val homeV500 = home.spongeProject("5.1.0")
 lazy val homeV600 = home.spongeProject("6.0.0")
 lazy val homeV700 = home.spongeProject("7.0.0")
 
