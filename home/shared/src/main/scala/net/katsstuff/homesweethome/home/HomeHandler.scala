@@ -36,8 +36,8 @@ import org.spongepowered.api.world.{Location, World}
 import com.flowpowered.math.vector.Vector3d
 import com.google.common.cache.CacheBuilder
 
-import io.github.katrix.katlib.helper.Implicits._
-import io.github.katrix.katlib.i18n.Localized
+import net.katsstuff.katlib.helper.Implicits._
+import net.katsstuff.katlib.i18n.Localized
 import net.katsstuff.homesweethome.lib.LibPerm
 import net.katsstuff.homesweethome.{HSHResource, HomeConfig, HomePlugin, NestedMap, Storage}
 
@@ -238,5 +238,6 @@ class HomeHandler(implicit plugin: HomePlugin) {
       .flatMap(s => Try(s.toInt).toOption)
       .getOrElse(config.residentLimitDefault)
 
-  private def save(): Unit = Storage.save(plugin.storagePath, homeMap.toNormalMap)
+  private def save(): Unit =
+    Storage.save(plugin.storagePath, homeMap.toNormalMap).unsafeRunSync() //TODO: Handle exceptions
 }

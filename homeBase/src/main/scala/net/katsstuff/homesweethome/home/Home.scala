@@ -22,34 +22,19 @@ package net.katsstuff.homesweethome.home
 
 import java.util.UUID
 
-import org.spongepowered.api.Sponge
-import org.spongepowered.api.entity.living.player.Player
-import org.spongepowered.api.world.{Location, World}
-
-import com.flowpowered.math.vector.Vector3d
-
 import io.circe._
-import net.katsstuff.katlib.helper.Implicits._
+import cats.syntax.all._
+import cats.instances.option._
+import net.katstuff.katlib.algebras.Locations
 
 case class Home(x: Double, y: Double, z: Double, yaw: Double, pitch: Double, worldUuid: UUID, residents: Seq[UUID]) {
 
-  def this(location: Location[World], rotation: Vector3d) {
-    this(
-      location.getX,
-      location.getY,
-      location.getZ,
-      rotation.getX,
-      rotation.getY,
-      location.getExtent.getUniqueId,
-      Seq.empty
-    )
-  }
-
-  def world:    Option[World]           = Sponge.getServer.getWorld(worldUuid).toOption
-  def location: Option[Location[World]] = world.map(new Location(_, x, y, z))
-  def rotation: Vector3d                = new Vector3d(yaw, pitch, 0)
-
-  def teleport(player: Player): Boolean = location.exists(loc => player.setLocationAndRotationSafely(loc, rotation))
+  def teleport[F[_], Location, Player](player: Player)(implicit locations: Locations[F, Location, Player]): F[Boolean] =
+    for {
+      optLocation     <- locations.createLocation(x, y, z, yaw, pitch, worldUuid)
+      optSafeLocation <- optLocation.traverse(_.makeSafe)
+      success         <- optSafeLocation.traverse(locations.teleport(player, _))
+    } yield success.exists(identity)
 
   def addResident(resident: UUID):    Home = copy(residents = resident +: residents)
   def removeResident(resident: UUID): Home = copy(residents = residents.filter(_ != resident))

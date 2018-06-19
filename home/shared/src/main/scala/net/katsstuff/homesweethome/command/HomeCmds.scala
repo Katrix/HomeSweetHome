@@ -6,8 +6,8 @@ import org.spongepowered.api.service.pagination.PaginationList
 import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.format.TextColors._
 
-import io.github.katrix.katlib.helper.Implicits._
-import io.github.katrix.katlib.i18n.Localized
+import net.katsstuff.katlib.helper.Implicits._
+import net.katsstuff.katlib.i18n.Localized
 import net.katsstuff.homesweethome.lib.LibPerm
 import net.katsstuff.homesweethome.{HSHResource, HomePlugin}
 import net.katsstuff.scammander.sponge.CommandInfo

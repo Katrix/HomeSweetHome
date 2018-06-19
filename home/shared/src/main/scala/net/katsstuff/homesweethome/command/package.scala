@@ -29,10 +29,10 @@ import org.spongepowered.api.text.Text
 import org.spongepowered.api.text.action.TextActions
 import org.spongepowered.api.world.{Location, World}
 
-import io.github.katrix.katlib.KatPlugin
-import io.github.katrix.katlib.command.KatLibCommands
-import io.github.katrix.katlib.helper.Implicits._
-import io.github.katrix.katlib.i18n.Localized
+import net.katsstuff.katlib.KatPlugin
+import net.katsstuff.katlib.command.KatLibCommands
+import net.katsstuff.katlib.helper.Implicits._
+import net.katsstuff.katlib.i18n.Localized
 import net.katsstuff.homesweethome.home.{Home, HomeHandler}
 import net.katsstuff.homesweethome.lib.LibPerm
 import net.katsstuff.scammander.ScammanderHelper

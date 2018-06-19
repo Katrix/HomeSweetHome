@@ -8,9 +8,8 @@ import org.spongepowered.api.text.format.TextColors._
 import cats.data.EitherT
 import cats.effect.IO
 import cats.syntax.all._
-import cats.instances.all._
-import io.github.katrix.katlib.helper.Implicits._
-import io.github.katrix.katlib.i18n.Localized
+import net.katsstuff.katlib.helper.Implicits._
+import net.katsstuff.katlib.i18n.Localized
 import net.katsstuff.homesweethome.lib.LibPerm
 import net.katsstuff.homesweethome.{HomeConfig, HomePlugin, Storage}
 import net.katsstuff.scammander.sponge.CommandInfo

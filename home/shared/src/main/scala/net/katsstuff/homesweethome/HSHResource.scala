@@ -25,7 +25,7 @@ import java.util.{Locale, ResourceBundle}
 import org.jetbrains.annotations.PropertyKey
 import org.spongepowered.api.text.Text
 
-import io.github.katrix.katlib.i18n.Resource
+import net.katsstuff.katlib.i18n.Resource
 
 object HSHResource extends Resource {
   final val ResourceLocation = "assets.homesweethome.lang"

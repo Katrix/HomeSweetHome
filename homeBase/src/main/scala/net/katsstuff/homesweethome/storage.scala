@@ -20,55 +20,53 @@
  */
 package net.katsstuff.homesweethome
 
-import java.nio.file.{Files, Path}
+import java.nio.file.Path
 import java.util.UUID
 
-import scala.collection.JavaConverters._
-
-import cats.effect.IO
+import cats.MonadError
+import cats.syntax.all._
 import io.circe._
 import io.circe.syntax._
 import net.katsstuff.homesweethome.home.Home
-import net.katsstuff.katlib.KatPlugin
-import net.katsstuff.katlib.helper.LogHelper
+import net.katstuff.katlib.algebras.{FileAccess, LogHelper}
 
-object Storage {
+trait Storage[F[_]] {
 
-  def load(path: Path)(implicit scalaPlugin: KatPlugin): IO[Map[UUID, Map[String, Home]]] = {
+  def load(path: Path): F[Map[UUID, Map[String, Home]]]
+
+  def save(path: Path, homes: Map[UUID, Map[String, Home]]): F[Unit]
+}
+
+class DefaultStorage[F[_]](
+    implicit log: LogHelper[F],
+    files: FileAccess[F],
+    F: MonadError[F, Throwable]
+) {
+
+  def load(path: Path): F[Map[UUID, Map[String, Home]]] =
     for {
-      fileExists <- IO {
-        LogHelper.info("Loading homes")
-        Files.exists(path)
-      }
-      data <- if (fileExists) {
-        IO(Files.readAllLines(path).asScala.mkString("\n")).flatMap { content =>
-          IO.fromEither {
-            parser.parse(content).flatMap { json =>
-              val cursor = json.hcursor
-              cursor.get[Int]("version").flatMap {
-                case 2 =>
-                  cursor.get[Map[UUID, Map[String, Home]]]("home")
-                case _ =>
-                  Left(new Exception("Unsupported storage version"))
-              }
-            }
+      _          <- log.info("Loading homes")
+      fileExists <- files.exists(path)
+      res <- if (fileExists) {
+        for {
+          content <- files.readFile(path)
+          json    <- F.fromEither(parser.parse(content))
+          cursor = json.hcursor
+          version <- F.fromEither(cursor.get[Int]("version"))
+          data <- version match {
+            case 2 => F.fromEither(cursor.get[Map[UUID, Map[String, Home]]]("home"))
+            case _ => F.raiseError[Map[UUID, Map[String, Home]]](new Exception("Unsupported storage version"))
           }
-        }
-      } else
-        IO {
-          LogHelper.info("No homes found")
-          Map.empty[UUID, Map[String, Home]]
-        }
-    } yield data
-  }
+        } yield data
+      } else {
+        log.info("No homes found").as(Map.empty[UUID, Map[String, Home]])
+      }
+    } yield res
 
-  def save(path: Path, homes: Map[UUID, Map[String, Home]]): IO[Unit] = {
+  def save(path: Path, homes: Map[UUID, Map[String, Home]]): F[Unit] = {
     val printer = Printer.noSpaces.copy(dropNullValues = true)
     val json    = Json.obj("version" -> 2.asJson, "home" -> homes.asJson)
 
-    for {
-      _ <- IO(Files.createDirectories(path.getParent))
-      _ <- IO(Files.write(path, json.pretty(printer).lines.toSeq.asJava))
-    } yield ()
+    files.saveFile(path, json.pretty(printer))
   }
 }

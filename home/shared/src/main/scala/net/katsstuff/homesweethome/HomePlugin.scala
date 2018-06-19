@@ -2,8 +2,8 @@ package net.katsstuff.homesweethome
 
 import java.nio.file.Path
 
-import io.github.katrix.katlib.KatPlugin
 import net.katsstuff.homesweethome.home.HomeHandler
+import net.katsstuff.katlib.KatPlugin
 
 trait HomePlugin extends KatPlugin {
 

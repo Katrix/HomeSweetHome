@@ -34,8 +34,8 @@ import com.google.inject.Inject
 
 import cats.effect.IO
 import cats.syntax.all._
-import io.github.katrix.katlib.ImplKatPlugin
-import io.github.katrix.katlib.helper.LogHelper
+import net.katsstuff.katlib.ImplKatPlugin
+import net.katsstuff.katlib.helper.LogHelper
 import net.katsstuff.homesweethome.home.HomeHandler
 import net.katsstuff.homesweethome.lib.LibPlugin
 
@@ -49,9 +49,9 @@ object HomeSweetHome {
       case (config, storage) =>
         for {
           _ <- IO(plugin.homeHandler.reloadHomeData(storage, config))
-          _ <- IO(command.HomeCmds.HomeCmd.register(this, Seq("home")))
-          _ <- IO(command.HomeCmds.HomeListCmd.register(this, Seq("homes")))
-          _ <- IO(command.BaseCmds.HomeSweetHomeCmd.register(this, Seq("homesweethome", "hsh")))
+          _ <- IO(command.HomeCmds.HomeCmd.register(plugin, Seq("home")))
+          _ <- IO(command.HomeCmds.HomeListCmd.register(plugin, Seq("homes")))
+          _ <- IO(command.BaseCmds.HomeSweetHomeCmd.register(plugin, Seq("homesweethome", "hsh")))
         } yield ()
     }.flatten
 
